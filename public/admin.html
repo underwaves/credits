@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SUNFZ - ระบบแอดมินจัดการเครดิต</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#FFFBEB',
+              100: '#FEF3C7',
+              200: '#FDE68A',
+              300: '#FCD34D',
+              400: '#FBBF24',
+              500: '#F59E0B',
+              600: '#D97706',
+              700: '#B45309',
+              800: '#92400E',
+              900: '#78350F',
+            },
+            trust: {
+              500: '#10B981',
+              600: '#059669',
+            }
+          },
+          fontFamily: {
+            sans: ['Noto Sans Thai', 'sans-serif'],
+            heading: ['Plus Jakarta Sans', 'Prompt', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="/css/style.css">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/images/logo.svg">
+</head>
+<body class="bg-[#F8FAFC] text-slate-900 min-h-screen flex flex-col font-sans antialiased">
+
+  <!-- ============================================== -->
+  <!-- 1. LOGIN SCREEN (Visible when NOT authenticated) -->
+  <!-- ============================================== -->
+  <div id="login-view" class="flex-grow flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white border border-slate-200 rounded-3xl shadow-xl p-8 sm:p-10 relative overflow-hidden">
+      
+      <!-- Top Decorative Accent -->
+      <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600"></div>
+
+      <!-- Brand Logo & Header -->
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto mb-4 shadow-sm">
+          <img src="/images/logo.svg" alt="SUNFZ Logo" class="w-9 h-9">
+        </div>
+        <h1 class="font-heading text-2xl font-black text-slate-900 tracking-tight">
+          SUNFZ Admin Studio
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
+          ระบบจัดการเครดิตและหลักฐานการซื้อขาย
+        </p>
+      </div>
+
+      <!-- Login Form -->
+      <form id="admin-login-form" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            รหัส PIN แอดมินร้าน SUNFZ
+          </label>
+          <div class="relative">
+            <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input 
+              type="password" 
+              id="login-pin-input" 
+              placeholder="กรอก PIN 4 หลัก (ค่าเริ่มต้น: 1234)" 
+              class="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:bg-white focus:ring-2 focus:ring-amber-500/20 transition font-medium"
+              required
+              autofocus
+            >
+          </div>
+        </div>
+
+        <!-- Error Message Container -->
+        <div id="login-error-alert" class="hidden text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-xl p-3 flex items-center gap-2">
+          <i data-lucide="alert-circle" class="w-4 h-4 shrink-0 text-rose-500"></i>
+          <span id="login-error-text">รหัส PIN ไม่ถูกต้อง</span>
+        </div>
+
+        <button 
+          type="submit" 
+          id="btn-login"
+          class="w-full py-3 bg-amber-500 hover:bg-amber-600 active:scale-[0.99] text-white font-bold rounded-2xl text-sm shadow-md shadow-amber-500/20 transition flex items-center justify-center gap-2"
+        >
+          <i data-lucide="log-in" class="w-4 h-4"></i>
+          <span>เข้าสู่ระบบแอดมิน</span>
+        </button>
+      </form>
+
+      <!-- Back to Public Site -->
+      <div class="mt-8 pt-6 border-t border-slate-100 text-center">
+        <a href="/" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-amber-600 transition">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+          <span>กลับไปหน้าเว็บไซต์สำหรับลูกค้า</span>
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- 2. ADMIN DASHBOARD (Visible when authenticated) -->
+  <!-- ============================================== -->
+  <div id="dashboard-view" class="hidden flex-grow flex flex-col">
+    
+    <!-- Top Navbar -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        
+        <!-- Brand & Status -->
+        <div class="flex items-center gap-3">
+          <a href="/admin" class="flex items-center gap-2">
+            <img src="/images/logo.svg" alt="SUNFZ Logo" class="w-7 h-7">
+            <span id="admin-nav-shop-name" class="font-heading font-black text-lg text-slate-900 tracking-tight">SUNFZ</span>
+            <span class="text-xs px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 font-bold border border-amber-200">ADMIN</span>
+          </a>
+          <span class="hidden sm:inline-flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 font-medium">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>ออนไลน์</span>
+          </span>
+        </div>
+
+        <!-- Right Quick Actions -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <a 
+            id="admin-public-link"
+            href="/s/sunfz" 
+            target="_blank" 
+            class="px-3.5 py-1.5 rounded-xl border border-slate-200 hover:border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-semibold flex items-center gap-1.5 transition"
+            title="เปิดดูหน้าลูกค้าในแท็บใหม่"
+          >
+            <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-400"></i>
+            <span class="hidden sm:inline">ดูหน้าร้านค้า</span>
+          </a>
+          
+          <button 
+            onclick="handleLogout()" 
+            class="px-3 py-1.5 rounded-xl text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 text-xs font-semibold flex items-center gap-1.5 transition"
+            title="ออกจากระบบ"
+          >
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">ออกจากระบบ</span>
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 flex-grow w-full space-y-6">
+      
+      <!-- Stats Overview Cards -->
+      <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <!-- Card 1: Total Credits -->
+        <div class="clean-card p-4 sm:p-5 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">เครดิตทั้งหมด</p>
+            <h3 id="stat-total-credits" class="font-heading text-2xl sm:text-3xl font-black text-slate-900">0</h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">รายการที่โพสต์</p>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shrink-0">
+            <i data-lucide="image" class="w-6 h-6"></i>
+          </div>
+        </div>
+
+        <!-- Card 2: Total Sales -->
+        <div class="clean-card p-4 sm:p-5 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">ยอดขายสะสม</p>
+            <h3 id="stat-total-sales" class="font-heading text-2xl sm:text-3xl font-black text-slate-900">฿0</h3>
+            <p class="text-[11px] text-emerald-600 font-medium mt-0.5">รวมทุกออเดอร์</p>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
+            <i data-lucide="banknote" class="w-6 h-6"></i>
+          </div>
+        </div>
+
+        <!-- Card 3: Pinned Credits -->
+        <div class="clean-card p-4 sm:p-5 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">ปักหมุดเด่น</p>
+            <h3 id="stat-pinned-count" class="font-heading text-2xl sm:text-3xl font-black text-amber-500">0</h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">แสดงบนสุดเสมอ</p>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 text-amber-500 flex items-center justify-center shrink-0">
+            <i data-lucide="star" class="w-6 h-6 fill-amber-400"></i>
+          </div>
+        </div>
+
+        <!-- Card 4: Shop Status -->
+        <div class="clean-card p-4 sm:p-5 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">สถานะร้านค้า</p>
+            <h3 class="font-heading text-lg sm:text-xl font-bold text-slate-800">SUNFZ STORE</h3>
+            <p class="text-[11px] text-emerald-600 font-medium mt-0.5">● เปิดรับออเดอร์ 24 ชม.</p>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200 text-slate-600 flex items-center justify-center shrink-0">
+            <i data-lucide="shield-check" class="w-6 h-6 text-emerald-500"></i>
+          </div>
+        </div>
+      </section>
+
+      <!-- Navigation Tabs -->
+      <section class="border-b border-slate-200 flex items-center gap-2 overflow-x-auto pb-1">
+        <button 
+          id="tab-btn-add" 
+          onclick="switchTab('add')" 
+          class="admin-tab active inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition"
+        >
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>+ เพิ่มเครดิตใหม่</span>
+        </button>
+        <button 
+          id="tab-btn-list" 
+          onclick="switchTab('list')" 
+          class="admin-tab inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition"
+        >
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span>จัดการรายการเครดิต (<span id="tab-list-count">0</span>)</span>
+        </button>
+        <button 
+          id="tab-btn-settings" 
+          onclick="switchTab('settings')" 
+          class="admin-tab inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition"
+        >
+          <i data-lucide="settings" class="w-4 h-4"></i>
+          <span>ตั้งค่าร้านค้า &amp; PIN</span>
+        </button>
+      </section>
+
+      <!-- TAB 1: ADD CREDIT FORM -->
+      <section id="tab-content-add" class="space-y-6">
+        <div class="clean-card p-6 sm:p-8 max-w-3xl mx-auto">
+          
+          <div class="flex items-center gap-3 pb-5 mb-5 border-b border-slate-100">
+            <div class="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shrink-0">
+              <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h2 class="font-heading font-extrabold text-lg text-slate-900">
+                เพิ่มรูปเครดิตใหม่ (ขายทุกอย่างตามใจฉัน)
+              </h2>
+              <p class="text-xs text-slate-500">
+                อัปโหลดรูปภาพสลิปหรือแชทหลักฐาน กรอกชื่อสินค้า แล้วกดบันทึกได้ทันที
+              </p>
+            </div>
+          </div>
+
+          <form id="new-credit-form" onsubmit="handleCreateCredit(event)" class="space-y-5">
+            
+            <!-- 1. Image Upload Dropzone -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                1. รูปภาพสลิปโอนเงิน / แชทหลักฐาน <span class="text-rose-500">*</span>
+              </label>
+
+              <div 
+                id="upload-dropzone"
+                onclick="document.getElementById('input-credit-files').click()"
+                class="border-2 border-dashed border-slate-200 hover:border-amber-500 rounded-2xl p-6 text-center cursor-pointer bg-slate-50/60 hover:bg-amber-50/20 transition group"
+              >
+                <input 
+                  type="file" 
+                  id="input-credit-files" 
+                  multiple 
+                  accept="image/jpeg,image/png,image/webp,image/gif" 
+                  class="hidden" 
+                  onchange="handleFilesSelected(event)"
+                >
+                <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-slate-400 group-hover:text-amber-500 flex items-center justify-center mx-auto mb-2 shadow-sm transition">
+                  <i data-lucide="image-plus" class="w-6 h-6"></i>
+                </div>
+                <p class="text-sm font-semibold text-slate-800">
+                  คลิกเพื่อเลือกรูปภาพ หรือลากไฟล์มาวางที่นี่
+                </p>
+                <p class="text-xs text-slate-400 mt-1">
+                  รองรับ JPG, PNG, WebP (เลือกได้สูงสุด 5 รูปต่อครั้ง)
+                </p>
+              </div>
+
+              <!-- Selected Images Preview Grid -->
+              <div id="upload-preview-container" class="mt-3 flex flex-wrap gap-2.5"></div>
+            </div>
+
+            <!-- 2. Product Title -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                2. ขายอะไร / ชื่อรายการ <span class="text-rose-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="input-title" 
+                placeholder="เช่น ไอดี ROV 50 สกิน, บัญชีพรีเมียม 1 ปี, ไอดี Genshin C6, สกินปืน Valorant ฯลฯ" 
+                required
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:bg-white focus:ring-2 focus:ring-amber-500/20 transition"
+              >
+            </div>
+
+            <!-- 3. Price & Customer -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  3. ราคาที่ขาย (บาท) <span class="text-slate-400 font-normal lowercase">(ถ้ามี)</span>
+                </label>
+                <div class="relative">
+                  <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-sm">฿</span>
+                  <input 
+                    type="number" 
+                    id="input-price" 
+                    placeholder="เช่น 1500" 
+                    min="0"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white focus:ring-2 focus:ring-amber-500/20 transition"
+                  >
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  4. ชื่อลูกค้า / ช่องทาง <span class="text-slate-400 font-normal lowercase">(ถ้ามี)</span>
+                </label>
+                <input 
+                  type="text" 
+                  id="input-customer" 
+                  placeholder="เช่น คุณบาส (Line), คุณนนท์ (Inbox เพจ)" 
+                  class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:bg-white focus:ring-2 focus:ring-amber-500/20 transition"
+                >
+              </div>
+            </div>
+
+            <!-- 4. Review Note -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                5. ข้อความรีวิว / บันทึกย่อ <span class="text-slate-400 font-normal lowercase">(ถ้ามี)</span>
+              </label>
+              <textarea 
+                id="input-description" 
+                rows="2" 
+                placeholder="เช่น ลูกค้าโอนไวมาก จัดการส่งมอบและเปลี่ยนเมลให้เรียบร้อยครับ" 
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:bg-white focus:ring-2 focus:ring-amber-500/20 transition"
+              ></textarea>
+            </div>
+
+            <!-- 5. Pin Option -->
+            <div class="flex items-center gap-2.5 p-3 rounded-xl bg-amber-50/70 border border-amber-200/80">
+              <input 
+                type="checkbox" 
+                id="input-is-pinned" 
+                class="w-4 h-4 text-amber-500 border-slate-300 rounded focus:ring-amber-400 cursor-pointer"
+              >
+              <label for="input-is-pinned" class="text-xs sm:text-sm font-semibold text-slate-800 cursor-pointer flex items-center gap-1.5">
+                <span>⭐ ปักหมุดรายการนี้ไว้บนสุด (Featured)</span>
+                <span class="text-slate-400 text-xs font-normal">- ลูกค้าจะเห็นเครดิตนี้เป็นอันดับแรก</span>
+              </label>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-3">
+              <button 
+                type="submit" 
+                id="btn-submit-credit"
+                class="w-full py-3 bg-amber-500 hover:bg-amber-600 active:scale-[0.99] text-white font-bold rounded-2xl text-sm shadow-md shadow-amber-500/20 transition flex items-center justify-center gap-2"
+              >
+                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                <span>บันทึกและโพสต์เครดิต</span>
+              </button>
+            </div>
+
+          </form>
+
+        </div>
+      </section>
+
+      <!-- TAB 2: MANAGE CREDITS LIST -->
+      <section id="tab-content-list" class="hidden space-y-4">
+        
+        <!-- Controls Bar -->
+        <div class="clean-card p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div class="relative w-full sm:w-80">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input 
+              type="text" 
+              id="admin-search-input" 
+              placeholder="ค้นหาตามชื่อสินค้า, ลูกค้า, ยอดเงิน..." 
+              oninput="handleAdminSearch(event)"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-amber-500 focus:bg-white transition"
+            >
+          </div>
+
+          <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <span class="text-xs text-slate-500">
+              พบ <strong id="admin-filtered-count" class="text-slate-900">0</strong> รายการ
+            </span>
+            <button 
+              onclick="switchTab('add')" 
+              class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-semibold shadow-sm transition flex items-center gap-1.5"
+            >
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>เพิ่มเครดิต</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Credits Table / Cards -->
+        <div id="admin-credits-container" class="space-y-3">
+          <!-- Rendered by JS -->
+        </div>
+
+      </section>
+
+      <!-- TAB 3: SETTINGS & SECURITY -->
+      <section id="tab-content-settings" class="hidden max-w-2xl mx-auto space-y-6">
+        
+        <!-- Shop Info Settings Card -->
+        <div class="clean-card p-6 sm:p-7 space-y-4">
+          <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+            <i data-lucide="store" class="w-5 h-5 text-amber-500"></i>
+            <h3 class="font-heading font-bold text-base text-slate-900">ข้อมูลหน้าร้านค้า</h3>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">ชื่อร้าน</label>
+            <input type="text" id="setting-shop-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">สโลแกน / คำอธิบายร้าน</label>
+            <input type="text" id="setting-tagline" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">แถบประกาศด้านบนสุด</label>
+            <input type="text" id="setting-announcement" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition">
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Line ID / ลิงก์</label>
+              <input type="text" id="setting-line-url" placeholder="https://line.me/..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Facebook URL</label>
+              <input type="text" id="setting-fb-url" placeholder="https://facebook.com/..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition">
+            </div>
+          </div>
+
+          <button 
+            type="button" 
+            onclick="saveShopSettings()" 
+            class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5"
+          >
+            <i data-lucide="save" class="w-3.5 h-3.5"></i>
+            <span>บันทึกการตั้งค่าร้านค้า</span>
+          </button>
+        </div>
+
+        <!-- Security & PIN Change Card -->
+        <div class="clean-card p-6 sm:p-7 space-y-4">
+          <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+            <i data-lucide="key" class="w-5 h-5 text-amber-500"></i>
+            <h3 class="font-heading font-bold text-base text-slate-900">ความปลอดภัย &amp; รหัส PIN</h3>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">PIN ปัจจุบัน</label>
+              <input type="password" id="input-current-pin" placeholder="PIN เดิม" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">PIN ใหม่</label>
+              <input type="password" id="input-new-pin" placeholder="PIN ใหม่ 4 ตัวขึ้นไป" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition">
+            </div>
+          </div>
+
+          <button 
+            type="button" 
+            onclick="handleChangePin()" 
+            class="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center gap-1.5"
+          >
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-amber-500"></i>
+            <span>อัปเดตรหัส PIN</span>
+          </button>
+        </div>
+
+        <!-- Backup & Restore Database Card -->
+        <div class="clean-card p-6 sm:p-7 space-y-4">
+          <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+            <i data-lucide="database" class="w-5 h-5 text-amber-500"></i>
+            <h3 class="font-heading font-bold text-base text-slate-900">สำรองและกู้คืนข้อมูล (Backup &amp; Restore)</h3>
+          </div>
+          <p class="text-xs text-slate-500">
+            ดาวน์โหลดไฟล์สำรองข้อมูล JSON ไว้ในคอมพิวเตอร์ของคุณเพื่อความปลอดภัย หรือกู้คืนข้อมูลเดิมได้ทุกเมื่อ
+          </p>
+
+          <div class="flex flex-col sm:flex-row gap-3 pt-1">
+            <button 
+              type="button" 
+              onclick="downloadBackupFile()" 
+              class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
+            >
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>ดาวน์โหลดไฟล์สำรองข้อมูล (.json)</span>
+            </button>
+
+            <label class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+              <span>กู้คืนข้อมูลจากไฟล์ JSON</span>
+              <input type="file" accept=".json" class="hidden" onchange="handleRestoreBackupFile(event)">
+            </label>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- ============================================== -->
+  <!-- 3. EDIT CREDIT MODAL -->
+  <!-- ============================================== -->
+  <div id="edit-credit-modal" class="fixed inset-0 z-50 clean-modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="relative w-full max-w-lg bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
+        <div class="flex items-center gap-2">
+          <i data-lucide="edit-3" class="w-5 h-5 text-amber-500"></i>
+          <h3 class="font-heading text-base font-bold text-slate-900">
+            แก้ไขรายการเครดิต
+          </h3>
+        </div>
+        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-200/50 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Form Body -->
+      <div class="p-6 overflow-y-auto flex-grow space-y-4">
+        <form id="edit-credit-form" onsubmit="handleSaveEditCredit(event)" class="space-y-4">
+          <input type="hidden" id="edit-credit-id">
+
+          <!-- Current Images & New Additions -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              รูปภาพหลักฐาน
+            </label>
+            <div id="edit-images-preview" class="flex flex-wrap gap-2 mb-2"></div>
+            
+            <button 
+              type="button" 
+              onclick="document.getElementById('edit-file-input').click()" 
+              class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
+            >
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>เพิ่มรูปภาพใหม่</span>
+            </button>
+            <input 
+              type="file" 
+              id="edit-file-input" 
+              multiple 
+              accept="image/*" 
+              class="hidden" 
+              onchange="handleEditFilesSelected(event)"
+            >
+          </div>
+
+          <!-- Title -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              ขายอะไร / ชื่อรายการ <span class="text-rose-500">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="edit-title" 
+              required
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+            >
+          </div>
+
+          <!-- Price & Customer -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">ราคา (บาท)</label>
+              <input 
+                type="number" 
+                id="edit-price" 
+                min="0"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+              >
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">ชื่อลูกค้า / ช่องทาง</label>
+              <input 
+                type="text" 
+                id="edit-customer" 
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+              >
+            </div>
+          </div>
+
+          <!-- Note -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">ข้อความรีวิว / รายละเอียด</label>
+            <textarea 
+              id="edit-description" 
+              rows="2" 
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+            ></textarea>
+          </div>
+
+          <!-- Pin -->
+          <div class="flex items-center gap-2 pt-1">
+            <input type="checkbox" id="edit-is-pinned" class="w-4 h-4 text-amber-500 rounded border-slate-300">
+            <label for="edit-is-pinned" class="text-xs font-semibold text-slate-700 cursor-pointer">
+              ⭐ ปักหมุดรายการนี้ไว้บนสุด
+            </label>
+          </div>
+
+          <!-- Footer Buttons -->
+          <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <button 
+              type="button" 
+              onclick="closeEditModal()" 
+              class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-semibold transition"
+            >
+              ยกเลิก
+            </button>
+            <button 
+              type="submit" 
+              id="btn-save-edit"
+              class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5"
+            >
+              <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              <span>บันทึกการแก้ไข</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="admin-toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2"></div>
+
+  <!-- Admin Script -->
+  <script src="/js/admin.js"></script>
+</body>
+</html>

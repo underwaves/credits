@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <defs>
+    <linearGradient id="sun-warm" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#FBBF24" />
+    </linearGradient>
+    <linearGradient id="sun-soft" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FEF3C7" />
+      <stop offset="100%" stop-color="#FDE68A" />
+    </linearGradient>
+  </defs>
+
+  <!-- Soft Sun Halo -->
+  <circle cx="50" cy="50" r="42" fill="url(#sun-soft)" opacity="0.6"/>
+
+  <!-- Sun Rays (Clean minimal geometric rounded lines) -->
+  <g stroke="url(#sun-warm)" stroke-width="4.5" stroke-linecap="round">
+    <line x1="50" y1="12" x2="50" y2="20"/>
+    <line x1="50" y1="80" x2="50" y2="88"/>
+    <line x1="12" y1="50" x2="20" y2="50"/>
+    <line x1="80" y1="50" x2="88" y2="50"/>
+    <line x1="23" y1="23" x2="29" y2="29"/>
+    <line x1="71" y1="71" x2="77" y2="77"/>
+    <line x1="23" y1="77" x2="29" y2="71"/>
+    <line x1="71" y1="29" x2="77" y2="23"/>
+  </g>
+
+  <!-- Sun Core -->
+  <circle cx="50" cy="50" r="22" fill="url(#sun-warm)"/>
+  
+  <!-- Subtle Trust Checkmark in center -->
+  <path d="M43 50.5 L47.5 55 L57.5 45" fill="none" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

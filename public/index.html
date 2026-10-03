@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>sunfz - รวมเครดิตการซื้อขาย</title>
+  <link rel="icon" type="image/svg+xml" href="/images/logo.svg">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            sun: {
+              50: '#fffbeb',
+              100: '#fef3c7',
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex flex-col antialiased selection:bg-amber-100 selection:text-amber-900">
+
+  <!-- Top Announcement Bar -->
+  <div id="announcement-bar" class="bg-amber-50 border-b border-amber-200/60 py-2 px-4 text-xs sm:text-sm text-center font-medium text-amber-900 flex items-center justify-center gap-2">
+    <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 pulse-green"></span>
+    <span id="announcement-text">✨ รวมเครดิตซื้อขายร้าน sunfz ซื้อขายปลอดภัย มีหลักฐานทุกรายการ!</span>
+  </div>
+
+  <!-- Header / Navbar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <div class="max-w-[1024px] mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+      
+      <!-- Brand Logo & Name -->
+      <a href="/" class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center p-1.5 shadow-sm">
+          <img src="/images/logo.svg" alt="sunfz logo" class="w-full h-full object-contain">
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span id="nav-shop-name" class="font-heading font-black text-xl tracking-tight text-slate-900">
+              sunfz
+            </span>
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              ✓ เครดิตแท้
+            </span>
+          </div>
+          <span class="text-[11px] text-slate-500 block leading-tight">สมุดรวมเครดิตซื้อขาย</span>
+        </div>
+      </a>
+
+      <!-- Right Header Actions -->
+      <div class="flex items-center gap-3">
+        <!-- Live Total Counter -->
+        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i>
+          <span>เครดิต: <strong id="header-total-count" class="text-slate-900 font-bold">0</strong> รายการ</span>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Hero Section: Simple, Straightforward -->
+  <section class="py-6 sm:py-8 bg-white border-b border-slate-200 text-center">
+    <div class="max-w-[1024px] mx-auto px-4 sm:px-6">
+      
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold mb-3">
+        <i data-lucide="check-circle" class="w-3.5 h-3.5 text-amber-600"></i>
+        <span>หลักฐานการส่งมอบ &amp; สลิปจริงทุกออเดอร์</span>
+      </div>
+
+      <h1 class="font-heading text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
+        รวมเครดิตการซื้อขายร้าน sunfz
+      </h1>
+      <p id="hero-tagline" class="text-xs sm:text-sm text-slate-500 max-w-md mx-auto mb-5 font-normal">
+        รวมหลักฐานการส่งของ สลิปโอนเงิน และแชทยืนยันจากลูกค้า เช็คประวัติได้ที่นี่ 100%
+      </p>
+
+      <!-- Social Quick Contact Links -->
+      <div id="social-links-container" class="flex flex-wrap items-center justify-center gap-2 text-xs">
+        <!-- Rendered by JS -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Search Bar -->
+  <section class="sticky top-16 z-30 bg-[#F8FAFC]/95 backdrop-blur-md border-b border-slate-200 py-3">
+    <div class="max-w-[1024px] mx-auto px-4 sm:px-6">
+      <div class="relative w-full">
+        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+        <input 
+          type="text" 
+          id="search-input" 
+          placeholder="ค้นหาเครดิต... พิมพ์ชื่อสินค้า, ชื่อลูกค้า, หรือยอดเงิน" 
+          class="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-8 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition shadow-sm"
+          oninput="handleSearchInput(event)"
+        >
+        <button id="clear-search-btn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content: Review Cards Feed -->
+  <main class="flex-grow max-w-[1024px] mx-auto px-4 sm:px-6 py-6 w-full">
+    
+    <!-- Count Label -->
+    <div class="flex items-center justify-between mb-4 text-xs text-slate-500">
+      <span>รายการเครดิตทั้งหมด: <strong id="result-count-label" class="text-slate-800">0 รายการ</strong></span>
+      <span class="text-slate-400">คลิกที่รูปเพื่อซูมดูรูปเต็ม</span>
+    </div>
+
+    <!-- Loading Skeleton -->
+    <div id="loading-state" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div class="clean-card p-3 animate-pulse">
+        <div class="h-56 bg-slate-200 rounded-xl mb-3"></div>
+        <div class="h-4 bg-slate-200 rounded w-3/4 mb-2"></div>
+        <div class="h-3 bg-slate-100 rounded w-1/2"></div>
+      </div>
+      <div class="clean-card p-3 animate-pulse">
+        <div class="h-56 bg-slate-200 rounded-xl mb-3"></div>
+        <div class="h-4 bg-slate-200 rounded w-3/4 mb-2"></div>
+        <div class="h-3 bg-slate-100 rounded w-1/2"></div>
+      </div>
+      <div class="clean-card p-3 animate-pulse">
+        <div class="h-56 bg-slate-200 rounded-xl mb-3"></div>
+        <div class="h-4 bg-slate-200 rounded w-3/4 mb-2"></div>
+        <div class="h-3 bg-slate-100 rounded w-1/2"></div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="hidden py-16 text-center">
+      <div class="w-16 h-16 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto mb-3 text-slate-400">
+        <i data-lucide="inbox" class="w-8 h-8"></i>
+      </div>
+      <h3 class="font-heading text-base font-bold text-slate-800 mb-1">ยังไม่มีรายการเครดิตในหมวดนี้</h3>
+      <p class="text-xs text-slate-500 max-w-xs mx-auto mb-4">หรือลองพิมพ์คำค้นหาใหม่อีกครั้ง</p>
+      <button onclick="clearSearch()" class="px-3.5 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-semibold shadow-sm transition">
+        ดูทั้งหมด
+      </button>
+    </div>
+
+    <!-- Review Cards Feed (Photo Proof First Grid) -->
+    <div id="credits-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
+      <!-- Injected by JavaScript -->
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-200 bg-white py-6 text-xs text-slate-500">
+    <div class="max-w-[1024px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+      <div class="flex items-center gap-2">
+        <img src="/images/logo.svg" alt="sunfz logo" class="w-4 h-4">
+        <span id="footer-shop-name" class="font-bold text-slate-800">sunfz</span>
+        <span>&copy; <span id="year-text">2026</span> • รวมเครดิตการซื้อขาย</span>
+      </div>
+      <div class="flex items-center gap-3 text-slate-500">
+        <span class="text-emerald-600 font-medium">✓ ปลอดภัย ส่งจริงทุกรายการ</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================== -->
+  <!-- MODALS -->
+  <!-- ============================================== -->
+
+  <!-- 1. LIGHTBOX MODAL (Image Fullscreen & Detail View) -->
+  <div id="lightbox-modal" class="fixed inset-0 z-50 clean-modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="relative w-full max-w-2xl bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      
+      <!-- Header -->
+      <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i> หลักฐานการซื้อขาย
+          </span>
+          <span class="text-xs text-slate-400" id="lightbox-date">-</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="copyCreditLink()" class="px-2.5 py-1 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1 text-xs font-medium border border-slate-200" title="คัดลอกลิงก์เครดิตนี้">
+            <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+            <span>แชร์</span>
+          </button>
+          <a id="lightbox-open-external" href="#" target="_blank" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition" title="เปิดรูปในแท็บใหม่">
+            <i data-lucide="external-link" class="w-4 h-4"></i>
+          </a>
+          <button onclick="closeLightbox()" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Image -->
+      <div class="relative flex-grow flex items-center justify-center bg-slate-900 p-2 min-h-[350px] overflow-hidden">
+        <img id="lightbox-img" src="" alt="Proof Screenshot" class="max-h-[65vh] object-contain rounded-lg shadow cursor-zoom-in" onclick="toggleZoomImage(this)">
+        
+        <!-- Prev / Next buttons -->
+        <button id="lightbox-prev-btn" onclick="prevLightboxImage()" class="hidden absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 hover:bg-white text-slate-900 flex items-center justify-center shadow transition">
+          <i data-lucide="chevron-left" class="w-5 h-5"></i>
+        </button>
+        <button id="lightbox-next-btn" onclick="nextLightboxImage()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/80 hover:bg-white text-slate-900 flex items-center justify-center shadow transition">
+          <i data-lucide="chevron-right" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Thumbnails -->
+      <div id="lightbox-thumbnails" class="hidden px-4 py-2 border-t border-slate-100 bg-slate-50 flex items-center gap-2 overflow-x-auto"></div>
+
+      <!-- Details Footer -->
+      <div class="px-5 py-3.5 border-t border-slate-100 bg-white flex items-center justify-between gap-3 text-xs sm:text-sm">
+        <div>
+          <h4 id="lightbox-title" class="font-heading font-bold text-sm sm:text-base text-slate-900">
+            -
+          </h4>
+          <p id="lightbox-description" class="text-xs text-slate-500 mt-0.5">
+            -
+          </p>
+          <div class="text-[11px] text-slate-400 mt-1">
+            ลูกค้า: <strong id="lightbox-customer" class="text-slate-700">-</strong>
+          </div>
+        </div>
+
+        <div class="text-right shrink-0">
+          <div id="lightbox-price" class="font-heading font-extrabold text-lg text-slate-900">
+            ฿0
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed bottom-6 left-6 z-50 flex flex-col gap-2"></div>
+
+  <!-- Application Script -->
+  <script src="/js/app.js"></script>
+</body>
+</html>

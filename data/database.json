@@ -1,0 +1,91 @@
+{
+  "settings": {
+    "shopName": "SUNFZ",
+    "tagline": "รวมหลักฐานและเครดิตการซื้อขายจริง เช็คประวัติได้ที่นี่ 100%",
+    "announcement": "✨ รวมเครดิตซื้อขายร้าน SUNFZ ซื้อขายปลอดภัย มีหลักฐานทุกรายการ!",
+    "adminPin": "1234",
+    "socials": {
+      "facebook": {
+        "label": "Facebook Fanpage",
+        "url": "https://facebook.com",
+        "enabled": true
+      },
+      "line": {
+        "label": "Line ID: @sunfz",
+        "url": "https://line.me",
+        "enabled": true
+      },
+      "discord": {
+        "label": "Discord Server",
+        "url": "https://discord.gg",
+        "enabled": true
+      },
+      "tiktok": {
+        "label": "TikTok Shop",
+        "url": "",
+        "enabled": false
+      }
+    },
+    "stats": {
+      "ratingScore": "5.0",
+      "totalOrders": "เครดิตจริง 100%",
+      "deliveryRate": "ส่งไว ปลอดภัย",
+      "responseTime": "ไม่กี่นาที",
+      "warrantyPeriod": "มีประกัน"
+    }
+  },
+  "categories": [
+    "ทั้งหมด",
+    "ทั่วไป"
+  ],
+  "credits": [
+    {
+      "id": "sample-1",
+      "title": "ไอดี Genshin Impact C6 Furina + Sign R1 & 24 ตัว 5 ดาว",
+      "game": "ไอดีเกม",
+      "price": 4500,
+      "customer": "คุณธนภัทร",
+      "rating": 5,
+      "date": "2026-10-03",
+      "timeAgo": "10 นาทีที่แล้ว",
+      "images": [
+        "/images/sample-genshin.svg"
+      ],
+      "description": "ส่งมอบเรียบร้อย ลูกค้าเช็คไอดีถูกต้อง โอนเงินไวมากครับ ขอบคุณที่ไว้วางใจ!",
+      "isPinned": true,
+      "createdAt": "2026-10-03T03:50:40.631Z"
+    },
+    {
+      "id": "sample-2",
+      "title": "บัญชีพรีเมียม 1 ปี ใช้งานได้ยาวๆ ไม่หลุด",
+      "game": "แอพพรีเมียม",
+      "price": 490,
+      "customer": "คุณนนท์",
+      "rating": 5,
+      "date": "2026-10-03",
+      "timeAgo": "2 ชม. ที่แล้ว",
+      "images": [
+        "/images/sample-starrail.svg"
+      ],
+      "description": "ส่งเมลและรหัสให้เรียบร้อย ล็อกอินผ่านฉลุย ขอบคุณครับ",
+      "isPinned": true,
+      "createdAt": "2026-10-03T01:50:40.631Z"
+    },
+    {
+      "id": "sample-3",
+      "title": "เติมแพ็กรายเดือน / เติมเกมส่งไว",
+      "game": "เติมเกม",
+      "price": 179,
+      "customer": "คุณกอล์ฟ",
+      "rating": 5,
+      "date": "2026-10-02",
+      "timeAgo": "เมื่อวานนี้",
+      "images": [
+        "/images/sample-genshin.svg"
+      ],
+      "description": "โอนปุ๊บเติมปั๊บ เข้าทันทีภายใน 2 นาทีครับ",
+      "isPinned": false,
+      "createdAt": "2026-10-02T10:30:00.000Z"
+    }
+  ]
+}
