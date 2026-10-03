@@ -10,7 +10,7 @@
   [![Express](https://img.shields.io/badge/Express-v5.0-000000?logo=express&logoColor=white)](https://expressjs.com)
   [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v3.4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
   [![License: MIT](https://img.shields.io/badge/License-MIT-amber.svg)](LICENSE)
-  [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/sunfluways)
+  [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/underwaves)
 
   <p align="center">
     <a href="#-overview">Overview</a> •
@@ -109,7 +109,7 @@ Designed around the **"Clean Trust & Proof-First"** design philosophy, it allows
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/sunfluways/sunfz-credits.git
+git clone https://github.com/underwaves/sunfz-credits.git
 cd sunfz-credits
 ```
 
@@ -175,5 +175,5 @@ Distributed under the MIT License. See [`LICENSE`](LICENSE) for more information
 ---
 
 <div align="center">
-  Crafted with ❤️ by <strong><a href="https://github.com/sunfluways">SUNFZ (sunfluways)</a></strong>
+  Crafted with ❤️ by <strong><a href="https://github.com/underwaves">SUNFZ (underwaves)</a></strong>
 </div>
