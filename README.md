@@ -109,8 +109,8 @@ Designed around the **"Clean Trust & Proof-First"** design philosophy, it allows
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/underwaves/sunfz-credits.git
-cd sunfz-credits
+git clone https://github.com/underwaves/credits.git
+cd credits
 ```
 
 ### 2. Install Dependencies
