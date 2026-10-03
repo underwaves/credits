@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -6,12 +7,13 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
+const dbService = require('./supabaseService');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Directories
 const DATA_DIR = path.join(__dirname, 'data');
-const DB_FILE = path.join(DATA_DIR, 'database.json');
 const UPLOAD_DIR = path.join(__dirname, 'public', 'uploads');
 
 if (!fs.existsSync(DATA_DIR)) {
@@ -21,20 +23,9 @@ if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }
 
-// Multer Storage Configuration
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, UPLOAD_DIR);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, 'credit-' + uniqueSuffix + ext);
-  }
-});
-
+// Multer in-memory storage so we can upload to Supabase Storage or save locally
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 15 * 1024 * 1024 }, // 15MB limit
   fileFilter: (req, file, cb) => {
     const allowed = /jpeg|jpg|png|webp|gif/;
@@ -47,120 +38,24 @@ const upload = multer({
   }
 });
 
-// Default initial database state for SUNFZ
-const initialData = {
-  settings: {
-    shopName: 'SUNFZ',
-    tagline: 'รวมหลักฐานและเครดิตการซื้อขายจริง เช็คประวัติได้ที่นี่ 100%',
-    announcement: '✨ รวมเครดิตซื้อขายร้าน SUNFZ ซื้อขายปลอดภัย มีหลักฐานทุกรายการ!',
-    adminPin: '1234',
-    socials: {
-      facebook: { label: 'Facebook Fanpage', url: 'https://facebook.com', enabled: true },
-      line: { label: 'Line ID: @sunfz', url: 'https://line.me', enabled: true },
-      discord: { label: 'Discord Server', url: 'https://discord.gg', enabled: true },
-      tiktok: { label: 'TikTok Shop', url: '', enabled: false }
-    },
-    stats: {
-      ratingScore: '5.0',
-      totalOrders: 'เครดิตจริง 100%',
-      deliveryRate: 'ส่งไว ปลอดภัย',
-      responseTime: 'ไม่กี่นาที',
-      warrantyPeriod: 'มีประกัน'
-    }
-  },
-  categories: ['ทั้งหมด', 'ทั่วไป'],
-  credits: [
-    {
-      id: 'sample-1',
-      title: 'ไอดี Genshin Impact C6 Furina + Sign R1 & 24 ตัว 5 ดาว',
-      game: 'ไอดีเกม',
-      price: 4500,
-      customer: 'คุณธนภัทร',
-      rating: 5,
-      date: '2026-10-03',
-      timeAgo: '10 นาทีที่แล้ว',
-      images: ['/images/sample-genshin.svg'],
-      description: 'ส่งมอบเรียบร้อย ลูกค้าเช็คไอดีถูกต้อง โอนเงินไวมากครับ ขอบคุณที่ไว้วางใจ!',
-      isPinned: true,
-      createdAt: '2026-10-03T03:50:40.631Z'
-    },
-    {
-      id: 'sample-2',
-      title: 'บัญชีพรีเมียม 1 ปี ใช้งานได้ยาวๆ ไม่หลุด',
-      game: 'แอพพรีเมียม',
-      price: 490,
-      customer: 'คุณนนท์',
-      rating: 5,
-      date: '2026-10-03',
-      timeAgo: '2 ชม. ที่แล้ว',
-      images: ['/images/sample-starrail.svg'],
-      description: 'ส่งเมลและรหัสให้เรียบร้อย ล็อกอินผ่านฉลุย ขอบคุณครับ',
-      isPinned: true,
-      createdAt: '2026-10-03T01:50:40.631Z'
-    },
-    {
-      id: 'sample-3',
-      title: 'เติมแพ็กรายเดือน / เติมเกมส่งไว',
-      game: 'เติมเกม',
-      price: 179,
-      customer: 'คุณกอล์ฟ',
-      rating: 5,
-      date: '2026-10-02',
-      timeAgo: 'เมื่อวานนี้',
-      images: ['/images/sample-genshin.svg'],
-      description: 'โอนปุ๊บเติมปั๊บ เข้าทันทีภายใน 2 นาทีครับ',
-      isPinned: false,
-      createdAt: '2026-10-02T10:30:00.000Z'
-    }
-  ]
-};
-
-// Database helper functions with atomic write
-function readDB() {
-  try {
-    if (!fs.existsSync(DB_FILE)) {
-      writeDB(initialData);
-      return initialData;
-    }
-    const raw = fs.readFileSync(DB_FILE, 'utf8');
-    const data = JSON.parse(raw);
-
-    // If it was wrapped in shops.sunfz, unwrap cleanly
-    if (data.shops && data.shops.sunfz) {
-      const unwrapped = {
-        settings: {
-          shopName: data.shops.sunfz.shopName || 'SUNFZ',
-          tagline: data.shops.sunfz.tagline || initialData.settings.tagline,
-          announcement: data.shops.sunfz.announcement || initialData.settings.announcement,
-          adminPin: data.shops.sunfz.adminPin || '1234',
-          socials: data.shops.sunfz.socials || initialData.settings.socials,
-          stats: data.shops.sunfz.stats || initialData.settings.stats
-        },
-        categories: data.shops.sunfz.categories || initialData.categories,
-        credits: data.shops.sunfz.credits || initialData.credits
-      };
-      writeDB(unwrapped);
-      return unwrapped;
-    }
-
-    if (!data.settings) return initialData;
-    return data;
-  } catch (err) {
-    console.error('Error reading database:', err);
-    return initialData;
+// Helper to save uploaded file buffer to Supabase or fallback to local disk
+async function saveUploadedFile(file) {
+  // 1. Try Supabase Storage
+  const supabaseUrl = await dbService.uploadImageToSupabase(
+    file.buffer,
+    file.originalname,
+    file.mimetype
+  );
+  if (supabaseUrl) {
+    return supabaseUrl;
   }
-}
 
-function writeDB(data) {
-  try {
-    const tempFile = DB_FILE + '.tmp';
-    fs.writeFileSync(tempFile, JSON.stringify(data, null, 2), 'utf8');
-    fs.renameSync(tempFile, DB_FILE);
-    return true;
-  } catch (err) {
-    console.error('Error writing database:', err);
-    return false;
-  }
+  // 2. Fallback to local disk
+  const ext = path.extname(file.originalname).toLowerCase();
+  const filename = 'credit-' + Date.now() + '-' + Math.round(Math.random() * 1e9) + ext;
+  const filePath = path.join(UPLOAD_DIR, filename);
+  fs.writeFileSync(filePath, file.buffer);
+  return '/uploads/' + filename;
 }
 
 // HMAC based stateless admin sessions
@@ -216,74 +111,58 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ========================
 
 // Get public shop settings & categories
-app.get('/api/public/settings', (req, res) => {
-  const db = readDB();
-  const safeSettings = {
-    shopName: db.settings.shopName,
-    tagline: db.settings.tagline,
-    announcement: db.settings.announcement,
-    socials: db.settings.socials,
-    stats: {
-      ...db.settings.stats,
-      totalCredits: db.credits ? db.credits.length : 0,
-      totalSoldAmount: (db.credits || []).reduce((acc, c) => acc + (Number(c.price) || 0), 0)
-    }
-  };
-  res.json({
-    success: true,
-    settings: safeSettings,
-    categories: db.categories || []
-  });
+app.get('/api/public/settings', async (req, res) => {
+  try {
+    const config = await dbService.getShopConfig();
+    const allCredits = await dbService.getCredits();
+
+    const safeSettings = {
+      shopName: config.settings.shopName,
+      tagline: config.settings.tagline,
+      announcement: config.settings.announcement,
+      socials: config.settings.socials,
+      stats: {
+        ...config.settings.stats,
+        totalCredits: allCredits ? allCredits.length : 0,
+        totalSoldAmount: (allCredits || []).reduce((acc, c) => acc + (Number(c.price) || 0), 0)
+      }
+    };
+
+    res.json({
+      success: true,
+      settings: safeSettings,
+      categories: config.categories || []
+    });
+  } catch (err) {
+    console.error('Error fetching settings:', err);
+    res.status(500).json({ success: false, message: 'ไม่สามารถโหลดข้อมูลร้านค้าได้' });
+  }
 });
 
 // Get credits with filtering and search
-app.get('/api/public/credits', (req, res) => {
-  const db = readDB();
-  let credits = [...(db.credits || [])];
-
-  const { search, category, sort } = req.query;
-
-  // Filter by category
-  if (category && category !== 'ทั้งหมด') {
-    credits = credits.filter(c => c.game === category);
+app.get('/api/public/credits', async (req, res) => {
+  try {
+    const { search, category, sort } = req.query;
+    const credits = await dbService.getCredits({ search, category, sort });
+    res.json({ success: true, credits });
+  } catch (err) {
+    console.error('Error fetching credits:', err);
+    res.status(500).json({ success: false, message: 'ไม่สามารถโหลดรายการเครดิตได้' });
   }
-
-  // Search
-  if (search && search.trim() !== '') {
-    const q = search.trim().toLowerCase();
-    credits = credits.filter(c => 
-      (c.title && c.title.toLowerCase().includes(q)) ||
-      (c.customer && c.customer.toLowerCase().includes(q)) ||
-      (c.description && c.description.toLowerCase().includes(q)) ||
-      (c.price && c.price.toString().includes(q))
-    );
-  }
-
-  // Sort
-  if (sort === 'price-high') {
-    credits.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
-  } else if (sort === 'price-low') {
-    credits.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
-  } else {
-    // Default: Pinned first, then newest
-    credits.sort((a, b) => {
-      if (a.isPinned && !b.isPinned) return -1;
-      if (!a.isPinned && b.isPinned) return 1;
-      return new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt);
-    });
-  }
-
-  res.json({ success: true, credits });
 });
 
 // Get single credit details
-app.get('/api/public/credits/:id', (req, res) => {
-  const db = readDB();
-  const credit = (db.credits || []).find(c => c.id === req.params.id);
-  if (!credit) {
-    return res.status(404).json({ success: false, message: 'ไม่พบรายการเครดิตนี้' });
+app.get('/api/public/credits/:id', async (req, res) => {
+  try {
+    const credit = await dbService.getCreditById(req.params.id);
+    if (!credit) {
+      return res.status(404).json({ success: false, message: 'ไม่พบรายการเครดิตนี้' });
+    }
+    res.json({ success: true, credit });
+  } catch (err) {
+    console.error('Error fetching single credit:', err);
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการโหลดเครดิต' });
   }
-  res.json({ success: true, credit });
 });
 
 // ========================
@@ -291,22 +170,27 @@ app.get('/api/public/credits/:id', (req, res) => {
 // ========================
 
 // Admin Login
-app.post('/api/admin/login', (req, res) => {
-  const { pin } = req.body;
-  const db = readDB();
+app.post('/api/admin/login', async (req, res) => {
+  try {
+    const { pin } = req.body;
+    const config = await dbService.getShopConfig();
+    const adminPin = (config.settings && config.settings.adminPin) ? config.settings.adminPin.toString() : '1234';
 
-  if (!pin || pin.toString() !== db.settings.adminPin.toString()) {
-    return res.status(400).json({ success: false, message: 'รหัสผ่าน / PIN แอดมินไม่ถูกต้อง' });
+    if (!pin || pin.toString() !== adminPin) {
+      return res.status(400).json({ success: false, message: 'รหัสผ่าน / PIN แอดมินไม่ถูกต้อง' });
+    }
+
+    const token = generateSessionToken();
+    res.cookie('admin_token', token, {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite: 'lax'
+    });
+
+    res.json({ success: true, token, message: 'เข้าสู่ระบบแอดมินสำเร็จ' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ' });
   }
-
-  const token = generateSessionToken();
-  res.cookie('admin_token', token, {
-    httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    sameSite: 'lax'
-  });
-
-  res.json({ success: true, token, message: 'เข้าสู่ระบบแอดมินสำเร็จ' });
 });
 
 // Admin check session status
@@ -333,21 +217,22 @@ app.post('/api/admin/logout', (req, res) => {
 // ========================
 
 // Create new credit with file upload
-app.post('/api/admin/credits', requireAdmin, upload.array('images', 5), (req, res) => {
+app.post('/api/admin/credits', requireAdmin, upload.array('images', 5), async (req, res) => {
   try {
     const { title, game, price, customer, rating, date, description, isPinned } = req.body;
-    
+
     if (!title || !title.trim()) {
       return res.status(400).json({ success: false, message: 'กรุณากรอกชื่อรายการ / สินค้าที่ขาย' });
     }
 
     const itemCategory = (game && game.trim()) ? game.trim() : 'ทั่วไป';
-    const db = readDB();
-    if (!db.credits) db.credits = [];
 
     let imagePaths = [];
     if (req.files && req.files.length > 0) {
-      imagePaths = req.files.map(f => '/uploads/' + f.filename);
+      for (const file of req.files) {
+        const savedUrl = await saveUploadedFile(file);
+        imagePaths.push(savedUrl);
+      }
     } else if (req.body.imageUrl) {
       imagePaths = [req.body.imageUrl];
     } else {
@@ -368,10 +253,9 @@ app.post('/api/admin/credits', requireAdmin, upload.array('images', 5), (req, re
       createdAt: new Date().toISOString()
     };
 
-    db.credits.unshift(newCredit);
-    writeDB(db);
+    const created = await dbService.createCredit(newCredit);
 
-    res.json({ success: true, credit: newCredit, message: 'เพิ่มเครดิตสำเร็จเรียบร้อยแล้ว' });
+    res.json({ success: true, credit: created, message: 'เพิ่มเครดิตสำเร็จเรียบร้อยแล้ว' });
   } catch (err) {
     console.error('Error creating credit:', err);
     res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการบันทึกเครดิต: ' + err.message });
@@ -379,21 +263,22 @@ app.post('/api/admin/credits', requireAdmin, upload.array('images', 5), (req, re
 });
 
 // Update credit
-app.put('/api/admin/credits/:id', requireAdmin, upload.array('images', 5), (req, res) => {
+app.put('/api/admin/credits/:id', requireAdmin, upload.array('images', 5), async (req, res) => {
   try {
     const { title, game, price, customer, rating, date, description, isPinned, keepExistingImages } = req.body;
-    const db = readDB();
-    const index = (db.credits || []).findIndex(c => c.id === req.params.id);
+    const existing = await dbService.getCreditById(req.params.id);
 
-    if (index === -1) {
+    if (!existing) {
       return res.status(404).json({ success: false, message: 'ไม่พบรายการเครดิตที่ต้องการแก้ไข' });
     }
 
-    const existing = db.credits[index];
     let newImages = [];
-
     if (req.files && req.files.length > 0) {
-      const uploaded = req.files.map(f => '/uploads/' + f.filename);
+      const uploaded = [];
+      for (const file of req.files) {
+        const savedUrl = await saveUploadedFile(file);
+        uploaded.push(savedUrl);
+      }
       if (keepExistingImages === 'true' || keepExistingImages === true) {
         newImages = [...(existing.images || []), ...uploaded];
       } else {
@@ -403,8 +288,7 @@ app.put('/api/admin/credits/:id', requireAdmin, upload.array('images', 5), (req,
       newImages = existing.images || ['/images/placeholder-credit.svg'];
     }
 
-    db.credits[index] = {
-      ...existing,
+    const updates = {
       title: title !== undefined ? title.trim() : existing.title,
       game: game !== undefined ? game.trim() : existing.game,
       price: price !== undefined ? Number(price) : existing.price,
@@ -413,12 +297,11 @@ app.put('/api/admin/credits/:id', requireAdmin, upload.array('images', 5), (req,
       date: date || existing.date,
       images: newImages,
       description: description !== undefined ? description.trim() : existing.description,
-      isPinned: isPinned !== undefined ? (isPinned === 'true' || isPinned === true) : existing.isPinned,
-      updatedAt: new Date().toISOString()
+      isPinned: isPinned !== undefined ? (isPinned === 'true' || isPinned === true) : existing.isPinned
     };
 
-    writeDB(db);
-    res.json({ success: true, credit: db.credits[index], message: 'อัปเดตข้อมูลเครดิตเรียบร้อย' });
+    const updated = await dbService.updateCredit(req.params.id, updates);
+    res.json({ success: true, credit: updated, message: 'อัปเดตข้อมูลเครดิตเรียบร้อย' });
   } catch (err) {
     console.error('Error updating credit:', err);
     res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการอัปเดต: ' + err.message });
@@ -426,17 +309,16 @@ app.put('/api/admin/credits/:id', requireAdmin, upload.array('images', 5), (req,
 });
 
 // Delete credit
-app.delete('/api/admin/credits/:id', requireAdmin, (req, res) => {
+app.delete('/api/admin/credits/:id', requireAdmin, async (req, res) => {
   try {
-    const db = readDB();
-    const item = (db.credits || []).find(c => c.id === req.params.id);
-
-    if (!item) {
+    const existing = await dbService.getCreditById(req.params.id);
+    if (!existing) {
       return res.status(404).json({ success: false, message: 'ไม่พบเครดิตที่ต้องการลบ' });
     }
 
-    if (item.images && Array.isArray(item.images)) {
-      item.images.forEach(imgPath => {
+    // Clean up local uploads if applicable
+    if (existing.images && Array.isArray(existing.images)) {
+      existing.images.forEach(imgPath => {
         if (imgPath.startsWith('/uploads/')) {
           const filePath = path.join(__dirname, 'public', imgPath);
           if (fs.existsSync(filePath)) {
@@ -446,9 +328,7 @@ app.delete('/api/admin/credits/:id', requireAdmin, (req, res) => {
       });
     }
 
-    db.credits = db.credits.filter(c => c.id !== req.params.id);
-    writeDB(db);
-
+    await dbService.deleteCredit(req.params.id);
     res.json({ success: true, message: 'ลบรายการเครดิตเรียบร้อยแล้ว' });
   } catch (err) {
     console.error('Error deleting credit:', err);
@@ -457,75 +337,112 @@ app.delete('/api/admin/credits/:id', requireAdmin, (req, res) => {
 });
 
 // Toggle pin credit
-app.put('/api/admin/credits/:id/pin', requireAdmin, (req, res) => {
-  const db = readDB();
-  const credit = (db.credits || []).find(c => c.id === req.params.id);
-  if (!credit) {
-    return res.status(404).json({ success: false, message: 'ไม่พบเครดิต' });
+app.put('/api/admin/credits/:id/pin', requireAdmin, async (req, res) => {
+  try {
+    const newPinned = await dbService.togglePinCredit(req.params.id);
+    if (newPinned === null) {
+      return res.status(404).json({ success: false, message: 'ไม่พบเครดิต' });
+    }
+    res.json({
+      success: true,
+      isPinned: newPinned,
+      message: newPinned ? 'ปักหมุดเครดิตแล้ว' : 'ยกเลิกการปักหมุดแล้ว'
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาด: ' + err.message });
   }
-  credit.isPinned = !credit.isPinned;
-  writeDB(db);
-  res.json({ success: true, isPinned: credit.isPinned, message: credit.isPinned ? 'ปักหมุดเครดิตแล้ว' : 'ยกเลิกการปักหมุดแล้ว' });
 });
 
 // Update shop settings
-app.put('/api/admin/settings', requireAdmin, (req, res) => {
+app.put('/api/admin/settings', requireAdmin, async (req, res) => {
   try {
-    const { shopName, tagline, announcement, socials, stats } = req.body;
-    const db = readDB();
+    const { shopName, tagline, announcement, socials, stats, categories } = req.body;
+    const config = await dbService.getShopConfig();
 
-    if (shopName) db.settings.shopName = shopName.trim();
-    if (tagline !== undefined) db.settings.tagline = tagline.trim();
-    if (announcement !== undefined) db.settings.announcement = announcement.trim();
-    if (socials) db.settings.socials = { ...db.settings.socials, ...socials };
-    if (stats) db.settings.stats = { ...db.settings.stats, ...stats };
+    const newSettings = {};
+    if (shopName) newSettings.shopName = shopName.trim();
+    if (tagline !== undefined) newSettings.tagline = tagline.trim();
+    if (announcement !== undefined) newSettings.announcement = announcement.trim();
+    if (socials) newSettings.socials = { ...config.settings.socials, ...socials };
+    if (stats) newSettings.stats = { ...config.settings.stats, ...stats };
 
-    writeDB(db);
-    res.json({ success: true, settings: db.settings, message: 'บันทึกการตั้งค่าร้านค้าเรียบร้อยแล้ว' });
+    const updatedSettings = await dbService.updateShopSettings(newSettings);
+
+    if (categories && Array.isArray(categories)) {
+      await dbService.updateCategories(categories);
+    }
+
+    res.json({ success: true, settings: updatedSettings, message: 'บันทึกการตั้งค่าร้านค้าเรียบร้อยแล้ว' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'บันทึกการตั้งค่าไม่สำเร็จ: ' + err.message });
   }
 });
 
 // Change admin PIN
-app.post('/api/admin/change-pin', requireAdmin, (req, res) => {
-  const { currentPin, newPin } = req.body;
-  const db = readDB();
+app.post('/api/admin/change-pin', requireAdmin, async (req, res) => {
+  try {
+    const { currentPin, newPin } = req.body;
+    const config = await dbService.getShopConfig();
+    const adminPin = (config.settings && config.settings.adminPin) ? config.settings.adminPin.toString() : '1234';
 
-  if (currentPin.toString() !== db.settings.adminPin.toString()) {
-    return res.status(400).json({ success: false, message: 'PIN ปัจจุบันไม่ถูกต้อง' });
+    if (currentPin.toString() !== adminPin) {
+      return res.status(400).json({ success: false, message: 'PIN ปัจจุบันไม่ถูกต้อง' });
+    }
+
+    if (!newPin || newPin.toString().length < 4) {
+      return res.status(400).json({ success: false, message: 'PIN ใหม่ต้องมีความยาวอย่างน้อย 4 ตัวอักษร' });
+    }
+
+    await dbService.updateShopSettings({ adminPin: newPin.toString().trim() });
+    res.json({ success: true, message: 'เปลี่ยนรหัสผ่าน / PIN แอดมินสำเร็จแล้ว' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการเปลี่ยน PIN: ' + err.message });
   }
-
-  if (!newPin || newPin.toString().length < 4) {
-    return res.status(400).json({ success: false, message: 'PIN ใหม่ต้องมีความยาวอย่างน้อย 4 ตัวอักษร' });
-  }
-
-  db.settings.adminPin = newPin.toString().trim();
-  writeDB(db);
-  res.json({ success: true, message: 'เปลี่ยนรหัสผ่าน / PIN แอดมินสำเร็จแล้ว' });
 });
 
 // Export Database JSON backup
-app.get('/api/admin/export', requireAdmin, (req, res) => {
-  const db = readDB();
-  res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Content-Disposition', `attachment; filename=credits-backup-${Date.now()}.json`);
-  res.send(JSON.stringify(db, null, 2));
+app.get('/api/admin/export', requireAdmin, async (req, res) => {
+  try {
+    const config = await dbService.getShopConfig();
+    const credits = await dbService.getCredits();
+    const backup = {
+      settings: config.settings,
+      categories: config.categories,
+      credits: credits
+    };
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename=credits-backup-${Date.now()}.json`);
+    res.send(JSON.stringify(backup, null, 2));
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'ไม่สามารถ Export ข้อมูลได้' });
+  }
 });
 
 // Import Database JSON
-app.post('/api/admin/import', requireAdmin, upload.single('backupFile'), (req, res) => {
+app.post('/api/admin/import', requireAdmin, multer().single('backupFile'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'กรุณาเลือกไฟล์สำรองข้อมูล JSON' });
     }
-    const content = fs.readFileSync(req.file.path, 'utf8');
+    const content = req.file.buffer.toString('utf8');
     const parsed = JSON.parse(content);
     if (!parsed.settings || !Array.isArray(parsed.credits)) {
       return res.status(400).json({ success: false, message: 'รูปแบบไฟล์สำรองข้อมูลไม่ถูกต้อง' });
     }
-    writeDB(parsed);
-    try { fs.unlinkSync(req.file.path); } catch (e) {}
+
+    await dbService.updateShopSettings(parsed.settings);
+    if (parsed.categories) {
+      await dbService.updateCategories(parsed.categories);
+    }
+    for (const c of parsed.credits) {
+      const existing = await dbService.getCreditById(c.id);
+      if (existing) {
+        await dbService.updateCredit(c.id, c);
+      } else {
+        await dbService.createCredit(c);
+      }
+    }
+
     res.json({ success: true, message: 'กู้คืนข้อมูลสำเร็จเรียบร้อยแล้ว' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'นำเข้าข้อมูลไม่สำเร็จ: ' + err.message });
@@ -547,11 +464,22 @@ app.use((req, res) => {
 });
 
 // Start Server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`\n======================================================`);
   console.log(`🎮 SUNFZ Credits Store Web Server is RUNNING!`);
   console.log(`🌐 Public Website: http://localhost:${PORT}`);
   console.log(`🔑 Admin Studio:  http://localhost:${PORT}/admin`);
   console.log(`📌 Default PIN:    1234`);
+  console.log(`⚡ Supabase:       ${process.env.SUPABASE_URL ? 'Connected' : 'Local Fallback'}`);
   console.log(`======================================================\n`);
 });
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`\n❌ Error: Port ${PORT} กำลังถูกใช้งานอยู่โดยโปรแกรมอื่น`);
+    console.error(`กรุณาปิดโปรแกรมที่ใช้ Port ${PORT} ก่อน หรือเปลี่ยน PORT ในไฟล์ .env\n`);
+  } else {
+    console.error('\n❌ Server error:', err.message);
+  }
+});
+
