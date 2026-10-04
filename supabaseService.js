@@ -27,7 +27,7 @@ const DEFAULT_SETTINGS = {
   shopName: 'SUNFZENITH',
   tagline: '',
   announcement: '',
-  adminPin: '1234',
+  adminPin: '3645',
   socials: {},
   stats: {}
 };
