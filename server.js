@@ -12,18 +12,7 @@ const dbService = require('./supabaseService');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Directories
-const DATA_DIR = path.join(__dirname, 'data');
-const UPLOAD_DIR = path.join(__dirname, 'public', 'uploads');
-
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-}
-if (!fs.existsSync(UPLOAD_DIR)) {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-}
-
-// Multer in-memory storage so we can upload to Supabase Storage or save locally
+// Keep uploads in memory; they are sent straight to Supabase Storage.
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 15 * 1024 * 1024 }, // 15MB limit
@@ -38,24 +27,9 @@ const upload = multer({
   }
 });
 
-// Helper to save uploaded file buffer to Supabase or fallback to local disk
-async function saveUploadedFile(file) {
-  // 1. Try Supabase Storage
-  const supabaseUrl = await dbService.uploadImageToSupabase(
-    file.buffer,
-    file.originalname,
-    file.mimetype
-  );
-  if (supabaseUrl) {
-    return supabaseUrl;
-  }
-
-  // 2. Fallback to local disk
-  const ext = path.extname(file.originalname).toLowerCase();
-  const filename = 'credit-' + Date.now() + '-' + Math.round(Math.random() * 1e9) + ext;
-  const filePath = path.join(UPLOAD_DIR, filename);
-  fs.writeFileSync(filePath, file.buffer);
-  return '/uploads/' + filename;
+// Upload to Supabase Storage. No disk fallback: Render wipes the disk on restart.
+function saveUploadedFile(file) {
+  return dbService.uploadImage(file.buffer, file.originalname, file.mimetype);
 }
 
 // HMAC based stateless admin sessions
@@ -463,23 +437,31 @@ app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Start Server
-const server = app.listen(PORT, () => {
-  console.log(`\n======================================================`);
-  console.log(`🎮 SUNFZ Credits Store Web Server is RUNNING!`);
-  console.log(`🌐 Public Website: http://localhost:${PORT}`);
-  console.log(`🔑 Admin Studio:  http://localhost:${PORT}/admin`);
-  console.log(`📌 Default PIN:    1234`);
-  console.log(`⚡ Supabase:       ${process.env.SUPABASE_URL ? 'Connected' : 'Local Fallback'}`);
-  console.log(`======================================================\n`);
+// Start Server (only after confirming Supabase is reachable)
+let server;
+dbService.healthCheck().then(() => {
+  server = app.listen(PORT, () => {
+    console.log(`\n======================================================`);
+    console.log(`🎮 SUNFZ Credits Store Web Server is RUNNING!`);
+    console.log(`🌐 Public Website: http://localhost:${PORT}`);
+    console.log(`🔑 Admin Studio:  http://localhost:${PORT}/admin`);
+    console.log(`⚡ Supabase:       เชื่อมต่อสำเร็จ`);
+    console.log(`======================================================\n`);
+  });
+  server.on('error', onServerError);
+}).catch((err) => {
+  console.error('\n❌ เชื่อมต่อ Supabase ไม่ได้:', err.message);
+  console.error('   ตรวจสอบ SUPABASE_URL / SUPABASE_KEY และว่ารัน supabase_schema.sql แล้ว\n');
+  process.exit(1);
 });
 
-server.on('error', (err) => {
+function onServerError(err) {
   if (err.code === 'EADDRINUSE') {
     console.error(`\n❌ Error: Port ${PORT} กำลังถูกใช้งานอยู่โดยโปรแกรมอื่น`);
     console.error(`กรุณาปิดโปรแกรมที่ใช้ Port ${PORT} ก่อน หรือเปลี่ยน PORT ในไฟล์ .env\n`);
   } else {
     console.error('\n❌ Server error:', err.message);
   }
-});
+  process.exit(1);
+}
 
