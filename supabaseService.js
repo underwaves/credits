@@ -24,7 +24,7 @@ function check({ data, error }, action) {
 }
 
 const DEFAULT_SETTINGS = {
-  shopName: 'SUNFZ',
+  shopName: 'SUNFZENITH',
   tagline: '',
   announcement: '',
   adminPin: '1234',

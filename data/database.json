@@ -1,8 +1,8 @@
 {
   "settings": {
-    "shopName": "SUNFZ",
+    "shopName": "SUNFZENITH",
     "tagline": "รวมหลักฐานและเครดิตการซื้อขายจริง เช็คประวัติได้ที่นี่ 100%",
-    "announcement": "✨ รวมเครดิตซื้อขายร้าน SUNFZ ซื้อขายปลอดภัย มีหลักฐานทุกรายการ!",
+    "announcement": "✨ รวมเครดิตซื้อขายร้าน SUNFZENITH ซื้อขายปลอดภัย มีหลักฐานทุกรายการ!",
     "adminPin": "1234",
     "socials": {
       "facebook": {
@@ -11,7 +11,7 @@
         "enabled": true
       },
       "line": {
-        "label": "Line ID: @sunfz",
+        "label": "Line ID: @sunfzenith",
         "url": "https://line.me",
         "enabled": true
       },

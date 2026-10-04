@@ -442,7 +442,7 @@ let server;
 dbService.healthCheck().then(() => {
   server = app.listen(PORT, () => {
     console.log(`\n======================================================`);
-    console.log(`🎮 SUNFZ Credits Store Web Server is RUNNING!`);
+    console.log(`🎮 SUNFZENITH Credits Store Web Server is RUNNING!`);
     console.log(`🌐 Public Website: http://localhost:${PORT}`);
     console.log(`🔑 Admin Studio:  http://localhost:${PORT}/admin`);
     console.log(`⚡ Supabase:       เชื่อมต่อสำเร็จ`);
