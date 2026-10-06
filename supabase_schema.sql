@@ -110,3 +110,21 @@ CREATE POLICY "Public bucket view" ON storage.objects FOR SELECT USING (bucket_i
 CREATE POLICY "Public bucket upload" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'credit-images');
 CREATE POLICY "Public bucket modify" ON storage.objects FOR UPDATE USING (bucket_id = 'credit-images');
 CREATE POLICY "Public bucket delete" ON storage.objects FOR DELETE USING (bucket_id = 'credit-images');
+
+-- 6. ตารางรีวิวจากลูกค้า (+1 และ -1 พร้อมหลักฐาน)
+CREATE TABLE IF NOT EXISTS public.customer_reviews (
+    id TEXT PRIMARY KEY,
+    type TEXT NOT NULL DEFAULT '+1', -- '+1' หรือ '-1'
+    customer_name TEXT NOT NULL,
+    message TEXT DEFAULT '',
+    images JSONB DEFAULT '[]'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_customer_reviews_created ON public.customer_reviews (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_customer_reviews_type ON public.customer_reviews (type);
+
+ALTER TABLE public.customer_reviews ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read on customer_reviews" ON public.customer_reviews FOR SELECT USING (true);
+CREATE POLICY "Allow public insert on customer_reviews" ON public.customer_reviews FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow all access on customer_reviews" ON public.customer_reviews FOR ALL USING (true) WITH CHECK (true);

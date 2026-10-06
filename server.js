@@ -139,6 +139,75 @@ app.get('/api/public/credits/:id', async (req, res) => {
   }
 });
 
+// Get customer reviews (+1 / -1)
+app.get('/api/public/reviews', async (req, res) => {
+  try {
+    const reviews = await dbService.getCustomerReviews();
+    const positiveCount = reviews.filter(r => r.type === '+1').length;
+    const negativeCount = reviews.filter(r => r.type === '-1').length;
+    res.json({
+      success: true,
+      reviews,
+      counts: {
+        positive: positiveCount,
+        negative: negativeCount,
+        total: reviews.length
+      }
+    });
+  } catch (err) {
+    console.error('Error fetching reviews:', err);
+    res.status(500).json({ success: false, message: 'ไม่สามารถโหลดรีวิวได้' });
+  }
+});
+
+// Submit customer review (+1 or -1 with evidence)
+app.post('/api/public/reviews', upload.array('images', 5), async (req, res) => {
+  try {
+    const { type, customerName, message } = req.body;
+    const reviewType = (type === '-1') ? '-1' : '+1';
+
+    // Validation: -1 requires evidence!
+    if (reviewType === '-1') {
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'การให้เครดิต -1 จำเป็นต้องแนบรูปภาพหลักฐาน (สลิปหรือภาพแชท) เพื่อยืนยันความโปร่งใส'
+        });
+      }
+      if (!message || !message.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: 'กรุณากรอกรายละเอียดปัญหาหรือเหตุผลสำหรับการให้ -1'
+        });
+      }
+    }
+
+    let imagePaths = [];
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const savedUrl = await saveUploadedFile(file);
+        imagePaths.push(savedUrl);
+      }
+    }
+
+    const review = await dbService.createCustomerReview({
+      type: reviewType,
+      customerName: (customerName && customerName.trim()) ? customerName.trim() : 'ลูกค้าทั่วไป',
+      message: message ? message.trim() : '',
+      images: imagePaths
+    });
+
+    res.json({
+      success: true,
+      review,
+      message: reviewType === '+1' ? 'ส่งรีวิว +1 เรียบร้อยแล้ว ขอบคุณสำหรับกำลังใจครับ!' : 'ส่งรายงาน -1 พร้อมหลักฐานเรียบร้อยแล้ว ทางร้านจะเร่งตรวจสอบครับ'
+    });
+  } catch (err) {
+    console.error('Error submitting review:', err);
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการบันทึกรีวิว: ' + err.message });
+  }
+});
+
 // ========================
 // AUTH ROUTES
 // ========================
@@ -324,6 +393,17 @@ app.put('/api/admin/credits/:id/pin', requireAdmin, async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาด: ' + err.message });
+  }
+});
+
+// Delete customer review (+1 or -1)
+app.delete('/api/admin/reviews/:id', requireAdmin, async (req, res) => {
+  try {
+    await dbService.deleteCustomerReview(req.params.id);
+    res.json({ success: true, message: 'ลบรายการรีวิวเรียบร้อยแล้ว' });
+  } catch (err) {
+    console.error('Error deleting review:', err);
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการลบรีวิว' });
   }
 });
 

@@ -192,6 +192,102 @@ async function healthCheck() {
   check(await supabase.from('credits').select('id', { head: true, count: 'exact' }), 'health check');
 }
 
+// ---------------- Customer Reviews (+1 / -1) ----------------
+async function getCustomerReviews() {
+  try {
+    const { data, error } = await supabase
+      .from('customer_reviews')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (!error && data) {
+      return data.map(r => ({
+        id: r.id,
+        type: r.type,
+        customerName: r.customer_name,
+        message: r.message || '',
+        images: r.images || [],
+        createdAt: r.created_at
+      }));
+    }
+  } catch (err) {}
+
+  // Fallback to shop_config.stats.customer_reviews
+  try {
+    const { data: cfg } = await supabase.from('shop_config').select('stats').eq('id', 'main').maybeSingle();
+    if (cfg && cfg.stats && Array.isArray(cfg.stats.customer_reviews)) {
+      return cfg.stats.customer_reviews;
+    }
+  } catch (e) {}
+
+  return [];
+}
+
+async function createCustomerReview({ type, customerName, message, images }) {
+  const row = {
+    id: `rev-${Date.now()}-${Math.round(Math.random() * 1e6)}`,
+    type: (type === '-1') ? '-1' : '+1',
+    customer_name: (customerName && customerName.trim()) ? customerName.trim() : 'ลูกค้าทั่วไป',
+    message: (message && message.trim()) ? message.trim() : '',
+    images: Array.isArray(images) ? images : [],
+    created_at: new Date().toISOString()
+  };
+
+  try {
+    const { data, error } = await supabase
+      .from('customer_reviews')
+      .insert(row)
+      .select()
+      .maybeSingle();
+    if (!error && data) {
+      return {
+        id: data.id,
+        type: data.type,
+        customerName: data.customer_name,
+        message: data.message,
+        images: data.images || [],
+        createdAt: data.created_at
+      };
+    }
+  } catch (err) {}
+
+  // Fallback to shop_config.stats.customer_reviews
+  const { data: cfg } = await supabase.from('shop_config').select('stats').eq('id', 'main').single();
+  const currentStats = (cfg && cfg.stats) || {};
+  const list = currentStats.customer_reviews || [];
+  const clientObj = {
+    id: row.id,
+    type: row.type,
+    customerName: row.customer_name,
+    message: row.message,
+    images: row.images,
+    createdAt: row.created_at
+  };
+  list.unshift(clientObj);
+  await supabase.from('shop_config').update({
+    stats: { ...currentStats, customer_reviews: list }
+  }).eq('id', 'main');
+
+  return clientObj;
+}
+
+async function deleteCustomerReview(id) {
+  try {
+    await supabase.from('customer_reviews').delete().eq('id', id);
+  } catch (err) {}
+
+  try {
+    const { data: cfg } = await supabase.from('shop_config').select('stats').eq('id', 'main').single();
+    if (cfg && cfg.stats && Array.isArray(cfg.stats.customer_reviews)) {
+      const filtered = cfg.stats.customer_reviews.filter(r => r.id !== id);
+      await supabase.from('shop_config').update({
+        stats: { ...cfg.stats, customer_reviews: filtered }
+      }).eq('id', 'main');
+    }
+  } catch (err) {}
+
+  return true;
+}
+
 module.exports = {
   getShopConfig,
   updateShopSettings,
@@ -203,5 +299,9 @@ module.exports = {
   deleteCredit,
   togglePinCredit,
   uploadImage,
+  getCustomerReviews,
+  createCustomerReview,
+  deleteCustomerReview,
   healthCheck
 };
+

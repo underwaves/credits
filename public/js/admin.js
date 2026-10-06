@@ -6,8 +6,10 @@
 const adminState = {
   isAuthenticated: false,
   shopSlug: 'sunfz',
-  shopName: 'SUNFZ',
+  shopName: 'SUNFZENITH',
   credits: [],
+  reviews: [],
+  reviewFilter: 'all',
   settings: {},
   activeTab: 'add',
   selectedFiles: [],
@@ -204,7 +206,8 @@ async function handleLogout() {
 async function loadDashboardData() {
   await Promise.all([
     fetchAdminCredits(),
-    fetchAdminSettings()
+    fetchAdminSettings(),
+    fetchAdminReviews()
   ]);
   updateDashboardStats();
 }
@@ -262,7 +265,7 @@ function switchTab(tabId) {
   adminState.activeTab = tabId;
 
   // Toggle button styles
-  const tabs = ['add', 'list', 'settings'];
+  const tabs = ['add', 'list', 'reviews', 'settings'];
   tabs.forEach(t => {
     const btn = document.getElementById(`tab-btn-${t}`);
     const content = document.getElementById(`tab-content-${t}`);
@@ -283,9 +286,140 @@ function switchTab(tabId) {
 
   if (tabId === 'list') {
     renderCreditsList();
+  } else if (tabId === 'reviews') {
+    fetchAdminReviews();
   }
 
   updateIcons();
+}
+
+// Fetch and render customer reviews in admin
+async function fetchAdminReviews() {
+  try {
+    const res = await fetch('/api/public/reviews');
+    const data = await res.json();
+    if (data.success) {
+      adminState.reviews = data.reviews || [];
+      const posCount = (data.counts && data.counts.positive) || 0;
+      const negCount = (data.counts && data.counts.negative) || 0;
+
+      const tabCount = document.getElementById('tab-reviews-count');
+      const countPlus = document.getElementById('admin-count-plus');
+      const countMinus = document.getElementById('admin-count-minus');
+
+      if (tabCount) tabCount.textContent = adminState.reviews.length;
+      if (countPlus) countPlus.textContent = posCount;
+      if (countMinus) countMinus.textContent = negCount;
+
+      renderAdminReviews();
+    }
+  } catch (err) {
+    console.error('Failed to load admin reviews:', err);
+  }
+}
+
+function filterAdminReviews(filterType) {
+  adminState.reviewFilter = filterType;
+
+  const btnAll = document.getElementById('admin-rev-filter-all');
+  const btnPlus = document.getElementById('admin-rev-filter-plus');
+  const btnMinus = document.getElementById('admin-rev-filter-minus');
+
+  if (btnAll && btnPlus && btnMinus) {
+    btnAll.className = `px-3 py-1 rounded-lg transition cursor-pointer ${filterType === 'all' ? 'bg-slate-900 text-white font-bold' : 'bg-slate-100 text-slate-700'}`;
+    btnPlus.className = `px-3 py-1 rounded-lg transition cursor-pointer ${filterType === '+1' ? 'bg-emerald-600 text-white font-bold' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'}`;
+    btnMinus.className = `px-3 py-1 rounded-lg transition cursor-pointer ${filterType === '-1' ? 'bg-rose-600 text-white font-bold' : 'bg-rose-50 text-rose-800 border border-rose-200'}`;
+  }
+
+  renderAdminReviews();
+}
+
+function renderAdminReviews() {
+  const container = document.getElementById('admin-reviews-list');
+  if (!container) return;
+
+  const filter = adminState.reviewFilter || 'all';
+  let list = adminState.reviews || [];
+  if (filter !== 'all') {
+    list = list.filter(r => r.type === filter);
+  }
+
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div class="clean-card p-8 text-center text-slate-400">
+        <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+        <p class="text-xs">ยังไม่มีรีวิวในหมวดหมู่นี้</p>
+      </div>
+    `;
+    updateIcons();
+    return;
+  }
+
+  container.innerHTML = list.map(r => {
+    const isPlus = (r.type === '+1');
+    const images = Array.isArray(r.images) ? r.images : [];
+    return `
+      <div class="clean-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4 border ${isPlus ? 'border-emerald-100' : 'border-rose-200'}">
+        <div class="space-y-2 flex-grow">
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-lg text-xs font-bold ${isPlus ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+              ${isPlus ? '👍 +1 เครดิต' : '⚠️ -1 รายงานปัญหา'}
+            </span>
+            <span class="font-bold text-slate-900 text-sm">${escapeHtml(r.customerName || 'ลูกค้าทั่วไป')}</span>
+            <span class="text-xs text-slate-400">• ${new Date(r.createdAt).toLocaleString('th-TH')}</span>
+          </div>
+
+          <p class="text-xs text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed">
+            "${escapeHtml(r.message || '(ไม่มีข้อความเพิ่มเติม)')}"
+          </p>
+
+          ${images.length > 0 ? `
+            <div class="flex flex-wrap items-center gap-2 pt-1">
+              <span class="text-[11px] font-semibold text-slate-500">รูปภาพหลักฐาน (${images.length}):</span>
+              ${images.map(img => `
+                <a href="${img}" target="_blank" class="block w-14 h-14 rounded-lg overflow-hidden border border-slate-200 hover:border-amber-500 transition">
+                  <img src="${img}" class="w-full h-full object-cover">
+                </a>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+
+        <div class="shrink-0 flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2">
+          <button 
+            onclick="deleteAdminReview('${r.id}')"
+            class="px-3 py-1.5 rounded-xl text-rose-600 hover:bg-rose-50 border border-rose-200 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+            title="ลบรีวิวนี้"
+          >
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            <span>ลบรีวิว</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  updateIcons();
+}
+
+async function deleteAdminReview(id) {
+  if (!confirm('คุณต้องการลบรีวิวนี้ใช่หรือไม่?')) return;
+
+  try {
+    const res = await fetch(`/api/admin/reviews/${id}`, {
+      method: 'DELETE',
+      headers: getAdminHeaders()
+    });
+    const data = await res.json();
+    if (data.success) {
+      showAdminToast('ลบรีวิวเรียบร้อยแล้ว');
+      await fetchAdminReviews();
+    } else {
+      showAdminToast(data.message || 'ไม่สามารถลบรีวิวได้', 'error');
+    }
+  } catch (err) {
+    showAdminToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+  }
 }
 
 // ========================
