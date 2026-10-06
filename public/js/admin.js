@@ -914,7 +914,7 @@ function populateSettingsForm() {
   const lineEl = document.getElementById('setting-line-url');
   const fbEl = document.getElementById('setting-fb-url');
 
-  if (nameEl) nameEl.value = shopName || 'SUNFZ';
+  if (nameEl) nameEl.value = shopName || 'SUNFZENITH';
   if (tagEl) tagEl.value = tagline || '';
   if (annEl) annEl.value = announcement || '';
   if (lineEl && socials?.line) lineEl.value = socials.line.url || '';
@@ -934,8 +934,10 @@ async function saveShopSettings() {
       tagline,
       announcement,
       socials: {
-        line: { label: 'Line ID / แชท', url: lineUrl, enabled: !!lineUrl },
-        facebook: { label: 'Facebook Fanpage', url: fbUrl, enabled: !!fbUrl }
+        line: { label: 'Line ID: luvxawrnrkc', url: lineUrl, enabled: !!lineUrl },
+        facebook: { label: 'Facebook', url: fbUrl, enabled: !!fbUrl },
+        discord: { label: 'Discord Server', url: '', enabled: false },
+        tiktok: { label: 'TikTok Shop', url: '', enabled: false }
       }
     };
 

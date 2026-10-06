@@ -6,19 +6,19 @@
     "adminPin": "3645",
     "socials": {
       "facebook": {
-        "label": "Facebook Fanpage",
-        "url": "https://facebook.com",
+        "label": "Facebook",
+        "url": "https://www.facebook.com/profile.php?id=61595346770633&locale=th_TH",
         "enabled": true
       },
       "line": {
-        "label": "Line ID: @sunfzenith",
-        "url": "https://line.me",
+        "label": "Line ID: luvxawrnrkc",
+        "url": "https://line.me/ti/p/~luvxawrnrkc",
         "enabled": true
       },
       "discord": {
         "label": "Discord Server",
-        "url": "https://discord.gg",
-        "enabled": true
+        "url": "",
+        "enabled": false
       },
       "tiktok": {
         "label": "TikTok Shop",
