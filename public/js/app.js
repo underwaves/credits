@@ -551,7 +551,7 @@ function setReviewType(type) {
   if (noticeBox && noticeText) {
     if (isPlus) {
       noticeBox.className = 'p-3 rounded-2xl text-xs bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-start gap-2';
-      noticeText.textContent = 'กด +1 พร้อมพิมพ์ข้อความรีวิวเองได้ถ้ามี เพื่อเป็นเครดิตให้ทางร้านครับ';
+      noticeText.textContent = 'กด +1 พร้อมพิมพ์ข้อความรีวิวเองได้ถ้ามี และแนบหลักฐานการซื้อขายเพื่อกันสแปมครับ';
     } else {
       noticeBox.className = 'p-3 rounded-2xl text-xs bg-rose-50 border border-rose-200 text-rose-800 flex items-start gap-2';
       noticeText.textContent = '⚠️ เพื่อความยุติธรรมและโปร่งใส การกด -1 จำเป็นต้องแนบหลักฐาน (ภาพแชทหรือสลิป) และระบุปัญหาที่พบ';
@@ -563,14 +563,14 @@ function setReviewType(type) {
     msgReq.className = isPlus ? 'text-slate-400 font-normal text-[11px]' : 'text-rose-600 font-bold text-[11px]';
   }
   if (imgReq) {
-    imgReq.textContent = isPlus ? '(ไม่บังคับ)' : '* (จำเป็นต้องแนบหลักฐาน)';
-    imgReq.className = isPlus ? 'text-slate-400 font-normal text-[11px]' : 'text-rose-600 font-bold text-[11px]';
+    imgReq.textContent = '* (จำเป็นต้องแนบหลักฐาน)';
+    imgReq.className = 'text-rose-600 font-bold text-[11px]';
   }
 
   if (submitBtn && submitText) {
     if (isPlus) {
       submitBtn.className = 'w-full py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold rounded-2xl text-sm shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2 cursor-pointer';
-      submitText.textContent = 'ส่งรีวิว +1';
+      submitText.textContent = 'ส่งรีวิว +1 พร้อมหลักฐาน';
     } else {
       submitBtn.className = 'w-full py-3 bg-rose-600 hover:bg-rose-700 active:scale-[0.99] text-white font-bold rounded-2xl text-sm shadow-md shadow-rose-600/20 transition flex items-center justify-center gap-2 cursor-pointer';
       submitText.textContent = 'ส่งรายงาน -1 พร้อมหลักฐาน';
@@ -628,16 +628,17 @@ async function submitCustomerReview(e) {
   const message = document.getElementById('review-message-input')?.value?.trim();
   const btn = document.getElementById('btn-submit-review');
 
-  // Strict Validation: -1 requires message AND evidence photo!
-  if (type === '-1') {
-    if (!state.reviewFiles || state.reviewFiles.length === 0) {
-      showToast('การกด -1 จำเป็นต้องแนบรูปภาพหลักฐานอย่างน้อย 1 รูป', 'error');
-      return;
-    }
-    if (!message) {
-      showToast('กรุณากรอกข้อความระบุปัญหาที่พบสำหรับการรายงาน -1', 'error');
-      return;
-    }
+  // Strict Validation: Both +1 and -1 require proof photo to prevent spam!
+  if (!state.reviewFiles || state.reviewFiles.length === 0) {
+    showToast(type === '+1'
+      ? 'การกด +1 จำเป็นต้องแนบรูปภาพหลักฐานการซื้อขาย (สลิปหรือภาพแชท) เพื่อป้องกันสแปม'
+      : 'การกด -1 จำเป็นต้องแนบรูปภาพหลักฐานอย่างน้อย 1 รูป', 'error');
+    return;
+  }
+
+  if (type === '-1' && !message) {
+    showToast('กรุณากรอกข้อความระบุปัญหาที่พบสำหรับการรายงาน -1', 'error');
+    return;
   }
 
   if (btn) {

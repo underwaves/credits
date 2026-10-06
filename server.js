@@ -166,14 +166,17 @@ app.post('/api/public/reviews', upload.array('images', 5), async (req, res) => {
     const { type, customerName, message } = req.body;
     const reviewType = (type === '-1') ? '-1' : '+1';
 
-    // Validation: -1 requires evidence!
+    // Validation: Both +1 and -1 require proof image to prevent spam!
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: reviewType === '+1'
+          ? 'การให้เครดิต +1 จำเป็นต้องแนบหลักฐานการซื้อขาย (สลิปหรือภาพแชท) เพื่อป้องกันสแปม'
+          : 'การให้เครดิต -1 จำเป็นต้องแนบรูปภาพหลักฐาน (สลิปหรือภาพแชท) เพื่อยืนยันความโปร่งใส'
+      });
+    }
+
     if (reviewType === '-1') {
-      if (!req.files || req.files.length === 0) {
-        return res.status(400).json({
-          success: false,
-          message: 'การให้เครดิต -1 จำเป็นต้องแนบรูปภาพหลักฐาน (สลิปหรือภาพแชท) เพื่อยืนยันความโปร่งใส'
-        });
-      }
       if (!message || !message.trim()) {
         return res.status(400).json({
           success: false,
