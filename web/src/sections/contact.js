@@ -40,7 +40,9 @@ export function ContactSection() {
           <div class="contact-info-col reveal-on-scroll">
             <div class="card-glass contact-info-card">
               <div class="contact-mascot-row">
-                ${MascotZenny({ mood: 'happy', size: 100 })}
+                <div style="width: 80px; height: 80px; border-radius: 9999px; overflow: hidden; border: 3px solid #FFF1A0; box-shadow: var(--shadow-sm); flex-shrink: 0; background: linear-gradient(135deg, #FFF9D2, #FFE494); display: flex; align-items: center; justify-content: center; font-size: 42px;">
+                  <span>☀️</span>
+                </div>
                 <div>
                   <h4 class="contact-card-title">ยินดีต้อนรับเสมอครับ!</h4>
                   <p class="contact-card-sub">✨ ปรึกษาฟรี ไม่มีข้อผูกมัด • เรท ม.ปลาย & นักศึกษา สบายกระเป๋า</p>

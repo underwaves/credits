@@ -74,11 +74,11 @@ export function HeroSection() {
             <!-- Reference Inspired Avatar Card -->
             <div class="stage-main-card">
               <div class="stage-avatar-circle">
-                <img src="/images/brand-mascot.jpg" alt="SUNFZENITH Official Character" class="stage-avatar-img" />
+                <span class="stage-sun-emoji">☀️</span>
               </div>
               <div class="stage-card-caption">
-                <span class="stage-tag">🌤️ Official Mascot</span>
-                <span class="stage-brand-label">SUNFZENITH</span>
+                <span class="stage-tag">☀️ SUNFZENITH</span>
+                <span class="stage-brand-label">Small Dream, Big Zenith</span>
                 <p class="stage-motto">“เล็กแต่ตั้งใจ ทำด้วยหัวใจทุกชิ้น”</p>
               </div>
             </div>

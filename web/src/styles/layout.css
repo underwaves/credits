@@ -47,6 +47,16 @@
   object-fit: cover;
 }
 
+.brand-sun-emoji {
+  font-size: 1.55rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.35));
+  user-select: none;
+}
+
 .brand-info {
   display: flex;
   flex-direction: column;
@@ -312,7 +322,10 @@ html[data-theme="dark"] .theme-icon-moon { display: block; }
   overflow: hidden;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
   border: 4px solid #fff;
-  background: #FFF9D2;
+  background: linear-gradient(135deg, #FFF9D2, #FFE494, #FFF0B8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .stage-avatar-img {
@@ -324,6 +337,23 @@ html[data-theme="dark"] .theme-icon-moon { display: block; }
 
 .stage-avatar-img:hover {
   transform: scale(1.06);
+}
+
+.stage-sun-emoji {
+  font-size: 110px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 8px 20px rgba(245, 158, 11, 0.35));
+  user-select: none;
+  animation: sun-pulse 4s ease-in-out infinite alternate;
+}
+
+@keyframes sun-pulse {
+  0% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.06) rotate(4deg); }
+  100% { transform: scale(1) rotate(0deg); }
 }
 
 .stage-card-caption {
@@ -814,12 +844,27 @@ html[data-theme="dark"] .contact-alert-box.error {
   height: 44px;
   border-radius: var(--radius-pill);
   overflow: hidden;
+  background: linear-gradient(135deg, var(--sun-400), var(--sky-300));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
 }
 
 .footer-avatar-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.footer-sun-emoji {
+  font-size: 1.55rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.35));
+  user-select: none;
 }
 
 .footer-brand-title {

@@ -41,7 +41,7 @@ if (fs.existsSync(path.join(dist, 'index.html'))) {
   check('Contains portfolio section', indexHtml.includes('id="portfolio"'));
   check('Contains pricing section', indexHtml.includes('id="pricing"'));
   check('Contains contact form', indexHtml.includes('id="contact-form"'));
-  check('Contains mascot avatar image', indexHtml.includes('/images/brand-mascot.jpg'));
+  check('Contains sun emoji brand icon', indexHtml.includes('☀️'));
   check('Contains honeypot field', indexHtml.includes('name="website"'));
   check('Contains CSRF/Same-origin security script', indexHtml.includes('sunfz'));
 }
