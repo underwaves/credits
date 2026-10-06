@@ -6,6 +6,27 @@
   <title>SUNFZENITH - รวมเครดิตการซื้อขาย</title>
   <link rel="icon" type="image/svg+xml" href="/images/logo.svg">
   
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="SUNFZENITH รวมเครดิตการซื้อขายออนไลน์ ประวัติดี ส่งจริง 100% มีหลักฐานสลิปโอนเงินและแชทยืนยันจากลูกค้า พร้อมระบบรีวิว +1 และรายงานปัญหาโปร่งใส">
+  <meta name="keywords" content="SUNFZENITH, เครดิตร้าน, ซื้อขายออนไลน์, รีวิวลูกค้า, สลิปโอนเงิน, หลักฐานการซื้อขาย">
+  <meta name="author" content="SUNFZENITH">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://sunfz-credits.onrender.com/">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://sunfz-credits.onrender.com/">
+  <meta property="og:title" content="SUNFZENITH - รวมเครดิตการซื้อขาย">
+  <meta property="og:description" content="รวมหลักฐานการส่งของ สลิปโอนเงิน และแชทยืนยันจากลูกค้า เช็คประวัติได้ที่นี่ 100% ปลอดภัย ไร้กังวล">
+  <meta property="og:image" content="https://sunfz-credits.onrender.com/images/logo.svg">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://sunfz-credits.onrender.com/">
+  <meta name="twitter:title" content="SUNFZENITH - รวมเครดิตการซื้อขาย">
+  <meta name="twitter:description" content="รวมหลักฐานการส่งของ สลิปโอนเงิน และแชทยืนยันจากลูกค้า เช็คประวัติได้ที่นี่ 100%">
+  <meta name="twitter:image" content="https://sunfz-credits.onrender.com/images/logo.svg">
+  
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -130,20 +151,21 @@
   <section class="sticky top-16 z-30 bg-[#F8FAFC]/95 backdrop-blur-md border-b border-slate-200 py-3">
     <div class="max-w-[1024px] mx-auto px-4 sm:px-6 space-y-2.5">
       
-      <!-- Search Input -->
-      <div class="relative w-full">
+      <!-- Search Input Form -->
+      <form onsubmit="handleSearchSubmit(event)" class="relative w-full" role="search">
         <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
         <input 
           type="text" 
           id="search-input" 
-          placeholder="ค้นหาเครดิต... พิมพ์ชื่อสินค้า, ชื่อลูกค้า, หรือยอดเงิน" 
+          placeholder="ค้นหาเครดิต... พิมพ์ชื่อสินค้า, ชื่อลูกค้า, หรือยอดเงิน (กด Enter เพื่อค้นหา)" 
           class="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-8 py-2.5 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition shadow-sm"
           oninput="handleSearchInput(event)"
+          autocomplete="off"
         >
-        <button id="clear-search-btn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+        <button type="button" id="clear-search-btn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600" aria-label="ล้างคำค้นหา">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
-      </div>
+      </form>
 
       <!-- Navigation Tabs (All Credits vs +1 vs -1) -->
       <div class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
@@ -204,6 +226,19 @@
       </div>
     </div>
 
+    <!-- Error State -->
+    <div id="error-state" class="hidden py-16 text-center">
+      <div class="w-16 h-16 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center mx-auto mb-3 text-rose-500">
+        <i data-lucide="wifi-off" class="w-8 h-8"></i>
+      </div>
+      <h3 class="font-heading text-base font-bold text-slate-800 mb-1">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้</h3>
+      <p class="text-xs text-slate-500 max-w-xs mx-auto mb-4">กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต แล้วลองใหม่อีกครั้ง</p>
+      <button onclick="retryFetchAll()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/20 transition flex items-center gap-1.5 mx-auto cursor-pointer">
+        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+        <span>ลองใหม่อีกครั้ง</span>
+      </button>
+    </div>
+
     <!-- Empty State -->
     <div id="empty-state" class="hidden py-16 text-center">
       <div class="w-16 h-16 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto mb-3 text-slate-400">
@@ -242,8 +277,8 @@
   <!-- ============================================== -->
 
   <!-- 1. LIGHTBOX MODAL (Image Fullscreen & Detail View) -->
-  <div id="lightbox-modal" class="fixed inset-0 z-50 clean-modal-backdrop hidden flex items-center justify-center p-4">
-    <div class="relative w-full max-w-2xl bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+  <div id="lightbox-modal" onclick="handleLightboxBackdropClick(event)" class="fixed inset-0 z-50 clean-modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="relative w-full max-w-2xl bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]" onclick="event.stopPropagation()">
       
       <!-- Header -->
       <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/80">
@@ -308,8 +343,8 @@
   </div>
 
   <!-- 2. CUSTOMER REVIEW MODAL (+1 / -1) -->
-  <div id="review-modal" class="fixed inset-0 z-50 clean-modal-backdrop hidden flex items-center justify-center p-4 overflow-y-auto">
-    <div class="relative w-full max-w-lg bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden flex flex-col my-6 max-h-[92vh]">
+  <div id="review-modal" onclick="handleReviewBackdropClick(event)" class="fixed inset-0 z-50 clean-modal-backdrop hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="relative w-full max-w-lg bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden flex flex-col my-6 max-h-[92vh]" onclick="event.stopPropagation()">
       
       <!-- Modal Header -->
       <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/80 shrink-0">

@@ -3,6 +3,7 @@
 // wiped on every restart, so a silent fallback would make data disappear.
 const { createClient } = require('@supabase/supabase-js');
 const path = require('path');
+const crypto = require('crypto');
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_KEY;
@@ -17,7 +18,7 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Throw on any Supabase error so routes return 500 instead of pretending success.
+// Throw on any Supabase error so routes return appropriate errors instead of pretending success.
 function check({ data, error }, action) {
   if (error) throw new Error(`Supabase ${action}: ${error.message}`);
   return data;
@@ -25,11 +26,38 @@ function check({ data, error }, action) {
 
 const DEFAULT_SETTINGS = {
   shopName: 'SUNFZENITH',
-  tagline: '',
-  announcement: '',
+  tagline: 'รวมหลักฐานและเครดิตการซื้อขายจริง เช็คประวัติได้ที่นี่ 100%',
+  announcement: '✨ รวมเครดิตซื้อขายร้าน SUNFZENITH ซื้อขายปลอดภัย มีหลักฐานทุกรายการ!',
   adminPin: '3645',
-  socials: {},
-  stats: {}
+  socials: {
+    line: {
+      url: 'https://line.me/ti/p/~luvxawrnrkc',
+      label: 'Line ID: luvxawrnrkc',
+      enabled: true
+    },
+    facebook: {
+      url: 'https://www.facebook.com/profile.php?id=61595346770633&locale=th_TH',
+      label: 'Facebook',
+      enabled: true
+    },
+    discord: {
+      url: '',
+      label: 'Discord Server',
+      enabled: false
+    },
+    tiktok: {
+      url: '',
+      label: 'TikTok Shop',
+      enabled: false
+    }
+  },
+  stats: {
+    ratingScore: '5.0',
+    totalOrders: 'เครดิตจริง 100%',
+    deliveryRate: 'ส่งไว ปลอดภัย',
+    responseTime: 'ไม่กี่นาที',
+    warrantyPeriod: 'มีประกัน'
+  }
 };
 
 function rowToCredit(r) {
@@ -76,11 +104,11 @@ async function getShopConfig() {
   return {
     settings: {
       shopName: data.shop_name || DEFAULT_SETTINGS.shopName,
-      tagline: data.tagline || '',
-      announcement: data.announcement || '',
+      tagline: data.tagline || DEFAULT_SETTINGS.tagline,
+      announcement: data.announcement || DEFAULT_SETTINGS.announcement,
       adminPin: data.admin_pin || DEFAULT_SETTINGS.adminPin,
-      socials: data.socials || {},
-      stats: data.stats || {}
+      socials: data.socials || DEFAULT_SETTINGS.socials,
+      stats: data.stats || DEFAULT_SETTINGS.stats
     },
     categories: data.categories || ['ทั้งหมด', 'ทั่วไป']
   };
@@ -115,9 +143,11 @@ async function getCredits({ category, search, sort } = {}) {
   if (category && category !== 'ทั้งหมด') q = q.eq('game', category);
 
   if (search && search.trim()) {
-    // Strip characters that would break PostgREST's or() filter syntax.
-    const s = search.trim().replace(/[,()%*]/g, ' ');
-    q = q.or(`title.ilike.%${s}%,customer.ilike.%${s}%,description.ilike.%${s}%`);
+    // Sanitize and escape search string to prevent breaking PostgREST or() filter
+    const s = search.trim().replace(/[%_,'"()\\*]/g, ' ').replace(/\s+/g, ' ').trim();
+    if (s) {
+      q = q.or(`title.ilike.%${s}%,customer.ilike.%${s}%,description.ilike.%${s}%`);
+    }
   }
 
   if (sort === 'price-high') q = q.order('price', { ascending: false });
@@ -157,14 +187,9 @@ async function deleteCredit(id) {
   const existing = await getCreditById(id);
   check(await supabase.from('credits').delete().eq('id', id), 'delete credit');
 
-  // Best-effort cleanup of images stored in our bucket.
-  const marker = `/storage/v1/object/public/${BUCKET}/`;
-  const files = (existing?.images || [])
-    .filter(u => typeof u === 'string' && u.includes(marker))
-    .map(u => u.split(marker)[1]);
-  if (files.length) {
-    const { error } = await supabase.storage.from(BUCKET).remove(files);
-    if (error) console.warn('ลบรูปใน Storage ไม่สำเร็จ:', error.message);
+  // Best-effort cleanup of images stored in our bucket
+  if (existing && existing.images) {
+    await deleteImagesFromStorage(existing.images);
   }
   return true;
 }
@@ -177,14 +202,39 @@ async function togglePinCredit(id) {
 }
 
 // ---------------- Storage ----------------
-async function uploadImage(buffer, originalName, mimeType) {
-  const ext = path.extname(originalName).toLowerCase() || '.jpg';
-  const fileName = `credit-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+async function uploadImage(buffer, detectedExt = '.jpg', mimeType = 'image/jpeg') {
+  const ext = detectedExt.startsWith('.') ? detectedExt : `.${detectedExt}`;
+  const fileName = `img-${Date.now()}-${crypto.randomBytes(6).toString('hex')}${ext}`;
   check(
-    await supabase.storage.from(BUCKET).upload(fileName, buffer, { contentType: mimeType }),
+    await supabase.storage.from(BUCKET).upload(fileName, buffer, { contentType: mimeType, upsert: false }),
     'upload image'
   );
-  return supabase.storage.from(BUCKET).getPublicUrl(fileName).data.publicUrl;
+  const publicUrl = supabase.storage.from(BUCKET).getPublicUrl(fileName).data.publicUrl;
+  return {
+    url: publicUrl,
+    fileName
+  };
+}
+
+async function deleteImagesFromStorage(imageUrlsOrNames) {
+  if (!Array.isArray(imageUrlsOrNames) || imageUrlsOrNames.length === 0) return;
+  const marker = `/storage/v1/object/public/${BUCKET}/`;
+  const fileNames = imageUrlsOrNames
+    .map(item => {
+      if (typeof item !== 'string') return null;
+      if (item.includes(marker)) return item.split(marker)[1];
+      if (!item.startsWith('/') && !item.startsWith('http')) return item;
+      return null;
+    })
+    .filter(Boolean);
+
+  if (fileNames.length > 0) {
+    try {
+      await supabase.storage.from(BUCKET).remove(fileNames);
+    } catch (err) {
+      console.warn('Storage cleanup warning:', err.message);
+    }
+  }
 }
 
 // Used at startup to verify the connection actually works.
@@ -224,7 +274,7 @@ async function getCustomerReviews() {
 
 async function createCustomerReview({ type, customerName, message, images }) {
   const row = {
-    id: `rev-${Date.now()}-${Math.round(Math.random() * 1e6)}`,
+    id: `rev-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
     type: (type === '-1') ? '-1' : '+1',
     customer_name: (customerName && customerName.trim()) ? customerName.trim() : 'ลูกค้าทั่วไป',
     message: (message && message.trim()) ? message.trim() : '',
@@ -271,19 +321,28 @@ async function createCustomerReview({ type, customerName, message, images }) {
 }
 
 async function deleteCustomerReview(id) {
+  let imagesToDelete = [];
   try {
+    const { data } = await supabase.from('customer_reviews').select('images').eq('id', id).maybeSingle();
+    if (data && data.images) imagesToDelete = data.images;
     await supabase.from('customer_reviews').delete().eq('id', id);
   } catch (err) {}
 
   try {
     const { data: cfg } = await supabase.from('shop_config').select('stats').eq('id', 'main').single();
     if (cfg && cfg.stats && Array.isArray(cfg.stats.customer_reviews)) {
+      const target = cfg.stats.customer_reviews.find(r => r.id === id);
+      if (target && target.images) imagesToDelete = [...imagesToDelete, ...target.images];
       const filtered = cfg.stats.customer_reviews.filter(r => r.id !== id);
       await supabase.from('shop_config').update({
         stats: { ...cfg.stats, customer_reviews: filtered }
       }).eq('id', 'main');
     }
   } catch (err) {}
+
+  if (imagesToDelete.length > 0) {
+    await deleteImagesFromStorage(imagesToDelete);
+  }
 
   return true;
 }
@@ -299,9 +358,9 @@ module.exports = {
   deleteCredit,
   togglePinCredit,
   uploadImage,
+  deleteImagesFromStorage,
   getCustomerReviews,
   createCustomerReview,
   deleteCustomerReview,
   healthCheck
 };
-

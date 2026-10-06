@@ -87,11 +87,13 @@ async function fetchSettings() {
 async function fetchCredits() {
   const loading = document.getElementById('loading-state');
   const empty = document.getElementById('empty-state');
+  const errorEl = document.getElementById('error-state');
   const grid = document.getElementById('credits-grid');
 
   if (state.currentTab === 'all') {
     if (loading) loading.classList.remove('hidden');
     if (empty) empty.classList.add('hidden');
+    if (errorEl) errorEl.classList.add('hidden');
     if (grid) grid.innerHTML = '';
   }
 
@@ -102,17 +104,28 @@ async function fetchCredits() {
     }
 
     const res = await fetch(`/api/public/credits?${params.toString()}`);
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
     const data = await res.json();
 
     if (data.success) {
       state.credits = data.credits || [];
+      if (errorEl) errorEl.classList.add('hidden');
       if (state.currentTab === 'all') {
         renderFeed();
       }
+    } else {
+      throw new Error(data.message || 'Failed to load credits');
     }
   } catch (err) {
     console.error('Error fetching credits:', err);
-    showToast('เกิดข้อผิดพลาดในการโหลดรายการเครดิต', 'error');
+    if (state.currentTab === 'all') {
+      if (grid) grid.innerHTML = '';
+      if (empty) empty.classList.add('hidden');
+      if (errorEl) errorEl.classList.remove('hidden');
+    }
+    showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง', 'error');
   } finally {
     if (loading) loading.classList.add('hidden');
   }
@@ -120,20 +133,45 @@ async function fetchCredits() {
 
 // Fetch reviews (+1 and -1)
 async function fetchReviews() {
+  const errorEl = document.getElementById('error-state');
+  const empty = document.getElementById('empty-state');
+  const grid = document.getElementById('credits-grid');
+
   try {
     const res = await fetch('/api/public/reviews');
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
     const data = await res.json();
     if (data.success) {
       state.reviews = data.reviews || [];
       state.reviewCounts = data.counts || { positive: 0, negative: 0, total: 0 };
       updateReviewBadges();
+      if (errorEl && state.currentTab !== 'all') errorEl.classList.add('hidden');
       if (state.currentTab !== 'all') {
         renderFeed();
       }
     }
   } catch (err) {
     console.error('Failed to load reviews:', err);
+    if (state.currentTab !== 'all') {
+      if (grid) grid.innerHTML = '';
+      if (empty) empty.classList.add('hidden');
+      if (errorEl) errorEl.classList.remove('hidden');
+    }
   }
+}
+
+// Retry fetch all data
+async function retryFetchAll() {
+  const errorEl = document.getElementById('error-state');
+  const loading = document.getElementById('loading-state');
+  if (errorEl) errorEl.classList.add('hidden');
+  if (loading) loading.classList.remove('hidden');
+  
+  await fetchSettings();
+  await Promise.all([fetchCredits(), fetchReviews()]);
+  updateIcons();
 }
 
 function updateReviewBadges() {
@@ -463,6 +501,21 @@ function renderFeed() {
 
 // Search handling
 let searchTimeout = null;
+
+function handleSearchSubmit(e) {
+  if (e) e.preventDefault();
+  clearTimeout(searchTimeout);
+  const input = document.getElementById('search-input');
+  if (input) {
+    state.searchQuery = input.value.trim();
+  }
+  if (state.currentTab === 'all') {
+    fetchCredits();
+  } else {
+    renderFeed();
+  }
+}
+
 function handleSearchInput(e) {
   const val = e.target.value;
   const clearBtn = document.getElementById('clear-search-btn');
@@ -473,7 +526,7 @@ function handleSearchInput(e) {
 
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(() => {
-    state.searchQuery = val;
+    state.searchQuery = val.trim();
     if (state.currentTab === 'all') {
       fetchCredits();
     } else {
@@ -621,12 +674,17 @@ function removeReviewFile(idx) {
   renderReviewPreviews();
 }
 
+let isSubmittingReview = false;
+
 async function submitCustomerReview(e) {
   e.preventDefault();
+  if (isSubmittingReview) return; // Prevent double submit
+
   const type = document.getElementById('review-type-input')?.value || '+1';
   const name = document.getElementById('review-name-input')?.value?.trim();
   const message = document.getElementById('review-message-input')?.value?.trim();
   const btn = document.getElementById('btn-submit-review');
+  const btnText = document.getElementById('btn-submit-text');
 
   // Strict Validation: Both +1 and -1 require proof photo to prevent spam!
   if (!state.reviewFiles || state.reviewFiles.length === 0) {
@@ -641,9 +699,12 @@ async function submitCustomerReview(e) {
     return;
   }
 
+  isSubmittingReview = true;
+  const originalBtnContent = btnText ? btnText.textContent : 'ส่งข้อมูล';
   if (btn) {
     btn.disabled = true;
-    btn.classList.add('opacity-70');
+    btn.classList.add('opacity-75', 'cursor-not-allowed');
+    if (btnText) btnText.textContent = 'กำลังส่งข้อมูล... กรุณารอสักครู่';
   }
 
   try {
@@ -669,12 +730,27 @@ async function submitCustomerReview(e) {
     }
   } catch (err) {
     console.error('Error submitting review:', err);
-    showToast('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+    showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง', 'error');
   } finally {
+    isSubmittingReview = false;
     if (btn) {
       btn.disabled = false;
-      btn.classList.remove('opacity-70');
+      btn.classList.remove('opacity-75', 'cursor-not-allowed');
+      if (btnText) btnText.textContent = originalBtnContent;
     }
+  }
+}
+
+// Modal Backdrop Click Handlers
+function handleLightboxBackdropClick(e) {
+  if (e.target.id === 'lightbox-modal') {
+    closeLightbox();
+  }
+}
+
+function handleReviewBackdropClick(e) {
+  if (e.target.id === 'review-modal') {
+    closeReviewModal();
   }
 }
 
