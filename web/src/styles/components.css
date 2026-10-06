@@ -1,0 +1,259 @@
+/* ========================================================
+   SUNFZENITH Design System - UI Components
+   ======================================================== */
+
+/* 1. BUTTONS */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 12px 24px;
+  border-radius: var(--radius-pill);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--sun-400) 0%, var(--sun-500) 100%);
+  color: var(--navy-900);
+  box-shadow: var(--shadow-sun);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--sun-300) 0%, var(--sun-400) 100%);
+  box-shadow: 0 12px 32px rgba(251, 191, 36, 0.45);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: var(--surface-card);
+  color: var(--text-main);
+  border: 1px solid var(--border-card);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(12px);
+}
+
+.btn-secondary:hover {
+  background: var(--surface-card-hover);
+  border-color: var(--sky-400);
+  color: var(--sky-600);
+  transform: translateY(-2px);
+}
+
+.btn-sky {
+  background: linear-gradient(135deg, var(--sky-400) 0%, var(--sky-500) 100%);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(59, 143, 232, 0.3);
+}
+
+.btn-sky:hover {
+  background: linear-gradient(135deg, var(--sky-300) 0%, var(--sky-400) 100%);
+  transform: translateY(-2px);
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+}
+
+.btn-lg {
+  padding: 16px 32px;
+  font-size: 1.05rem;
+}
+
+/* 2. CARDS */
+.card-glass {
+  background: var(--surface-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 28px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.card-interactive:hover {
+  transform: translateY(-6px);
+  border-color: var(--sky-300);
+  box-shadow: var(--shadow-lg);
+}
+
+/* 3. BADGES & PILLS */
+.badge-sunny {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-badge);
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  color: var(--text-accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+.badge-sky {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--sky-100);
+  border: 1px solid var(--sky-200);
+  color: var(--sky-600);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* 4. SECTION HEADINGS */
+.section-header {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto 48px;
+}
+
+.section-title {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 700;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+}
+
+.section-desc {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+}
+
+/* 5. FORM CONTROLS */
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-main);
+}
+
+.form-input, .form-textarea, .form-select {
+  width: 100%;
+  padding: 12px 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-card);
+  background: var(--surface-card);
+  color: var(--text-main);
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+  outline: none;
+  border-color: var(--sky-400);
+  box-shadow: 0 0 0 4px rgba(104, 174, 255, 0.2);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+/* 6. TOAST NOTIFICATION */
+#toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  border: 1px solid var(--border-card);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(16px);
+  color: var(--text-main);
+  font-size: 0.95rem;
+  font-weight: 500;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.toast.toast-success {
+  border-color: #10B981;
+}
+
+.toast.toast-error {
+  border-color: #F43F5E;
+}
+
+/* 7. MODALS */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(14, 23, 46, 0.65);
+  backdrop-filter: blur(8px);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s ease;
+}
+
+.modal-backdrop.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-box {
+  background: var(--surface-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 32px;
+  transform: scale(0.95);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-backdrop.open .modal-box {
+  transform: scale(1);
+}

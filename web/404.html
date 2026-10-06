@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oops! ดาวดวงนี้หลงทาง — SUNFZENITH</title>
+  <meta name="robots" content="noindex, follow" />
+  <link rel="icon" type="image/svg+xml" href="/images/logo.svg" />
+
+  <script>
+    (function() {
+      var saved = localStorage.getItem('sunfz_theme');
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+  </script>
+
+  <link rel="stylesheet" href="/src/styles/tokens.css" />
+  <link rel="stylesheet" href="/src/styles/base.css" />
+  <link rel="stylesheet" href="/src/styles/components.css" />
+  <link rel="stylesheet" href="/src/styles/motion.css" />
+  <link rel="stylesheet" href="/src/styles/layout.css" />
+
+  <style>
+    .page-404-wrap {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .box-404 {
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    .code-404 {
+      font-family: var(--font-heading);
+      font-size: 5rem;
+      font-weight: 900;
+      line-height: 1;
+      color: var(--sun-500);
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+    .title-404 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .desc-404 {
+      font-size: 1rem;
+      margin-bottom: 28px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header / Navbar -->
+  <header class="navbar-wrapper">
+    <div class="container navbar-inner">
+      <a href="/" class="brand-link">
+        <div class="brand-logo-wrap">
+          <img src="/images/brand-mascot.jpg" alt="SUNFZENITH" class="brand-avatar-img" />
+        </div>
+        <div class="brand-info">
+          <span class="brand-name">SUNFZENITH</span>
+          <span class="brand-tagline">Small Dream, Big Zenith</span>
+        </div>
+      </a>
+      <div class="nav-actions">
+        <a href="/" class="btn btn-secondary btn-sm">กลับหน้าแรก</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-404-wrap">
+    <div class="card-glass box-404 anim-float-gentle">
+      <!-- Mascot Zenny Lost Mood -->
+      <div style="width: 140px; height: 140px; margin: 0 auto; border-radius: 9999px; overflow: hidden; border: 4px solid #FFF1A0; box-shadow: var(--shadow-md);">
+        <img src="/images/brand-mascot.jpg" alt="Mascot Lost in Stars" style="width: 100%; height: 100%; object-fit: cover; filter: hue-rotate(20deg);" />
+      </div>
+
+      <div class="code-404">404</div>
+      <h1 class="title-404">Oops! ดาวดวงนี้หลงทาง 🌟</h1>
+      <p class="desc-404">
+        หน้าที่คุณกำลังค้นหาอาจถูกย้าย ลบออกไป หรือสะกด URL ผิด<br/>
+        ไม่ต้องกังวลนะ แวะกลับไปยังหน้าหลักของ SUNFZENITH ได้เลยครับ
+      </p>
+
+      <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+        <a href="/" class="btn btn-primary btn-lg">
+          <span>🚀 กลับหน้าแรก</span>
+        </a>
+        <a href="/credits" class="btn btn-secondary btn-lg">
+          <span>🛡️ ดูเครดิตร้าน</span>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer-wrapper" style="padding: 24px 0;">
+    <div class="container" style="text-align: center; font-size: 0.85rem; color: var(--text-soft);">
+      &copy; 2026 SUNFZENITH. Small Dream, Big Zenith.
+    </div>
+  </footer>
+</body>
+</html>

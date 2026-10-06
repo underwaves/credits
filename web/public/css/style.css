@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg-main: #F8FAFC;
+  --surface: #FFFFFF;
+  --text-primary: #0F172A;
+  --text-muted: #64748B;
+  --border-light: #E2E8F0;
+  --accent-sun: #F59E0B;
+  --accent-sun-light: #FEF3C7;
+  --trust-green: #10B981;
+  --trust-green-light: #ECFDF5;
+}
+
+body {
+  font-family: 'Noto Sans Thai', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif;
+}
+
+/* Custom Minimal Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F8FAFC;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Clean Card Styles */
+.clean-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.clean-card:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.06), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+  transform: translateY(-2px);
+}
+
+/* Category Filter Chips */
+.filter-chip {
+  transition: all 0.15s ease-in-out;
+}
+.filter-chip.active {
+  background-color: #0F172A;
+  color: #FFFFFF;
+  border-color: #0F172A;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+}
+.filter-chip:not(.active):hover {
+  background-color: #F1F5F9;
+  border-color: #CBD5E1;
+  color: #0F172A;
+}
+
+/* Star Rating Colors */
+.star-sun {
+  color: #F59E0B;
+  fill: #F59E0B;
+}
+
+/* Lightbox Modal Overlay */
+.clean-modal-backdrop {
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* Smooth zoom for images */
+.zoomable-thumb {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.group:hover .zoomable-thumb {
+  transform: scale(1.03);
+}
+
+/* Pulse dot */
+@keyframes soft-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.15); }
+}
+.pulse-green {
+  animation: soft-pulse 2s infinite ease-in-out;
+}

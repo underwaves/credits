@@ -1,0 +1,102 @@
+:root {
+  /* Brand Palette - Inspired by Sunny Sky & Reference */
+  --sky-50: #F4F9FF;
+  --sky-100: #E6F2FF;
+  --sky-200: #CCE4FF;
+  --sky-300: #9ECBFF;
+  --sky-400: #68AEFF;
+  --sky-500: #3B8FE8;
+  --sky-600: #1E6EC7;
+
+  --cream-50: #FFFDF8;
+  --cream-100: #FEF9EE;
+  --cream-200: #FDF3DC;
+  --cream-300: #FCE8BE;
+
+  --sun-100: #FFF9D2;
+  --sun-200: #FFF1A0;
+  --sun-300: #FFE469;
+  --sun-400: #FFD536;
+  --sun-500: #FBBF24;
+  --sun-600: #F59E0B;
+  --sun-gold: #FFB800;
+
+  --peach-100: #FFF1EB;
+  --peach-200: #FFE1D6;
+  --peach-300: #FFCAB8;
+
+  --navy-900: #0E172E;
+  --navy-800: #172445;
+  --navy-700: #23345E;
+  --navy-600: #394E7F;
+  --navy-500: #556EAA;
+
+  --gray-100: #F1F4F9;
+  --gray-200: #E2E7F0;
+  --gray-300: #CBD3E1;
+  --gray-400: #94A3B8;
+  --gray-500: #64748B;
+
+  /* Theme Variables (Light Mode Default) */
+  --bg-page: #F6FAFF;
+  --bg-gradient-top: #E6F2FF;
+  --bg-gradient-mid: #F8FBFF;
+  --bg-gradient-bottom: #FFFDF8;
+
+  --surface-card: rgba(255, 255, 255, 0.88);
+  --surface-card-hover: rgba(255, 255, 255, 0.98);
+  --surface-glass: rgba(255, 255, 255, 0.72);
+  --surface-badge: #FFF9E6;
+
+  --text-main: #13203C;
+  --text-muted: #536485;
+  --text-soft: #7C8BA6;
+  --text-accent: #E29600;
+
+  --border-light: rgba(186, 215, 255, 0.45);
+  --border-card: rgba(220, 235, 255, 0.7);
+  --border-focus: #3B8FE8;
+
+  --shadow-sm: 0 2px 8px rgba(35, 75, 140, 0.05);
+  --shadow-md: 0 8px 24px rgba(35, 75, 140, 0.08);
+  --shadow-lg: 0 16px 36px rgba(35, 75, 140, 0.12);
+  --shadow-sun: 0 10px 28px rgba(251, 191, 36, 0.35);
+
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 26px;
+  --radius-xl: 36px;
+  --radius-pill: 9999px;
+
+  --font-heading: 'Mitr', 'Fredoka', -apple-system, sans-serif;
+  --font-body: 'IBM Plex Sans Thai', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --container-max: 1160px;
+}
+
+/* Dark Mode - Deep Dreamy Sky with Golden Starlight */
+html[data-theme="dark"] {
+  --bg-page: #0C1327;
+  --bg-gradient-top: #121C38;
+  --bg-gradient-mid: #0D162E;
+  --bg-gradient-bottom: #090E1E;
+
+  --surface-card: rgba(22, 34, 66, 0.85);
+  --surface-card-hover: rgba(28, 44, 84, 0.95);
+  --surface-glass: rgba(18, 28, 56, 0.75);
+  --surface-badge: rgba(251, 191, 36, 0.15);
+
+  --text-main: #F4F7FF;
+  --text-muted: #A8B8D8;
+  --text-soft: #7A8EBA;
+  --text-accent: #FFD536;
+
+  --border-light: rgba(120, 160, 240, 0.18);
+  --border-card: rgba(120, 160, 240, 0.22);
+  --border-focus: #68AEFF;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.45);
+  --shadow-sun: 0 10px 28px rgba(251, 191, 36, 0.22);
+}

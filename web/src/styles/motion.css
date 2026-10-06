@@ -1,0 +1,105 @@
+/* ========================================================
+   SUNFZENITH Motion & Decorative Animations
+   Optimized with transform / opacity for 60fps GPU performance
+   ======================================================== */
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(1.5deg);
+  }
+}
+
+@keyframes floatGentle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes driftCloud {
+  0% {
+    transform: translateX(0px);
+  }
+  50% {
+    transform: translateX(25px);
+  }
+  100% {
+    transform: translateX(0px);
+  }
+}
+
+@keyframes twinkleStar {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15) rotate(15deg);
+  }
+}
+
+@keyframes sunPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 45px rgba(251, 191, 36, 0.7);
+  }
+}
+
+.anim-float {
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+.anim-float-gentle {
+  animation: floatGentle 4.5s ease-in-out infinite;
+}
+
+.anim-drift {
+  animation: driftCloud 18s ease-in-out infinite;
+}
+
+.anim-twinkle {
+  animation: twinkleStar 3.5s ease-in-out infinite;
+}
+
+.anim-sun-glow {
+  animation: sunPulse 4s ease-in-out infinite;
+}
+
+/* Staggered delays */
+.anim-delay-1 { animation-delay: 0.8s; }
+.anim-delay-2 { animation-delay: 1.6s; }
+.anim-delay-3 { animation-delay: 2.4s; }
+
+/* Scroll reveal helper */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-on-scroll.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Accessibility: Disable motion for users requesting reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal-on-scroll {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
