@@ -42,14 +42,19 @@ export function ServicesSection() {
     <section class="section-wrapper" id="services">
       <div class="container">
         <div class="section-header reveal-on-scroll">
-          <span class="badge-sunny">
-            ${SunIcon({ size: 16 })}
-            <span>SERVICES</span>
-          </span>
+          <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;">
+            <span class="badge-sunny">
+              ${SunIcon({ size: 16 })}
+              <span>SERVICES</span>
+            </span>
+            <span class="badge-sky">
+              <span>💬 ปรึกษาฟรี ไม่มีค่าใช้จ่าย</span>
+            </span>
+          </div>
           <h2 class="section-title">บริการของเรา</h2>
           <p class="section-desc">
-            ตอบโจทย์ทั้งสายเขียนโปรแกรม เว็บไซต์ และงานกราฟิกดีไซน์ 
-            ดูแลครบวงจรตั้งแต่เริ่มต้นจนถึงขั้นตอนส่งมอบงาน
+            ตอบโจทย์ทั้งสายเขียนโค้ด ทำเว็บไซต์ โครงงาน ม.ปลาย และโปรเจกต์นักศึกษา 
+            ดูแลครบวงจรตั้งแต่ให้คำปรึกษาจนถึงส่งมอบงาน ในราคาสบายกระเป๋า
           </p>
         </div>
 

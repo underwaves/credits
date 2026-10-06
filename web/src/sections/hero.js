@@ -19,7 +19,7 @@ export function HeroSection() {
           <div class="hero-badge-wrap anim-float-gentle">
             <span class="badge-sunny">
               ${SunIcon({ size: 18 })}
-              <span>Small Dream, Big Zenith</span>
+              <span>Small Dream, Big Zenith • ปรึกษาฟรี 100%</span>
             </span>
           </div>
 
@@ -31,34 +31,35 @@ export function HeroSection() {
 
           <p class="hero-desc">
             ยินดีต้อนรับสู่ <strong>SUNFZENITH</strong> สตูดิโอเล็ก ๆ ที่ตั้งใจทำงานคุณภาพ 
-            รับทำเว็บไซต์, ดูแลงานเขียนโปรแกรม, ออกแบบกราฟิก และสไลด์พรีเซนต์ 
-            ในราคานักศึกษาสบายกระเป๋า คุยง่าย เป็นกันเอง พร้อมส่งต่อผลงานที่ดีที่สุดให้คุณ
+            รับทำเว็บไซต์, โปรเจกต์เขียนโค้ด, โครงงาน ม.ปลาย, โปรเจกต์จบ, ออกแบบกราฟิก และสไลด์พรีเซนต์ 
+            <strong>ในราคาเริ่มต้นสบายกระเป๋าสำหรับน้อง ๆ ม.ปลาย และนิสิต/นักศึกษา</strong> 
+            ปรึกษาแนวทางฟรี ไม่มีข้อผูกมัด คุยง่ายเป็นกันเอง พร้อมส่งต่อผลงานที่ดีที่สุดให้คุณ
           </p>
 
           <div class="hero-cta-group">
             <a href="#contact" class="btn btn-primary btn-lg">
-              <span>เริ่มต้นพูดคุย</span>
+              <span>ปรึกษาไอเดียฟรี</span>
               <span class="cta-arrow">→</span>
             </a>
-            <a href="#services" class="btn btn-secondary btn-lg">
-              <span>ดูบริการของเรา</span>
+            <a href="#pricing" class="btn btn-secondary btn-lg">
+              <span>ดูเรท ม.ปลาย - นักศึกษา</span>
             </a>
           </div>
 
           <!-- Trust Badges -->
           <div class="hero-trust-bar">
             <div class="trust-item">
-              <span class="trust-icon">💛</span>
+              <span class="trust-icon">💬</span>
               <div>
-                <strong>คุยง่าย ราคานักศึกษา</strong>
-                <span class="trust-sub">งบประมาณปรับได้ตามต้องการ</span>
+                <strong>ปรึกษาฟรี ไม่มีค่าใช้จ่าย</strong>
+                <span class="trust-sub">ส่งโจทย์มาคุยหรือประเมินราคาก่อนได้</span>
               </div>
             </div>
             <div class="trust-item">
-              <span class="trust-icon">🛡️</span>
+              <span class="trust-icon">🎓</span>
               <div>
-                <strong>ตรวจสอบเครดิตได้ 100%</strong>
-                <span class="trust-sub">มีรีวิวและหลักฐานจริงทุกรายการ</span>
+                <strong>เรท ม.ปลาย - นักศึกษา</strong>
+                <span class="trust-sub">สบายกระเป๋า ปรับงบตามที่สะดวกได้จริง</span>
               </div>
             </div>
           </div>

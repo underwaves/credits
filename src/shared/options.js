@@ -10,9 +10,9 @@ export const SERVICE_OPTIONS = Object.freeze([
 ]);
 
 export const BUDGET_OPTIONS = Object.freeze([
-  { id: 'unsure', label: 'ยังไม่แน่ใจ / ให้ช่วยประเมิน' },
-  { id: 'lt1000', label: 'ไม่เกิน 1,000 บาท' },
-  { id: '1000-3000', label: '1,000 – 3,000 บาท' },
+  { id: 'unsure', label: 'ยังไม่แน่ใจ / ปรึกษาแนวทางฟรี' },
+  { id: 'lt1000', label: 'ไม่เกิน 1,000 บาท (เรท ม.ปลาย & นักศึกษา)' },
+  { id: '1000-3000', label: '1,000 – 3,000 บาท (โปรเจกต์/เว็บไซต์)' },
   { id: '3000-8000', label: '3,000 – 8,000 บาท' },
   { id: 'gt8000', label: 'มากกว่า 8,000 บาท' }
 ]);

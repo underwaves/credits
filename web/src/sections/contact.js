@@ -19,14 +19,19 @@ export function ContactSection() {
     <section class="section-wrapper contact-section-bg" id="contact">
       <div class="container">
         <div class="section-header reveal-on-scroll">
-          <span class="badge-sunny">
-            ${SparkleIcon({ size: 16 })}
-            <span>CONTACT US</span>
-          </span>
-          <h2 class="section-title">เริ่มต้นพูดคุยกับ SUNFZENITH</h2>
+          <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;">
+            <span class="badge-sunny">
+              ${SparkleIcon({ size: 16 })}
+              <span>CONTACT US</span>
+            </span>
+            <span class="badge-sky">
+              <span>💬 ปรึกษาฟรี ไม่มีค่าใช้จ่าย</span>
+            </span>
+          </div>
+          <h2 class="section-title">ปรึกษาไอเดียหรือส่งโจทย์งานกับ SUNFZENITH</h2>
           <p class="section-desc">
-            มีไอเดียหรือโปรเจกต์ที่อยากปรึกษา? ส่งข้อความหาเราได้เลย 
-            หรือทักแชทช่องทางด้านล่างได้ตลอด 24 ชั่วโมง
+            มีโจทย์การบ้าน โครงงาน ม.ปลาย โปรเจกต์วิชาเรียน หรือไอเดียที่อยากทำ? ส่งข้อความหาเราได้เลย 
+            ทักแชทพูดคุยหรือประเมินราคาได้ฟรี ไม่มีข้อผูกมัดครับ ✨
           </p>
         </div>
 
@@ -38,7 +43,7 @@ export function ContactSection() {
                 ${MascotZenny({ mood: 'happy', size: 100 })}
                 <div>
                   <h4 class="contact-card-title">ยินดีต้อนรับเสมอครับ!</h4>
-                  <p class="contact-card-sub">ปรึกษาฟรี ไม่มีข้อผูกมัด คุยสบายเป็นกันเอง</p>
+                  <p class="contact-card-sub">✨ ปรึกษาฟรี ไม่มีข้อผูกมัด • เรท ม.ปลาย & นักศึกษา สบายกระเป๋า</p>
                 </div>
               </div>
 

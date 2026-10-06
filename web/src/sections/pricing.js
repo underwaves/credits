@@ -28,7 +28,7 @@ export function PricingSection() {
 
         <div class="pricing-action">
           <a href="#contact" class="btn ${tier.highlight ? 'btn-primary' : 'btn-secondary'}" style="width: 100%;">
-            <span>ขอใบเสนอราคา</span>
+            <span>${tier.ctaText || 'ปรึกษาฟรี'}</span>
           </a>
         </div>
       </div>
@@ -39,14 +39,19 @@ export function PricingSection() {
     <section class="section-wrapper pricing-section-bg" id="pricing">
       <div class="container">
         <div class="section-header reveal-on-scroll">
-          <span class="badge-sunny">
-            ${SunIcon({ size: 16 })}
-            <span>PRICING</span>
-          </span>
-          <h2 class="section-title">อัตราค่าบริการเริ่มต้น</h2>
+          <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;">
+            <span class="badge-sunny">
+              ${SunIcon({ size: 16 })}
+              <span>PRICING</span>
+            </span>
+            <span class="badge-sky">
+              <span>✨ ปรึกษาฟรี 100% ไม่มีค่าใช้จ่าย</span>
+            </span>
+          </div>
+          <h2 class="section-title">ราคาเป็นกันเอง เริ่มต้นวัยเรียน ม.ปลาย - นักศึกษา</h2>
           <p class="section-desc">
-            ราคาปรับเปลี่ยนได้ตามขอบเขตงานจริง สามารถแจ้งงบประมาณที่คุณสะดวก 
-            เพื่อให้เราช่วยแนะนำโซลูชันที่เหมาะสมที่สุดได้เลยครับ
+            เข้าใจหัวอกคนวัยเรียน! เรทราคาสบายกระเป๋า เริ่มต้นหลักร้อย ปรับเปลี่ยนตามขอบเขตงานจริงได้ 
+            สามารถทักมาคุยหรือส่งโจทย์มาปรึกษาแนวทางก่อนได้ฟรี ไม่ทำไม่เป็นไรครับ ✨
           </p>
         </div>
 
