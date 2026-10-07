@@ -74,7 +74,7 @@ export function HeroSection() {
             <!-- Reference Inspired Avatar Card -->
             <div class="stage-main-card">
               <div class="stage-avatar-circle">
-                <span class="stage-sun-emoji">☀️</span>
+                <img src="/images/mascot.png" alt="SUNFZENITH Mascot" class="stage-avatar-img" width="220" height="220" loading="eager" />
               </div>
               <div class="stage-card-caption">
                 <span class="stage-tag">☀️ SUNFZENITH</span>

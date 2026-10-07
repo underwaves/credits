@@ -99,3 +99,7 @@ export function MascotZenny({ mood = 'happy', size = 160, className = '' } = {})
     </div>
   `;
 }
+
+export function MascotImage({ size = 160, className = '', alt = 'SUNFZENITH Mascot' } = {}) {
+  return `<img src="/images/mascot.png" alt="${alt}" class="${className}" width="${size}" height="${size}" style="object-fit: contain;" />`;
+}
