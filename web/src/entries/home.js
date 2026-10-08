@@ -206,7 +206,7 @@ async function initDynamicSiteContent() {
         annBar.innerHTML = `<span>${escapeHtml(general.announcement)}</span>`;
         annBar.style.display = 'block';
       } else if (annBar) {
-        annBar.style.display = 'none';
+        annBar.remove();
       }
 
       // Hero Title

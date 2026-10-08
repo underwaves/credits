@@ -1545,7 +1545,7 @@ function populateGeneralForm() {
   setVal('home-shop-name', g.shopName);
   setVal('home-shop-status', g.shopStatus);
   setVal('home-tagline', g.tagline);
-  setCheck('home-show-announcement', g.showAnnouncement !== false);
+  setCheck('home-show-announcement', Boolean(g.showAnnouncement));
   setVal('home-announcement', g.announcement);
   setVal('home-hero-lead', g.heroTitleLead);
   setVal('home-hero-high1', g.heroTitleHighlight1);
