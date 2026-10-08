@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initDynamicPortfolio();
   initDynamicSiteContent();
   initContactForm();
+  initRateCardModal();
 });
 
 // ---------------- 1. Theme Toggle ----------------
@@ -253,6 +254,7 @@ async function initDynamicSiteContent() {
     if (servicesGrid && Array.isArray(services) && services.length > 0) {
       servicesGrid.innerHTML = services.map((s) => {
         const feats = Array.isArray(s.features) ? s.features : [];
+        const tabKey = (s.id === 'presentation') ? 'slide' : (s.id === 'design') ? 'poster' : 'web';
         return `
           <div class="card-glass card-interactive service-card reveal-on-scroll revealed">
             <div class="service-card-top">
@@ -266,9 +268,12 @@ async function initDynamicSiteContent() {
                 ${feats.map((f) => `<li><span class="check-bullet">✓</span><span>${escapeHtml(f)}</span></li>`).join('')}
               </ul>
             ` : ''}
-            <div class="service-card-bottom">
-              <a href="#contact" class="btn btn-secondary btn-sm" onclick="selectServiceOption('${escapeHtml(s.id)}')">
-                <span>ปรึกษาบริการนี้ (${escapeHtml(s.startingPrice || 'เรทสบายกระเป๋า')})</span> <span>→</span>
+            <div class="service-card-bottom" style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="openRateCardModal('${tabKey}')" style="flex: 1 1 auto;">
+                <span>🔍 ดูรายละเอียดเรท</span>
+              </button>
+              <a href="#contact" class="btn btn-primary btn-sm" onclick="selectServiceOption('${escapeHtml(s.id)}')" style="flex: 1 1 auto; justify-content: center;">
+                <span>ปรึกษา (${escapeHtml(s.startingPrice || 'เรทสบายกระเป๋า')})</span> <span>→</span>
               </a>
             </div>
           </div>
@@ -292,6 +297,11 @@ async function initDynamicSiteContent() {
       pricingGrid.innerHTML = pricing.map((p) => {
         const feats = Array.isArray(p.features) ? p.features : [];
         const isHighlight = Boolean(p.isHighlight);
+        const pTabKey = (p.id === 'p1' || (p.title && p.title.includes('สไลด์')))
+          ? 'slide'
+          : (p.id === 'p2' || (p.title && p.title.includes('โปสเตอร์')))
+          ? 'poster'
+          : 'web';
         return `
           <div class="card-glass pricing-card reveal-on-scroll revealed ${isHighlight ? 'pricing-highlight' : ''}">
             <div class="pricing-badge-row">
@@ -305,7 +315,10 @@ async function initDynamicSiteContent() {
                 ${feats.map((f) => `<li><span class="pricing-check">✓</span><span>${escapeHtml(f)}</span></li>`).join('')}
               </ul>
             ` : ''}
-            <div class="pricing-action">
+            <div class="pricing-action" style="display: flex; flex-direction: column; gap: 8px;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="openRateCardModal('${pTabKey}')" style="width: 100%;">
+                <span>🔍 ดูตารางราคาและรายละเอียด</span>
+              </button>
               <a href="${escapeHtml(p.actionUrl || '#contact')}" class="btn ${isHighlight ? 'btn-primary' : 'btn-secondary'}" style="width: 100%;">
                 <span>${escapeHtml(p.actionText || 'ปรึกษาฟรี')}</span>
               </a>
@@ -450,7 +463,7 @@ window.handleContactSubmit = async function (e) {
     console.error('Contact submit error:', err);
     if (alertBox) {
       alertBox.className = 'contact-alert-box error';
-      alertBox.textContent = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ในขณะนี้ กรุณาทักทาง LINE: luvxawrnrkc ได้โดยตรงครับ';
+      alertBox.textContent = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ในขณะนี้ กรุณาทักทาง LINE OA: @419ajynp ได้โดยตรงครับ';
       alertBox.style.display = 'block';
     }
     showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง', 'error');
@@ -463,6 +476,94 @@ window.handleContactSubmit = async function (e) {
     }
   }
 };
+
+// ---------------- 6. Rate Card Details Modal ----------------
+function initRateCardModal() {
+  const modal = document.getElementById('rate-card-modal');
+  if (!modal) return;
+
+  // Tab buttons
+  modal.querySelectorAll('.rate-card-tab-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-target');
+      switchRateCardTab(targetId);
+    });
+  });
+
+  // Close when clicking outside modal box
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      closeRateCardModal();
+    }
+  });
+
+  // Close on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) {
+      closeRateCardModal();
+    }
+  });
+}
+
+window.openRateCardModal = function (tabKey = 'all') {
+  const modal = document.getElementById('rate-card-modal');
+  if (!modal) return;
+
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+
+  const tabMapping = {
+    web: 'rc-web',
+    website: 'rc-web',
+    coding: 'rc-web',
+    slide: 'rc-slide',
+    slides: 'rc-slide',
+    presentation: 'rc-slide',
+    poster: 'rc-poster',
+    posters: 'rc-poster',
+    design: 'rc-poster',
+    checklist: 'rc-checklist',
+    evaluation: 'rc-checklist',
+    terms: 'rc-terms',
+    about: 'rc-terms',
+    all: 'rc-web'
+  };
+
+  const targetPaneId = tabMapping[tabKey] || 'rc-web';
+  switchRateCardTab(targetPaneId);
+};
+
+window.closeRateCardModal = function () {
+  const modal = document.getElementById('rate-card-modal');
+  if (!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+};
+
+function switchRateCardTab(targetPaneId) {
+  const modal = document.getElementById('rate-card-modal');
+  if (!modal) return;
+
+  modal.querySelectorAll('.rate-card-tab-btn').forEach((b) => {
+    if (b.getAttribute('data-target') === targetPaneId) {
+      b.classList.add('active');
+      b.setAttribute('aria-selected', 'true');
+    } else {
+      b.classList.remove('active');
+      b.setAttribute('aria-selected', 'false');
+    }
+  });
+
+  modal.querySelectorAll('.rate-card-tab-pane').forEach((p) => {
+    if (p.id === targetPaneId) {
+      p.classList.add('active');
+    } else {
+      p.classList.remove('active');
+    }
+  });
+}
 
 // Toast notification helper
 function showToast(message, type = 'success') {

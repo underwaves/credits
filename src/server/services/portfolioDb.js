@@ -69,7 +69,7 @@ export const SEED_PORTFOLIO = [
     desc: 'งานออกแบบสไลด์นำเสนอโครงงานนวัตกรรมบรรจุภัณฑ์กล้วยและ DailyRipe กราฟิกย่อยข้อมูลง่าย เล่าเรื่องชัดเจน โทนสีและเลย์เอาต์ระดับมืออาชีพ',
     tech: ['PowerPoint', 'Canva', 'Graphic Layout', 'Data Visualization'],
     image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80',
-    demoUrl: 'https://line.me/ti/p/~luvxawrnrkc',
+    demoUrl: 'https://line.me/R/ti/p/@419ajynp',
     demoLabel: 'ปรึกษางานสไลด์',
     isReal: true,
     createdAt: '2026-09-20T00:00:00.000Z'

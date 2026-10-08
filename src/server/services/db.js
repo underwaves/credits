@@ -30,8 +30,8 @@ export const DEFAULT_SETTINGS = {
   adminPin: '3645',
   socials: {
     line: {
-      url: 'https://line.me/ti/p/~luvxawrnrkc',
-      label: 'Line ID: luvxawrnrkc',
+      url: 'https://line.me/R/ti/p/@419ajynp',
+      label: 'LINE OA: @419ajynp',
       enabled: true
     },
     facebook: {

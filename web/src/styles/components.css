@@ -275,3 +275,224 @@
   color: #fde68a;
   border-bottom-color: rgba(251, 191, 36, 0.2);
 }
+
+/* 8. RATE CARD MODAL & DETAILS SYSTEM */
+.rate-card-modal-box {
+  max-width: 780px;
+  padding: 24px 28px;
+}
+@media (max-width: 640px) {
+  .rate-card-modal-box {
+    padding: 20px 16px;
+  }
+}
+.rate-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-card);
+}
+.rate-card-title-wrap h3 {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rate-card-title-wrap p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+.rate-card-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 12px 0 8px;
+  border-bottom: 1px solid var(--border-card);
+  scrollbar-width: thin;
+}
+.rate-card-tab-btn {
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: var(--surface-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border-card);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+.rate-card-tab-btn:hover {
+  color: var(--text-main);
+  border-color: var(--sun-400);
+}
+.rate-card-tab-btn.active {
+  background: var(--navy-900);
+  color: #fff;
+  border-color: var(--navy-900);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+[data-theme="dark"] .rate-card-tab-btn.active {
+  background: var(--sun-400);
+  color: var(--navy-900);
+  border-color: var(--sun-400);
+}
+.rate-card-tab-pane {
+  display: none;
+  padding: 18px 0;
+  animation: fadeInPane 0.25s ease-out;
+}
+.rate-card-tab-pane.active {
+  display: block;
+}
+@keyframes fadeInPane {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rate-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+.rate-tier-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.rate-tier-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--sun-400);
+}
+.rate-tier-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.rate-tier-name {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--text-main);
+}
+.rate-tier-price {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: var(--sun-600);
+}
+[data-theme="dark"] .rate-tier-price {
+  color: var(--sun-300);
+}
+.rate-tier-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+.rate-tier-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rate-tier-bullets li {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.rate-tier-bullets li::before {
+  content: "•";
+  color: var(--sun-500);
+  font-weight: bold;
+}
+.rate-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin-top: 10px;
+}
+.rate-table th, .rate-table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-card);
+}
+.rate-table th {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  background: rgba(251, 191, 36, 0.08);
+  color: var(--text-main);
+}
+.rate-table tr:hover td {
+  background: rgba(251, 191, 36, 0.04);
+}
+.rate-table .col-price {
+  font-weight: 800;
+  color: var(--sun-600);
+  text-align: right;
+  white-space: nowrap;
+}
+[data-theme="dark"] .rate-table .col-price {
+  color: var(--sun-300);
+}
+.checklist-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.checklist-card h4 {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.checklist-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.checklist-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.checklist-list li span.check-icon {
+  color: #10b981;
+  font-weight: bold;
+}
+.rate-card-footer {
+  padding-top: 16px;
+  border-top: 1px solid var(--border-card);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
