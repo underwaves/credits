@@ -186,8 +186,11 @@ async function initDynamicSiteContent() {
         });
       }
       if (general.tagline) {
+        const cleanTagline = general.tagline.includes('—')
+          ? general.tagline.split('—')[0].trim()
+          : general.tagline.trim();
         document.querySelectorAll('.brand-tagline').forEach((el) => {
-          el.textContent = general.tagline;
+          el.textContent = cleanTagline;
         });
       }
 

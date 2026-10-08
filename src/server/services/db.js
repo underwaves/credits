@@ -25,7 +25,7 @@ function check({ data, error }, action) {
 
 export const DEFAULT_SETTINGS = {
   shopName: 'SUNFZENITH',
-  tagline: 'Small Dream, Big Zenith — เปลี่ยนไอเดียเล็ก ๆ ให้กลายเป็นผลงานที่ไปได้ไกลกว่าที่คิด',
+  tagline: 'Small Dream, Big Zenith',
   announcement: '✨ ยินดีต้อนรับสู่ SUNFZENITH สตูดิโอสร้างสรรค์งานดิจิทัล เว็บไซต์ และดีไซน์',
   adminPin: '3645',
   socials: {
