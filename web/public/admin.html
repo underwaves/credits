@@ -238,6 +238,14 @@
           <span>จัดการรายการเครดิต (<span id="tab-list-count">0</span>)</span>
         </button>
         <button 
+          id="tab-btn-portfolio" 
+          onclick="switchTab('portfolio')" 
+          class="admin-tab inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition"
+        >
+          <i data-lucide="palette" class="w-4 h-4"></i>
+          <span>จัดการผลงาน / Portfolio (<span id="tab-portfolio-count">0</span>)</span>
+        </button>
+        <button 
           id="tab-btn-reviews" 
           onclick="switchTab('reviews')" 
           class="admin-tab inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition"
@@ -430,6 +438,91 @@
         <!-- Credits Table / Cards -->
         <div id="admin-credits-container" class="space-y-3">
           <!-- Rendered by JS -->
+        </div>
+
+      </section>
+
+      <!-- TAB: PORTFOLIO MANAGEMENT -->
+      <section id="tab-content-portfolio" class="hidden space-y-4">
+        
+        <!-- Controls & Header Bar -->
+        <div class="clean-card p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2.5">
+              <span class="p-2.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 shrink-0">
+                <i data-lucide="palette" class="w-5 h-5"></i>
+              </span>
+              <div>
+                <h2 class="font-heading font-extrabold text-base sm:text-lg text-slate-900">
+                  จัดการผลงานและโปรเจกต์ (Portfolio Management)
+                </h2>
+                <p class="text-xs text-slate-500">
+                  เพิ่ม ลบ แก้ไข ผลงานเว็บไซต์ โค้ดดิ้ง ป้ายกราฟิก และสไลด์พรีเซนต์ เพื่อแสดงบนหน้าแรกทันที
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <button 
+              type="button"
+              onclick="fetchAdminPortfolio()" 
+              class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+              title="รีเฟรชข้อมูลผลงาน"
+            >
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <span>รีเฟรช</span>
+            </button>
+            <button 
+              type="button"
+              onclick="openCreatePortfolioModal()" 
+              class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/20 transition flex items-center gap-1.5 cursor-pointer"
+            >
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>+ เพิ่มผลงานใหม่</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Chips & Search Bar -->
+        <div class="clean-card p-4 space-y-3">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <!-- Filter chips -->
+            <div class="flex items-center gap-1.5 flex-wrap text-xs w-full sm:w-auto">
+              <button onclick="filterAdminPortfolio('all')" id="admin-port-filter-all" class="px-3 py-1.5 rounded-xl font-bold bg-slate-900 text-white cursor-pointer transition">
+                ทั้งหมด (<span id="admin-port-count-all">0</span>)
+              </button>
+              <button onclick="filterAdminPortfolio('website')" id="admin-port-filter-website" class="px-3 py-1.5 rounded-xl font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer transition">
+                🌐 เว็บไซต์ (<span id="admin-port-count-website">0</span>)
+              </button>
+              <button onclick="filterAdminPortfolio('coding')" id="admin-port-filter-coding" class="px-3 py-1.5 rounded-xl font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer transition">
+                ⚡ โค้ดดิ้ง &amp; AI (<span id="admin-port-count-coding">0</span>)
+              </button>
+              <button onclick="filterAdminPortfolio('design')" id="admin-port-filter-design" class="px-3 py-1.5 rounded-xl font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer transition">
+                🎨 กราฟิก &amp; โปสเตอร์ (<span id="admin-port-count-design">0</span>)
+              </button>
+              <button onclick="filterAdminPortfolio('presentation')" id="admin-port-filter-presentation" class="px-3 py-1.5 rounded-xl font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer transition">
+                📊 สไลด์นำเสนอ (<span id="admin-port-count-presentation">0</span>)
+              </button>
+            </div>
+
+            <!-- Search input -->
+            <div class="relative w-full sm:w-72">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+              <input 
+                type="text" 
+                id="admin-port-search" 
+                placeholder="ค้นหาชื่อผลงาน หรือ เทคโนโลยี..." 
+                oninput="handleAdminPortfolioSearch(event)"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-1.5 text-xs focus:outline-none focus:border-amber-500 focus:bg-white transition"
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Portfolio Cards Grid -->
+        <div id="admin-portfolio-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Populated by JavaScript -->
         </div>
 
       </section>
@@ -689,6 +782,210 @@
             >
               <i data-lucide="check" class="w-3.5 h-3.5"></i>
               <span>บันทึกการแก้ไข</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- 4. ADD / EDIT PORTFOLIO MODAL -->
+  <!-- ============================================== -->
+  <div id="portfolio-modal" class="fixed inset-0 z-50 clean-modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="relative w-full max-w-xl bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
+        <div class="flex items-center gap-2">
+          <i data-lucide="palette" class="w-5 h-5 text-amber-500"></i>
+          <h3 id="portfolio-modal-title" class="font-heading text-base font-bold text-slate-900">
+            เพิ่มผลงานใหม่
+          </h3>
+        </div>
+        <button type="button" onclick="closePortfolioModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-200/50 transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 overflow-y-auto flex-grow space-y-4">
+        <form id="portfolio-form" onsubmit="handlePortfolioSubmit(event)" class="space-y-4">
+          <input type="hidden" id="port-form-id">
+
+          <!-- 1. Title -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              ชื่อผลงาน / ชื่อโปรเจกต์ <span class="text-rose-500">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="port-form-title" 
+              required
+              placeholder="เช่น ป้ายเครดิต Genshin, ตู้รับยา IoT, การ์ดวันแม่..."
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+            >
+          </div>
+
+          <!-- 2. Category & Category Label -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                หมวดหมู่หลัก <span class="text-rose-500">*</span>
+              </label>
+              <select 
+                id="port-form-category" 
+                onchange="handlePortCategoryChange(this.value)"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+              >
+                <option value="design">🎨 งานดีไซน์ &amp; กราฟิก (design)</option>
+                <option value="website">🌐 เว็บไซต์ &amp; แอพ (website)</option>
+                <option value="coding">⚡ โค้ดดิ้ง &amp; AI (coding)</option>
+                <option value="presentation">📊 สไลด์นำเสนอ (presentation)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                ข้อความหมวดหมู่ย่อย (Badge)
+              </label>
+              <input 
+                type="text" 
+                id="port-form-cat-label" 
+                placeholder="เช่น Graphic &amp; Banner, Web App"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+              >
+            </div>
+          </div>
+
+          <!-- 3. Image (Upload or URL) -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              รูปภาพผลงาน / หน้าปก <span class="text-rose-500">*</span>
+            </label>
+
+            <!-- Image preview -->
+            <div id="port-img-preview-box" class="hidden mb-2.5 p-2 bg-slate-50 border border-slate-200 rounded-2xl relative flex items-center justify-center">
+              <img id="port-img-preview-tag" src="" alt="Preview" class="max-h-48 rounded-xl object-contain shadow-sm">
+              <button 
+                type="button" 
+                onclick="clearPortfolioImage()" 
+                class="absolute top-3 right-3 p-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-md transition cursor-pointer"
+                title="ลบรูปภาพนี้"
+              >
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <div class="space-y-2">
+              <div 
+                id="port-file-dropzone" 
+                onclick="document.getElementById('port-file-input').click()"
+                class="border-2 border-dashed border-slate-200 hover:border-amber-500 rounded-xl p-4 text-center cursor-pointer bg-slate-50/60 hover:bg-amber-50/20 transition flex items-center justify-center gap-3"
+              >
+                <i data-lucide="image-plus" class="w-5 h-5 text-slate-400"></i>
+                <div class="text-left">
+                  <p class="text-xs font-bold text-slate-700">คลิกเพื่ออัปโหลดไฟล์รูปภาพ (JPG, PNG, WebP)</p>
+                  <p class="text-[11px] text-slate-400" id="port-file-name-hint">ขนาดไม่เกิน 5MB</p>
+                </div>
+              </div>
+              <input 
+                type="file" 
+                id="port-file-input" 
+                accept="image/*" 
+                class="hidden" 
+                onchange="handlePortfolioFileChange(event)"
+              >
+
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] text-slate-400 shrink-0 font-medium">หรือใส่ลิงก์รูป URL:</span>
+                <input 
+                  type="text" 
+                  id="port-form-image-url" 
+                  placeholder="https://... หรือ /images/..." 
+                  oninput="handlePortfolioUrlInput(event)"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Description -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              คำอธิบายรายละเอียดผลงาน / จุดเด่น
+            </label>
+            <textarea 
+              id="port-form-desc" 
+              rows="3" 
+              placeholder="อธิบายว่าผลงานนี้คืออะไร ทำอะไรได้บ้าง หรือใช้เทคนิคอะไร..."
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+            ></textarea>
+          </div>
+
+          <!-- 5. Tech Stack -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              เทคโนโลยี / แท็กเครื่องมือ (คั่นด้วยจุลภาค ,)
+            </label>
+            <input 
+              type="text" 
+              id="port-form-tech" 
+              placeholder="เช่น Photoshop, Illustrator หรือ React 19, Tailwind CSS, Vite"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+            >
+          </div>
+
+          <!-- 6. Demo Link & Button Label -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                ลิงก์ผลงาน (Demo / GitHub / รูปภาพ)
+              </label>
+              <input 
+                type="text" 
+                id="port-form-demo-url" 
+                placeholder="เช่น https://github.com/... หรือ ลิงก์รูปภาพ"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+              >
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                ข้อความบนปุ่มกดดูผลงาน
+              </label>
+              <input 
+                type="text" 
+                id="port-form-demo-label" 
+                placeholder="เช่น ดูภาพผลงานเต็ม หรือ เข้าชมเว็บไซต์"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+              >
+            </div>
+          </div>
+
+          <!-- 7. Is Real Checkbox -->
+          <div class="flex items-center gap-2 pt-1">
+            <input type="checkbox" id="port-form-is-real" checked class="w-4 h-4 text-amber-500 rounded border-slate-300">
+            <label for="port-form-is-real" class="text-xs font-semibold text-slate-700 cursor-pointer">
+              ⚡ แสดงป้าย &quot;Real Project / งานจริง&quot;
+            </label>
+          </div>
+
+          <!-- Footer Buttons -->
+          <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <button 
+              type="button" 
+              onclick="closePortfolioModal()" 
+              class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-semibold transition cursor-pointer"
+            >
+              ยกเลิก
+            </button>
+            <button 
+              type="submit" 
+              id="btn-save-portfolio"
+              class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/20 transition flex items-center gap-1.5 cursor-pointer"
+            >
+              <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              <span>บันทึกผลงาน</span>
             </button>
           </div>
         </form>

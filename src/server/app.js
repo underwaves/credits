@@ -57,6 +57,13 @@ export function createApp() {
     })
   );
 
+  // Serve uploaded images statically
+  const uploadsDir = path.join(rootDir, 'public', 'images', 'uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+  app.use('/images/uploads', express.static(uploadsDir, { maxAge: '1d' }));
+
   // SEO routes
   app.use(seoRouter);
 

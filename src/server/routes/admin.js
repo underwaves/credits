@@ -12,6 +12,13 @@ import {
 } from '../middleware/security.js';
 import { config } from '../config.js';
 import * as db from '../services/db.js';
+import {
+  getAllPortfolio,
+  getPortfolioById,
+  createPortfolio,
+  updatePortfolio,
+  deletePortfolio
+} from '../services/portfolioDb.js';
 
 export const adminRouter = express.Router();
 
@@ -244,6 +251,189 @@ adminRouter.put('/settings', requireAdmin, async (req, res) => {
   } catch (err) {
     console.error('[admin] Settings update error:', err.message);
     res.status(500).json({ success: false, message: 'บันทึกการตั้งค่าไม่สำเร็จ' });
+  }
+});
+
+// ---------------- Portfolio Management ----------------
+adminRouter.get('/portfolio', requireAdmin, (req, res) => {
+  try {
+    const portfolio = getAllPortfolio();
+    res.json({ success: true, portfolio });
+  } catch (err) {
+    console.error('[admin] Fetch portfolio error:', err.message);
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการโหลดรายการผลงาน' });
+  }
+});
+
+adminRouter.post('/portfolio', requireAdmin, imageUpload.single('image'), async (req, res) => {
+  let uploadedFile = null;
+  try {
+    const {
+      title,
+      category,
+      categoryLabel,
+      desc,
+      tech,
+      imageUrl,
+      demoUrl,
+      demoLabel,
+      isReal
+    } = req.body;
+
+    if (!title || !title.trim()) {
+      return res.status(400).json({ success: false, message: 'กรุณากรอกชื่อผลงาน' });
+    }
+
+    let finalImageUrl = imageUrl ? imageUrl.trim() : '';
+
+    if (req.file) {
+      const detected = detectImageMime(req.file.buffer);
+      if (!detected) {
+        return res.status(400).json({
+          success: false,
+          message: `ไฟล์ "${req.file.originalname}" ไม่ใช่รูปภาพที่ถูกต้อง (รองรับ JPG, PNG, WebP)`
+        });
+      }
+      const uploaded = await db.uploadImage(req.file.buffer, detected.ext, detected.mime);
+      uploadedFile = uploaded.fileName;
+      finalImageUrl = uploaded.url;
+    }
+
+    if (!finalImageUrl) {
+      finalImageUrl = '/images/placeholder-credit.svg';
+    }
+
+    const cat = (category || 'design').trim();
+    let catLabel = categoryLabel?.trim();
+    if (!catLabel) {
+      const labelMap = {
+        website: 'Web Application',
+        coding: 'Coding & Backend',
+        design: 'Graphic & Design',
+        presentation: 'Slide Deck & Presentation'
+      };
+      catLabel = labelMap[cat] || 'ผลงานสร้างสรรค์';
+    }
+
+    let finalDemoLabel = demoLabel?.trim();
+    if (!finalDemoLabel) {
+      finalDemoLabel = (cat === 'website' || (demoUrl && demoUrl.startsWith('http') && !demoUrl.includes('image')))
+        ? 'เข้าชมโปรเจกต์'
+        : 'ดูภาพผลงานเต็ม';
+    }
+
+    const newItem = createPortfolio({
+      title: title.trim(),
+      category: cat,
+      categoryLabel: catLabel,
+      desc: desc ? desc.trim() : '',
+      tech: tech || '',
+      image: finalImageUrl,
+      demoUrl: demoUrl ? demoUrl.trim() : finalImageUrl,
+      demoLabel: finalDemoLabel,
+      isReal: isReal !== 'false' && isReal !== false
+    });
+
+    res.json({
+      success: true,
+      portfolio: newItem,
+      message: 'เพิ่มผลงานสำเร็จเรียบร้อยแล้ว ✨'
+    });
+  } catch (err) {
+    console.error('[admin] Create portfolio error:', err.message);
+    if (uploadedFile) {
+      await db.deleteImagesFromStorage([uploadedFile]);
+    }
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการเพิ่มผลงาน: ' + err.message });
+  }
+});
+
+adminRouter.put('/portfolio/:id', requireAdmin, imageUpload.single('image'), async (req, res) => {
+  let uploadedFile = null;
+  try {
+    const id = req.params.id;
+    const existing = getPortfolioById(id);
+    if (!existing) {
+      return res.status(404).json({ success: false, message: 'ไม่พบรายการผลงานนี้' });
+    }
+
+    const {
+      title,
+      category,
+      categoryLabel,
+      desc,
+      tech,
+      imageUrl,
+      demoUrl,
+      demoLabel,
+      isReal
+    } = req.body;
+
+    let finalImageUrl = existing.image;
+    if (imageUrl && imageUrl.trim()) {
+      finalImageUrl = imageUrl.trim();
+    }
+
+    if (req.file) {
+      const detected = detectImageMime(req.file.buffer);
+      if (!detected) {
+        return res.status(400).json({
+          success: false,
+          message: `ไฟล์ "${req.file.originalname}" ไม่ใช่รูปภาพที่ถูกต้อง (รองรับ JPG, PNG, WebP)`
+        });
+      }
+      const uploaded = await db.uploadImage(req.file.buffer, detected.ext, detected.mime);
+      uploadedFile = uploaded.fileName;
+      finalImageUrl = uploaded.url;
+    }
+
+    const updates = {};
+    if (title !== undefined) updates.title = title.trim();
+    if (category !== undefined) updates.category = category.trim();
+    if (categoryLabel !== undefined) updates.categoryLabel = categoryLabel.trim();
+    if (desc !== undefined) updates.desc = desc.trim();
+    if (tech !== undefined) updates.tech = tech;
+    if (finalImageUrl) updates.image = finalImageUrl;
+    if (demoUrl !== undefined) updates.demoUrl = demoUrl.trim();
+    if (demoLabel !== undefined) updates.demoLabel = demoLabel.trim();
+    if (isReal !== undefined) updates.isReal = isReal !== 'false' && isReal !== false;
+
+    const updated = updatePortfolio(id, updates);
+    res.json({
+      success: true,
+      portfolio: updated,
+      message: 'อัปเดตผลงานเรียบร้อยแล้ว ✨'
+    });
+  } catch (err) {
+    console.error('[admin] Update portfolio error:', err.message);
+    if (uploadedFile) {
+      await db.deleteImagesFromStorage([uploadedFile]);
+    }
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการแก้ไขผลงาน: ' + err.message });
+  }
+});
+
+adminRouter.delete('/portfolio/:id', requireAdmin, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const existing = getPortfolioById(id);
+    if (!existing) {
+      return res.status(404).json({ success: false, message: 'ไม่พบรายการผลงานนี้' });
+    }
+
+    if (existing.image && (existing.image.startsWith('/images/uploads/') || existing.image.includes('supabase'))) {
+      await db.deleteImagesFromStorage([existing.image]);
+    }
+
+    const deleted = deletePortfolio(id);
+    if (!deleted) {
+      return res.status(400).json({ success: false, message: 'ลบผลงานไม่สำเร็จ' });
+    }
+
+    res.json({ success: true, message: 'ลบผลงานเรียบร้อยแล้ว' });
+  } catch (err) {
+    console.error('[admin] Delete portfolio error:', err.message);
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการลบผลงาน' });
   }
 });
 

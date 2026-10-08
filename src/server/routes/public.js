@@ -4,6 +4,7 @@ import { reviewLimiter, contactLimiter } from '../middleware/rateLimit.js';
 import { validateContact, checkSpamSignals, validateReview, validateImageFiles } from '../../shared/validation.js';
 import * as db from '../services/db.js';
 import { notifyNewContact } from '../services/notifier.js';
+import { getAllPortfolio } from '../services/portfolioDb.js';
 
 export const publicRouter = express.Router();
 
@@ -90,6 +91,17 @@ publicRouter.get('/credits/:id', async (req, res) => {
   } catch (err) {
     console.error('[public] Single credit error:', err.message);
     res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการโหลดเครดิต' });
+  }
+});
+
+// ---------------- Portfolio ----------------
+publicRouter.get('/portfolio', (req, res) => {
+  try {
+    const portfolio = getAllPortfolio();
+    res.json({ success: true, portfolio });
+  } catch (err) {
+    console.error('[public] Portfolio fetch error:', err.message);
+    res.status(500).json({ success: false, message: 'ไม่สามารถโหลดผลงานได้' });
   }
 });
 

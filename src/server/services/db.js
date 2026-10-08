@@ -1,6 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { config } from '../config.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const rootDir = path.resolve(__dirname, '../../../');
 
 const BUCKET = 'credit-images';
 
@@ -216,41 +223,87 @@ export async function togglePinCredit(id) {
 // ---------------- Storage ----------------
 
 export async function uploadImage(buffer, detectedExt = '.jpg', mimeType = 'image/jpeg') {
-  if (!supabase) throw new Error('Supabase Storage is not configured');
-
   const ext = detectedExt.startsWith('.') ? detectedExt : `.${detectedExt}`;
   const fileName = `img-${Date.now()}-${crypto.randomBytes(8).toString('hex')}${ext}`;
 
-  check(
-    await supabase.storage.from(BUCKET).upload(fileName, buffer, {
-      contentType: mimeType,
-      upsert: false
-    }),
-    'upload image'
-  );
+  if (supabase) {
+    try {
+      check(
+        await supabase.storage.from(BUCKET).upload(fileName, buffer, {
+          contentType: mimeType,
+          upsert: false
+        }),
+        'upload image'
+      );
 
-  const publicUrl = supabase.storage.from(BUCKET).getPublicUrl(fileName).data.publicUrl;
-  return { url: publicUrl, fileName };
+      const publicUrl = supabase.storage.from(BUCKET).getPublicUrl(fileName).data.publicUrl;
+      return { url: publicUrl, fileName };
+    } catch (err) {
+      console.warn('[db.uploadImage] Supabase upload failed, falling back to local file storage:', err.message);
+    }
+  }
+
+  // Local file storage fallback
+  const targetDirs = [
+    path.join(rootDir, 'public', 'images', 'uploads'),
+    path.join(rootDir, 'web', 'public', 'images', 'uploads'),
+    path.join(rootDir, 'dist', 'images', 'uploads')
+  ];
+
+  for (const dir of targetDirs) {
+    try {
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFileSync(path.join(dir, fileName), buffer);
+    } catch (err) {
+      console.warn(`[db.uploadImage] Failed writing to ${dir}:`, err.message);
+    }
+  }
+
+  return { url: `/images/uploads/${fileName}`, fileName };
 }
 
 export async function deleteImagesFromStorage(imageUrlsOrNames) {
-  if (!supabase || !Array.isArray(imageUrlsOrNames) || imageUrlsOrNames.length === 0) return;
+  if (!Array.isArray(imageUrlsOrNames) || imageUrlsOrNames.length === 0) return;
 
-  const marker = `/storage/v1/object/public/${BUCKET}/`;
-  const fileNames = imageUrlsOrNames
-    .map((item) => {
-      if (typeof item !== 'string') return null;
-      if (item.includes(marker)) return item.split(marker)[1];
-      if (!item.startsWith('/') && !item.startsWith('http')) return item;
-      return null;
-    })
-    .filter(Boolean);
+  if (supabase) {
+    const marker = `/storage/v1/object/public/${BUCKET}/`;
+    const fileNames = imageUrlsOrNames
+      .map((item) => {
+        if (typeof item !== 'string') return null;
+        if (item.includes(marker)) return item.split(marker)[1];
+        if (!item.startsWith('/') && !item.startsWith('http')) return item;
+        return null;
+      })
+      .filter(Boolean);
 
-  if (fileNames.length > 0) {
-    try {
-      await supabase.storage.from(BUCKET).remove(fileNames);
-    } catch (err) {
-      console.warn('[db] Storage cleanup warning:', err.message);
+    if (fileNames.length > 0) {
+      try {
+        await supabase.storage.from(BUCKET).remove(fileNames);
+      } catch (err) {
+        console.warn('[db] Storage cleanup warning:', err.message);
+      }
+    }
+  }
+
+  // Clean up any local files
+  for (const item of imageUrlsOrNames) {
+    if (typeof item === 'string' && item.includes('/images/uploads/')) {
+      const fileName = path.basename(item);
+      const targetDirs = [
+        path.join(rootDir, 'public', 'images', 'uploads'),
+        path.join(rootDir, 'web', 'public', 'images', 'uploads'),
+        path.join(rootDir, 'dist', 'images', 'uploads')
+      ];
+      for (const dir of targetDirs) {
+        const filePath = path.join(dir, fileName);
+        if (fs.existsSync(filePath)) {
+          try {
+            fs.unlinkSync(filePath);
+          } catch (_) {}
+        }
+      }
     }
   }
 }

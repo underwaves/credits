@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileMenu();
   initScrollReveal();
   initPortfolioFilter();
+  initDynamicPortfolio();
   initContactForm();
 });
 
@@ -76,26 +77,98 @@ function initScrollReveal() {
 
 // ---------------- 4. Portfolio Filter ----------------
 function initPortfolioFilter() {
-  const tabs = document.querySelectorAll('.filter-tab');
-  const cards = document.querySelectorAll('.portfolio-card');
-  if (!tabs.length || !cards.length) return;
+  const container = document.querySelector('.portfolio-filter-tabs');
+  if (!container || container.dataset.initialized) return;
+  container.dataset.initialized = 'true';
 
-  tabs.forEach((tab) => {
-    tab.addEventListener('click', () => {
-      tabs.forEach((t) => t.classList.remove('active'));
-      tab.classList.add('active');
+  container.addEventListener('click', (e) => {
+    const tab = e.target.closest('.filter-tab');
+    if (!tab) return;
 
-      const filter = tab.getAttribute('data-filter');
-      cards.forEach((card) => {
-        const cat = card.getAttribute('data-category');
-        if (filter === 'all' || cat === filter) {
-          card.style.display = '';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-    });
+    container.querySelectorAll('.filter-tab').forEach((t) => t.classList.remove('active'));
+    tab.classList.add('active');
+
+    const filter = tab.getAttribute('data-filter');
+    applyPortfolioFilter(filter);
   });
+}
+
+function applyPortfolioFilter(filter) {
+  const cards = document.querySelectorAll('.portfolio-card');
+  cards.forEach((card) => {
+    const cat = card.getAttribute('data-category');
+    if (filter === 'all' || cat === filter) {
+      card.style.display = '';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
+// ---------------- 4.1 Dynamic Portfolio Loader ----------------
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+async function initDynamicPortfolio() {
+  const grid = document.getElementById('portfolio-grid');
+  if (!grid) return;
+
+  try {
+    const res = await fetch('/api/public/portfolio');
+    const data = await res.json();
+    if (data.success && Array.isArray(data.portfolio) && data.portfolio.length > 0) {
+      grid.innerHTML = data.portfolio.map((item) => {
+        const cat = escapeHtml(item.category || 'design');
+        const catLabel = escapeHtml(item.categoryLabel || item.category || 'ผลงาน');
+        const title = escapeHtml(item.title || '');
+        const desc = escapeHtml(item.desc || '');
+        const image = escapeHtml(item.image || '/images/placeholder-credit.svg');
+        const demoUrl = escapeHtml(item.demoUrl || item.image || '#');
+        const demoLabel = escapeHtml(item.demoLabel || 'ดูภาพผลงานเต็ม');
+        const techList = Array.isArray(item.tech) ? item.tech : (item.tech ? String(item.tech).split(',') : []);
+
+        return `
+          <div class="card-glass card-interactive portfolio-card reveal-on-scroll revealed" data-category="${cat}">
+            <div class="portfolio-thumb-wrap">
+              <img src="${image}" alt="${title}" class="portfolio-thumb-img" loading="lazy" onerror="this.src='/images/placeholder-credit.svg'" />
+              <span class="portfolio-cat-badge">${catLabel}</span>
+              ${item.isReal !== false ? `<span class="portfolio-live-badge">⚡ Real Project</span>` : ''}
+            </div>
+            <div class="portfolio-body">
+              <h4 class="portfolio-title">${title}</h4>
+              <p class="portfolio-desc">${desc}</p>
+              <div class="portfolio-tech-tags">
+                ${techList.map((t) => `<span class="tech-tag">${escapeHtml(t.trim())}</span>`).join('')}
+              </div>
+              <div class="portfolio-link-wrap">
+                <a href="${demoUrl}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">
+                  <span>${demoLabel}</span> <span>→</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Respect currently active filter tab
+      const activeTab = document.querySelector('.portfolio-filter-tabs .filter-tab.active');
+      if (activeTab) {
+        applyPortfolioFilter(activeTab.getAttribute('data-filter') || 'all');
+      }
+
+      initScrollReveal();
+    }
+  } catch (err) {
+    // If backend fetch fails, keep fallback static HTML
+    console.debug('[portfolio] Using fallback static cards:', err);
+  }
 }
 
 // Quick helper to select service from service card
