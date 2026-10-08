@@ -975,7 +975,7 @@ async function saveShopSettings() {
       tagline,
       announcement,
       socials: {
-        line: { label: 'Line ID: luvxawrnrkc', url: lineUrl, enabled: !!lineUrl },
+        line: { label: 'LINE OA: @419ajynp', url: lineUrl, enabled: !!lineUrl },
         facebook: { label: 'Facebook', url: fbUrl, enabled: !!fbUrl },
         discord: { label: 'Discord Server', url: '', enabled: false },
         tiktok: { label: 'TikTok Shop', url: '', enabled: false }
@@ -1293,7 +1293,7 @@ function handlePortCategoryChange(val) {
 
   const defaultLabels = {
     website: 'Web Application',
-    coding: 'Coding & AI',
+    coding: 'Web & Software',
     design: 'Graphic & Banner',
     presentation: 'Slide Deck'
   };

@@ -40,9 +40,10 @@ if (fs.existsSync(path.join(dist, 'index.html'))) {
   check('Contains services section', indexHtml.includes('id="services"'));
   check('Contains portfolio section', indexHtml.includes('id="portfolio"'));
   check('Contains pricing section', indexHtml.includes('id="pricing"'));
-  check('Contains contact form', indexHtml.includes('id="contact-form"'));
+  check('Contains contact section', indexHtml.includes('id="contact"'));
+  check('Contains LINE OA link (@419ajynp)', indexHtml.includes('line.me/R/ti/p/@419ajynp'));
+  check('Contains no contact form (LINE OA CTA only)', !indexHtml.includes('id="contact-form"'));
   check('Contains sun emoji brand icon', indexHtml.includes('☀️'));
-  check('Contains honeypot field', indexHtml.includes('name="website"'));
   check('Contains CSRF/Same-origin security script', indexHtml.includes('sunfz'));
 }
 

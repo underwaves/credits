@@ -80,61 +80,6 @@ describe('Server & Endpoints', () => {
       expect(res.body.settings).toBeDefined();
       expect(res.body.settings.shopName).toBe('SUNFZENITH');
     });
-
-    it('POST /api/public/contact rejects spam honeypot', async () => {
-      const res = await request(app)
-        .post('/api/public/contact')
-        .send({
-          name: 'Spam Bot',
-          contactChannel: 'email',
-          contactValue: 'spam@bot.com',
-          service: 'web-landing',
-          budget: '5k-15k',
-          details: 'Spamming content here please buy',
-          website: 'http://malicious.link',
-          elapsedMs: 5000
-        });
-
-      // Honeypot returns success: true silently to misdirect bots without storing
-      expect(res.status).toBe(200);
-      expect(res.body.success).toBe(true);
-    });
-
-    it('POST /api/public/contact rejects too-fast submission', async () => {
-      const res = await request(app)
-        .post('/api/public/contact')
-        .send({
-          name: 'Fast Bot',
-          contactChannel: 'email',
-          contactValue: 'fast@bot.com',
-          service: 'web-landing',
-          budget: '5k-15k',
-          details: 'Too fast submission test',
-          elapsedMs: 200
-        });
-
-      expect(res.status).toBe(400);
-      expect(res.body.success).toBe(false);
-      expect(res.body.message).toContain('รวดเร็ว');
-    });
-
-    it('POST /api/public/contact validates missing fields properly', async () => {
-      const res = await request(app)
-        .post('/api/public/contact')
-        .send({
-          name: '',
-          contactChannel: 'line',
-          contactValue: '',
-          service: 'invalid',
-          budget: 'invalid',
-          details: '',
-          elapsedMs: 5000
-        });
-
-      expect(res.status).toBe(400);
-      expect(res.body.success).toBe(false);
-      expect(res.body.errors).toBeDefined();
-    });
   });
 
   describe('Admin Auth', () => {

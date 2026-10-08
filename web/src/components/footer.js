@@ -19,8 +19,8 @@ export function Footer() {
             เปลี่ยนทุกไอเดียเล็ก ๆ ให้กลายเป็นผลงานจริงที่คุณภาคภูมิใจ
           </p>
           <div class="footer-social-links">
-            <a href="https://line.me/ti/p/~luvxawrnrkc" target="_blank" rel="noopener" class="social-chip" title="LINE ID: luvxawrnrkc">
-              <span>💬</span> LINE: luvxawrnrkc
+            <a href="https://line.me/R/ti/p/@419ajynp" target="_blank" rel="noopener" class="social-chip" title="LINE OA: @419ajynp">
+              <span>💬</span> LINE: @419ajynp
             </a>
             <a href="https://www.facebook.com/profile.php?id=61595346770633&locale=th_TH" target="_blank" rel="noopener" class="social-chip" title="Facebook Page">
               <span>📘</span> Facebook
@@ -31,10 +31,10 @@ export function Footer() {
         <div class="footer-links-col">
           <h4 class="footer-col-title">บริการหลัก</h4>
           <ul class="footer-nav-list">
-            <li><a href="/#services">Website & Web Application</a></li>
-            <li><a href="/#services">Coding, Debug & API</a></li>
-            <li><a href="/#services">Graphic & Social Media Artwork</a></li>
-            <li><a href="/#services">Slide Deck & Presentation</a></li>
+            <li><a href="/#services">Website & Landing Page</a></li>
+            <li><a href="/#services">Web App & ระบบหลังบ้าน</a></li>
+            <li><a href="/#services">สไลด์พรีเซนต์ & รายงาน</a></li>
+            <li><a href="/#services">โปสเตอร์ & อินโฟกราฟิก</a></li>
           </ul>
         </div>
 

@@ -4,7 +4,7 @@
     "title": "Smart Pharmacy Locker — ตู้รับยาอัจฉริยะ IoT",
     "category": "website",
     "categoryLabel": "Web App & IoT",
-    "desc": "นวัตกรรมตู้รับยาอัตโนมัติพร้อมระบบสายพานลำเลียง จุดตรวจความปลอดภัย 5 Rights และ AI เสียงพูดภาษาไทยแนะนำวิธีทานยาเพื่อผู้สูงอายุ",
+    "desc": "นวัตกรรมตู้รับยาอัตโนมัติพร้อมระบบสายพานลำเลียง จุดตรวจความปลอดภัย 5 Rights และระบบเสียงพูดภาษาไทยแนะนำวิธีทานยาเพื่อผู้สูงอายุ",
     "tech": [
       "React 19",
       "Tailwind CSS",
@@ -39,15 +39,15 @@
   },
   {
     "id": "p3",
-    "title": "DocuMind AI — Enterprise Document Intelligence",
-    "category": "coding",
-    "categoryLabel": "AI & RAG Platform",
-    "desc": "แพลตฟอร์มคลังความรู้และตอบคำถามเอกสารองค์กรด้วย Clean Architecture บน FastAPI, pgvector และ Google Gemini พร้อม Real-time SSE Streaming",
+    "title": "DocuMind — Enterprise Document Platform",
+    "category": "website",
+    "categoryLabel": "Document & Knowledge Platform",
+    "desc": "แพลตฟอร์มคลังความรู้และตอบคำถามสืบค้นเอกสารองค์กรด้วย Clean Architecture บน FastAPI, pgvector พร้อม Real-time SSE Streaming",
     "tech": [
       "Python",
       "FastAPI",
       "PostgreSQL (pgvector)",
-      "Gemini API",
+      "Vector Search",
       "Docker"
     ],
     "image": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80",
@@ -58,14 +58,14 @@
   },
   {
     "id": "p4",
-    "title": "Multi-Agent Semantic Firewall (งานวิจัยตีพิมพ์ AUCC)",
-    "category": "coding",
-    "categoryLabel": "AI Research & Paper",
-    "desc": "บทความวิจัยและโมเดลตรวจสอบข้อเท็จจริง ลดความผิดพลาดของโมเดลภาษา LLM จาก 60% เหลือ 5% (นำเสนอในการประชุมวิชาการ AUCC 2025)",
+    "title": "Semantic Firewall & Fact-Checking Engine (งานวิจัยตีพิมพ์ AUCC)",
+    "category": "website",
+    "categoryLabel": "Research & Data Engine",
+    "desc": "บทความวิจัยและระบบตรวจสอบความถูกต้องของข้อมูล (Fact-Checking) ตรวจสอบความถูกต้องของข้อความอย่างแม่นยำ นำเสนอในการประชุมวิชาการ AUCC",
     "tech": [
       "Python",
-      "Multi-Agent System",
-      "Fact-Checking",
+      "Fact-Checking Engine",
+      "Information Retrieval",
       "Search API",
       "FastAPI"
     ],
@@ -88,7 +88,7 @@
       "Data Visualization"
     ],
     "image": "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80",
-    "demoUrl": "https://line.me/ti/p/~luvxawrnrkc",
+    "demoUrl": "https://line.me/R/ti/p/@419ajynp",
     "demoLabel": "ปรึกษางานสไลด์",
     "isReal": true,
     "createdAt": "2026-09-20T00:00:00.000Z"
@@ -114,10 +114,10 @@
   },
   {
     "id": "p7",
-    "title": "FruitLeaf AI — โรคผลไม้ไทย & 3D Interactive Model",
+    "title": "FruitLeaf 3D — ข้อมูลโรคผลไม้ไทย & Interactive Model",
     "category": "design",
     "categoryLabel": "3D Model & Web UI",
-    "desc": "เว็บแอปพลิเคชันสืบค้นโรคผลไม้ไทยพร้อมโมเดลผลไม้ 3 มิติแบบหมุนโต้ตอบได้ด้วย Three.js Low-Poly Procedural Viewer และฐานข้อมูล 30 โรค",
+    "desc": "เว็บแอปพลิเคชันสืบค้นข้อมูลโรคผลไม้ไทยพร้อมโมเดลผลไม้ 3 มิติแบบหมุนโต้ตอบได้ด้วย Three.js Low-Poly Procedural Viewer และฐานข้อมูลโรคพืช",
     "tech": [
       "Three.js",
       "Python",

@@ -1,5 +1,3 @@
-import { validateContact } from '@shared/validation.js';
-
 document.addEventListener('DOMContentLoaded', () => {
   initThemeToggle();
   initMobileMenu();
@@ -7,7 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initPortfolioFilter();
   initDynamicPortfolio();
   initDynamicSiteContent();
-  initContactForm();
   initRateCardModal();
 });
 
@@ -254,7 +251,7 @@ async function initDynamicSiteContent() {
     if (servicesGrid && Array.isArray(services) && services.length > 0) {
       servicesGrid.innerHTML = services.map((s) => {
         const feats = Array.isArray(s.features) ? s.features : [];
-        const tabKey = (s.id === 'presentation') ? 'slide' : (s.id === 'design') ? 'poster' : 'web';
+        const tabKey = (s.id === 'slide' || s.id === 'presentation') ? 'slide' : (s.id === 'design' || s.id === 'poster') ? 'poster' : 'web';
         return `
           <div class="card-glass card-interactive service-card reveal-on-scroll revealed">
             <div class="service-card-top">
@@ -272,23 +269,13 @@ async function initDynamicSiteContent() {
               <button type="button" class="btn btn-secondary btn-sm" onclick="openRateCardModal('${tabKey}')" style="flex: 1 1 auto;">
                 <span>🔍 ดูรายละเอียดเรท</span>
               </button>
-              <a href="#contact" class="btn btn-primary btn-sm" onclick="selectServiceOption('${escapeHtml(s.id)}')" style="flex: 1 1 auto; justify-content: center;">
+              <a href="https://line.me/R/ti/p/@419ajynp" target="_blank" rel="noopener" class="btn btn-primary btn-sm" style="flex: 1 1 auto; justify-content: center;">
                 <span>ปรึกษา (${escapeHtml(s.startingPrice || 'เรทสบายกระเป๋า')})</span> <span>→</span>
               </a>
             </div>
           </div>
         `;
       }).join('');
-
-      // Also update select options in contact form
-      const cfServiceSelect = document.getElementById('cf-service');
-      if (cfServiceSelect) {
-        const currentVal = cfServiceSelect.value;
-        cfServiceSelect.innerHTML = services.map((s) => `
-          <option value="${escapeHtml(s.id)}">${escapeHtml(s.title)} (${escapeHtml(s.startingPrice || '')})</option>
-        `).join('') + '<option value="other">อื่น ๆ / ยังไม่แน่ใจ</option>';
-        if (currentVal) cfServiceSelect.value = currentVal;
-      }
     }
 
     // 3. Pricing Grid
@@ -297,11 +284,12 @@ async function initDynamicSiteContent() {
       pricingGrid.innerHTML = pricing.map((p) => {
         const feats = Array.isArray(p.features) ? p.features : [];
         const isHighlight = Boolean(p.isHighlight);
-        const pTabKey = (p.id === 'p1' || (p.title && p.title.includes('สไลด์')))
+        const pTabKey = (p.id === 'prc-slide' || p.id === 'slide' || p.id === 'p1' || (p.title && p.title.includes('สไลด์')))
           ? 'slide'
-          : (p.id === 'p2' || (p.title && p.title.includes('โปสเตอร์')))
+          : (p.id === 'prc-poster' || p.id === 'poster' || p.id === 'p2' || (p.title && p.title.includes('โปสเตอร์')))
           ? 'poster'
           : 'web';
+        const targetUrl = (p.actionUrl && p.actionUrl !== '#contact') ? p.actionUrl : 'https://line.me/R/ti/p/@419ajynp';
         return `
           <div class="card-glass pricing-card reveal-on-scroll revealed ${isHighlight ? 'pricing-highlight' : ''}">
             <div class="pricing-badge-row">
@@ -319,7 +307,7 @@ async function initDynamicSiteContent() {
               <button type="button" class="btn btn-secondary btn-sm" onclick="openRateCardModal('${pTabKey}')" style="width: 100%;">
                 <span>🔍 ดูตารางราคาและรายละเอียด</span>
               </button>
-              <a href="${escapeHtml(p.actionUrl || '#contact')}" class="btn ${isHighlight ? 'btn-primary' : 'btn-secondary'}" style="width: 100%;">
+              <a href="${escapeHtml(targetUrl)}" target="_blank" rel="noopener" class="btn ${isHighlight ? 'btn-primary' : 'btn-secondary'}" style="width: 100%;">
                 <span>${escapeHtml(p.actionText || 'ปรึกษาฟรี')}</span>
               </a>
             </div>
@@ -353,129 +341,6 @@ async function initDynamicSiteContent() {
     console.debug('[cms] Using fallback static site content:', err);
   }
 }
-
-// Quick helper to select service from service card
-window.selectServiceOption = function (serviceId) {
-  const selectEl = document.getElementById('cf-service');
-  if (selectEl) {
-    selectEl.value = serviceId;
-  }
-};
-
-// ---------------- 5. Contact Form ----------------
-const formStartTime = Date.now();
-
-function initContactForm() {
-  const channelSelect = document.getElementById('cf-channel');
-  if (channelSelect) {
-    channelSelect.addEventListener('change', updateContactPlaceholder);
-  }
-}
-
-window.updateContactPlaceholder = function () {
-  const channelSelect = document.getElementById('cf-channel');
-  const inputEl = document.getElementById('cf-contact');
-  if (!channelSelect || !inputEl) return;
-
-  const placeholders = {
-    line: 'เช่น sunny.dream หรือ @lineid',
-    facebook: 'เช่น ชื่อโปรไฟล์ หรือ ลิงก์เฟซบุ๊ก',
-    email: 'เช่น you@example.com',
-    phone: 'เช่น 08x-xxx-xxxx'
-  };
-
-  inputEl.placeholder = placeholders[channelSelect.value] || 'กรอกข้อมูลติดต่อ';
-};
-
-let isSubmittingContact = false;
-
-window.handleContactSubmit = async function (e) {
-  e.preventDefault();
-  if (isSubmittingContact) return;
-
-  const form = document.getElementById('contact-form');
-  const submitBtn = document.getElementById('btn-submit-contact');
-  const submitText = document.getElementById('btn-contact-text');
-  const alertBox = document.getElementById('contact-alert');
-
-  // Clear previous errors
-  document.querySelectorAll('.form-error-msg').forEach((el) => (el.textContent = ''));
-  if (alertBox) {
-    alertBox.style.display = 'none';
-    alertBox.className = 'contact-alert-box';
-  }
-
-  const formData = {
-    name: document.getElementById('cf-name')?.value?.trim(),
-    contactChannel: document.getElementById('cf-channel')?.value,
-    contactValue: document.getElementById('cf-contact')?.value?.trim(),
-    service: document.getElementById('cf-service')?.value,
-    budget: document.getElementById('cf-budget')?.value,
-    details: document.getElementById('cf-details')?.value?.trim(),
-    website: document.getElementById('cf-website')?.value,
-    elapsedMs: Date.now() - formStartTime
-  };
-
-  // Client-side validation
-  const validation = validateContact(formData);
-  if (!validation.ok) {
-    for (const [field, msg] of Object.entries(validation.errors)) {
-      const errEl = document.getElementById(`err-${field}`);
-      if (errEl) errEl.textContent = msg;
-    }
-    showToast('กรุณากรอกข้อมูลในฟอร์มให้ครบถ้วนถูกต้อง', 'error');
-    return;
-  }
-
-  isSubmittingContact = true;
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.style.opacity = '0.7';
-    if (submitText) submitText.textContent = 'กำลังส่งข้อความ... กรุณารอสักครู่ ✨';
-  }
-
-  try {
-    const res = await fetch('/api/public/contact', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-      if (alertBox) {
-        alertBox.className = 'contact-alert-box success';
-        alertBox.textContent = data.message || 'ส่งข้อความเรียบร้อยแล้ว!';
-        alertBox.style.display = 'block';
-      }
-      showToast('ส่งข้อความสำเร็จแล้ว! เราจะติดต่อกลับโดยเร็วที่สุดครับ', 'success');
-      form.reset();
-    } else {
-      if (alertBox) {
-        alertBox.className = 'contact-alert-box error';
-        alertBox.textContent = data.message || 'เกิดข้อผิดพลาดในการส่งข้อความ';
-        alertBox.style.display = 'block';
-      }
-      showToast(data.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง', 'error');
-    }
-  } catch (err) {
-    console.error('Contact submit error:', err);
-    if (alertBox) {
-      alertBox.className = 'contact-alert-box error';
-      alertBox.textContent = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ในขณะนี้ กรุณาทักทาง LINE OA: @419ajynp ได้โดยตรงครับ';
-      alertBox.style.display = 'block';
-    }
-    showToast('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง', 'error');
-  } finally {
-    isSubmittingContact = false;
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.style.opacity = '1';
-      if (submitText) submitText.textContent = 'ส่งข้อความหาเรา ✨';
-    }
-  }
-};
 
 // ---------------- 6. Rate Card Details Modal ----------------
 function initRateCardModal() {

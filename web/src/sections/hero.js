@@ -30,10 +30,10 @@ export function HeroSection() {
           </h1>
 
           <p class="hero-desc">
-            ยินดีต้อนรับสู่ <strong>SUNFZENITH</strong> สตูดิโอเล็ก ๆ ที่ตั้งใจทำงานคุณภาพ 
-            รับทำสไลด์พรีเซนต์ โปสเตอร์ อินโฟกราฟิก <strong>เริ่มต้นเพียง 49 บาท</strong> 
-            พร้อมรับทำเว็บไซต์ โครงงาน ม.ปลาย และโปรเจกต์เขียนโปรแกรม ในราคาสบายกระเป๋าสำหรับวัยเรียน 
-            ปรึกษาแนวทางฟรี ไม่มีข้อผูกมัด คุยง่ายเป็นกันเอง พร้อมส่งต่อผลงานที่ดีที่สุดให้คุณ
+            ยินดีต้อนรับสู่ <strong>SUNFZENITH</strong> ร้านเล็ก ๆ ที่ตั้งใจทำงานคุณภาพ 
+            รับทำเว็บไซต์, Web App, งานสไลด์, อินโฟกราฟิก และโปสเตอร์ 
+            ใส่ใจรายละเอียดในทุกชิ้นงาน ออกแบบให้เหมาะกับการใช้งานจริง ในราคาสบายกระเป๋า 
+            ปรึกษารายละเอียดหรือส่งโจทย์มาประเมินก่อนได้ฟรี คุยง่ายเป็นกันเองครับ
           </p>
 
           <div class="hero-cta-group">
@@ -42,7 +42,7 @@ export function HeroSection() {
               <span class="cta-arrow">→</span>
             </a>
             <a href="#pricing" class="btn btn-secondary btn-lg">
-              <span>ดูเรท ม.ปลาย - นักศึกษา</span>
+              <span>ดูรายละเอียดราคา</span>
             </a>
           </div>
 
@@ -59,7 +59,7 @@ export function HeroSection() {
               <span class="trust-icon">🎨</span>
               <div>
                 <strong>สไลด์ & โปสเตอร์ เริ่มต้น 49 ฿</strong>
-                <span class="trust-sub">เรท ม.ปลาย - นักศึกษา สบายกระเป๋า</span>
+                <span class="trust-sub">สไลด์ 49.- • เว็บไซต์เริ่มต้น 149.-</span>
               </div>
             </div>
           </div>
@@ -96,8 +96,8 @@ export function HeroSection() {
             <div class="floating-widget widget-tech anim-float-gentle anim-delay-2">
               <span class="widget-emoji">💻</span>
               <div>
-                <strong>Digital & Tech Studio</strong>
-                <span>Web App • Code • Design</span>
+                <strong>Website & Design Studio</strong>
+                <span>Website • Web App • Design</span>
               </div>
             </div>
           </div>

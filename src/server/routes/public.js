@@ -1,9 +1,8 @@
 import express from 'express';
 import { imageUpload, detectImageMime, MAX_FILES } from '../middleware/upload.js';
-import { reviewLimiter, contactLimiter } from '../middleware/rateLimit.js';
-import { validateContact, checkSpamSignals, validateReview, validateImageFiles } from '../../shared/validation.js';
+import { reviewLimiter } from '../middleware/rateLimit.js';
+import { validateReview, validateImageFiles } from '../../shared/validation.js';
 import * as db from '../services/db.js';
-import { notifyNewContact } from '../services/notifier.js';
 import { getAllPortfolio } from '../services/portfolioDb.js';
 import { getSiteContent } from '../services/contentDb.js';
 
@@ -184,54 +183,6 @@ publicRouter.post('/reviews', reviewLimiter, imageUpload.array('images', MAX_FIL
     res.status(400).json({
       success: false,
       message: err.message.includes('รูปภาพ') ? err.message : 'เกิดข้อผิดพลาดในการบันทึกรีวิว กรุณาลองใหม่อีกครั้ง'
-    });
-  }
-});
-
-// ---------------- Contact Form ----------------
-publicRouter.post('/contact', contactLimiter, async (req, res) => {
-  try {
-    const { website, elapsedMs } = req.body;
-
-    // Honeypot & timing checks
-    const spamSignal = checkSpamSignals({ website, elapsedMs });
-    if (spamSignal === 'honeypot') {
-      // Silently accept honeypot hits without saving to deceive automated bots
-      return res.json({ success: true, message: 'ส่งข้อความเรียบร้อยแล้ว' });
-    }
-    if (spamSignal === 'too-fast') {
-      return res.status(400).json({
-        success: false,
-        message: 'กรุณากรอกฟอร์มตามธรรมชาติ (ตรวจพบการส่งข้อมูลที่รวดเร็วเกินไป)'
-      });
-    }
-
-    const validation = validateContact(req.body);
-    if (!validation.ok) {
-      return res.status(400).json({
-        success: false,
-        message: 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบข้อมูลในฟอร์ม',
-        errors: validation.errors
-      });
-    }
-
-    const saved = await db.saveContactMessage({
-      ...validation.data,
-      ip: req.ip || req.socket.remoteAddress
-    });
-
-    // Fire webhook asynchronously
-    notifyNewContact(saved).catch(() => {});
-
-    res.json({
-      success: true,
-      message: 'ส่งข้อความสำเร็จแล้ว! ทีมงาน SUNFZENITH จะติดต่อกลับโดยเร็วที่สุดครับ ✨'
-    });
-  } catch (err) {
-    console.error('[public] Contact error:', err.message);
-    res.status(500).json({
-      success: false,
-      message: 'ไม่สามารถส่งข้อความได้ในขณะนี้ กรุณาติดต่อทาง LINE หรือ Facebook โดยตรง'
     });
   }
 });

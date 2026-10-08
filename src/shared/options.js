@@ -3,9 +3,11 @@
 
 export const SERVICE_OPTIONS = Object.freeze([
   { id: 'website', label: 'Website / Web App' },
-  { id: 'coding', label: 'Coding / Programming' },
-  { id: 'design', label: 'Graphic / Design' },
+  { id: 'webapp', label: 'Web App & ระบบหลังบ้าน' },
+  { id: 'slide', label: 'ทำสไลด์พรีเซนต์ & รายงาน' },
+  { id: 'design', label: 'โปสเตอร์ & อินโฟกราฟิก / งานออกแบบ' },
   { id: 'presentation', label: 'Presentation' },
+  { id: 'coding', label: 'Coding / Programming' },
   { id: 'other', label: 'อื่น ๆ / ยังไม่แน่ใจ' }
 ]);
 
