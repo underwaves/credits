@@ -89,7 +89,7 @@ function initPortfolioFilter() {
       cards.forEach((card) => {
         const cat = card.getAttribute('data-category');
         if (filter === 'all' || cat === filter) {
-          card.style.display = 'flex';
+          card.style.display = '';
         } else {
           card.style.display = 'none';
         }

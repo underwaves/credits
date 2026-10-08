@@ -602,13 +602,36 @@ html[data-theme="dark"] .filter-tab.active {
   gap: 28px;
 }
 
+.portfolio-card {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100%;
+}
+
+.portfolio-card[style*="display: none"] {
+  display: none !important;
+}
+
 .portfolio-thumb-wrap {
   position: relative;
+  width: 100%;
   height: 220px;
   border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--sky-100);
   margin-bottom: 18px;
+  flex-shrink: 0;
+}
+
+.portfolio-body {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.portfolio-link-wrap {
+  margin-top: auto;
+  padding-top: 8px;
 }
 
 .portfolio-thumb-img {
