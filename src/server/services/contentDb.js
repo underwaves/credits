@@ -11,7 +11,7 @@ const contentFilePath = path.join(dataDir, 'content.json');
 export const DEFAULT_CONTENT = {
   general: {
     shopName: 'SUNFZENITH',
-    tagline: 'Small Dream, Big Zenith — เปลี่ยนไอเดียเล็ก ๆ ให้กลายเป็นผลงานที่ไปได้ไกลกว่าที่คิด',
+    tagline: 'Small Dream, Big Zenith',
     announcement: '✨ ยินดีต้อนรับสู่ SUNFZENITH สตูดิโอทำเว็บ สไลด์ และดีไซน์ โดย นศ.วิศวกรรม AI • LINE OA: @419ajynp',
     showAnnouncement: false,
     shopStatus: '🟢 เปิดรับออเดอร์ 24 ชม.',

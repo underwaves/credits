@@ -6,8 +6,8 @@ export function Footer() {
       <div class="container footer-content">
         <div class="footer-brand-col">
           <div class="footer-brand-header">
-            <div class="footer-avatar-wrap">
-              <img src="/images/mascot.png" alt="SUNFZENITH Mascot" class="footer-avatar-img" width="44" height="44" />
+            <div class="footer-avatar-wrap anim-sun-glow">
+              <span class="brand-sun-emoji">☀️</span>
             </div>
             <div>
               <span class="footer-brand-title">SUNFZENITH</span>
