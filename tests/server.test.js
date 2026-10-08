@@ -228,5 +228,119 @@ describe('Server & Endpoints', () => {
       expect(deleteRes.status).toBe(200);
       expect(deleteRes.body.success).toBe(true);
     });
+
+    it('CMS Content, Services & Pricing CRUD workflow', async () => {
+      // Login
+      const loginRes = await request(app)
+        .post('/api/admin/login')
+        .send({ pin: '3645' });
+      const cookie = loginRes.headers['set-cookie'];
+
+      // 1. GET /api/public/content
+      const publicContentRes = await request(app).get('/api/public/content');
+      expect(publicContentRes.status).toBe(200);
+      expect(publicContentRes.body.success).toBe(true);
+      expect(publicContentRes.body.content.general).toBeDefined();
+      expect(publicContentRes.body.content.services).toBeDefined();
+      expect(publicContentRes.body.content.pricing).toBeDefined();
+
+      // 2. GET /api/admin/content
+      const adminContentRes = await request(app)
+        .get('/api/admin/content')
+        .set('Cookie', cookie);
+      expect(adminContentRes.status).toBe(200);
+      expect(adminContentRes.body.success).toBe(true);
+      expect(adminContentRes.body.content).toBeDefined();
+
+      // 3. PUT /api/admin/content/general
+      const updateGenRes = await request(app)
+        .put('/api/admin/content/general')
+        .set('Cookie', cookie)
+        .send({ tagline: 'Automated Test Tagline' });
+      expect(updateGenRes.status).toBe(200);
+      expect(updateGenRes.body.success).toBe(true);
+      expect(updateGenRes.body.general.tagline).toBe('Automated Test Tagline');
+
+      // 4. PUT /api/admin/content/socials
+      const updateSocRes = await request(app)
+        .put('/api/admin/content/socials')
+        .set('Cookie', cookie)
+        .send({ discord: { url: 'https://discord.gg/test', label: 'Test Discord', enabled: true } });
+      expect(updateSocRes.status).toBe(200);
+      expect(updateSocRes.body.success).toBe(true);
+      expect(updateSocRes.body.socials.discord.enabled).toBe(true);
+
+      // 5. Services CRUD
+      const createServiceRes = await request(app)
+        .post('/api/admin/services')
+        .set('Cookie', cookie)
+        .send({
+          title: 'Test Service',
+          icon: '🚀',
+          badge: 'New',
+          startingPrice: '99 ฿',
+          desc: 'Test description',
+          features: ['Feature 1', 'Feature 2']
+        });
+      expect(createServiceRes.status).toBe(200);
+      expect(createServiceRes.body.success).toBe(true);
+      const testService = createServiceRes.body.service;
+      expect(testService.id).toBeDefined();
+
+      const updateServiceRes = await request(app)
+        .put(`/api/admin/services/${testService.id}`)
+        .set('Cookie', cookie)
+        .send({ title: 'Updated Test Service' });
+      expect(updateServiceRes.status).toBe(200);
+      expect(updateServiceRes.body.service.title).toBe('Updated Test Service');
+
+      const delServiceRes = await request(app)
+        .delete(`/api/admin/services/${testService.id}`)
+        .set('Cookie', cookie);
+      expect(delServiceRes.status).toBe(200);
+      expect(delServiceRes.body.success).toBe(true);
+
+      // 6. Pricing CRUD
+      const createPricingRes = await request(app)
+        .post('/api/admin/pricing')
+        .set('Cookie', cookie)
+        .send({
+          title: 'Test Package',
+          price: '299 ฿',
+          badge: 'Popular',
+          desc: 'Package description',
+          isHighlight: true,
+          features: ['Benefit 1'],
+          actionText: 'Order Now',
+          actionUrl: '#contact'
+        });
+      expect(createPricingRes.status).toBe(200);
+      expect(createPricingRes.body.success).toBe(true);
+      const testPricing = createPricingRes.body.pricing;
+      expect(testPricing.id).toBeDefined();
+
+      const updatePricingRes = await request(app)
+        .put(`/api/admin/pricing/${testPricing.id}`)
+        .set('Cookie', cookie)
+        .send({ title: 'Updated Test Package' });
+      expect(updatePricingRes.status).toBe(200);
+      expect(updatePricingRes.body.pricing.title).toBe('Updated Test Package');
+
+      const delPricingRes = await request(app)
+        .delete(`/api/admin/pricing/${testPricing.id}`)
+        .set('Cookie', cookie);
+      expect(delPricingRes.status).toBe(200);
+      expect(delPricingRes.body.success).toBe(true);
+
+      // Clean up test data
+      await request(app)
+        .put('/api/admin/content/general')
+        .set('Cookie', cookie)
+        .send({ tagline: 'Small Dream, Big Zenith — เปลี่ยนไอเดียเล็ก ๆ ให้กลายเป็นผลงานที่ไปได้ไกลกว่าที่คิด' });
+      await request(app)
+        .put('/api/admin/content/socials')
+        .set('Cookie', cookie)
+        .send({ discord: { url: '', label: 'Discord Server', enabled: false } });
+    });
   });
 });

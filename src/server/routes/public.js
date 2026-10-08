@@ -5,6 +5,7 @@ import { validateContact, checkSpamSignals, validateReview, validateImageFiles }
 import * as db from '../services/db.js';
 import { notifyNewContact } from '../services/notifier.js';
 import { getAllPortfolio } from '../services/portfolioDb.js';
+import { getSiteContent } from '../services/contentDb.js';
 
 export const publicRouter = express.Router();
 
@@ -33,19 +34,32 @@ async function processUploadedImages(files) {
   }
 }
 
-// ---------------- Public Shop Settings ----------------
+// ---------------- Public Shop Settings & Content ----------------
+publicRouter.get('/content', (req, res) => {
+  try {
+    const content = getSiteContent();
+    res.json({ success: true, content });
+  } catch (err) {
+    console.error('[public] Content fetch error:', err.message);
+    res.status(500).json({ success: false, message: 'ไม่สามารถโหลดข้อมูลเนื้อหาเว็บไซต์ได้' });
+  }
+});
+
 publicRouter.get('/settings', async (req, res) => {
   try {
     const config = await db.getShopConfig();
+    const siteContent = getSiteContent();
     const allCredits = await db.getCredits();
 
     const safeSettings = {
-      shopName: config.settings.shopName,
-      tagline: config.settings.tagline,
-      announcement: config.settings.announcement,
-      socials: config.settings.socials,
+      shopName: siteContent.general?.shopName || config.settings.shopName,
+      tagline: siteContent.general?.tagline || config.settings.tagline,
+      announcement: siteContent.general?.announcement || config.settings.announcement,
+      showAnnouncement: siteContent.general?.showAnnouncement !== false,
+      shopStatus: siteContent.general?.shopStatus || '🟢 เปิดรับออเดอร์ 24 ชม.',
+      socials: siteContent.socials || config.settings.socials,
       stats: {
-        ratingScore: config.settings.stats?.ratingScore || '5.0',
+        ratingScore: siteContent.general?.ratingScore || config.settings.stats?.ratingScore || '5.0',
         totalOrders: config.settings.stats?.totalOrders || '100% คุณภาพ',
         deliveryRate: config.settings.stats?.deliveryRate || 'ส่งตรงเวลา',
         responseTime: config.settings.stats?.responseTime || 'ตอบไว',

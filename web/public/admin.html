@@ -220,51 +220,359 @@
       </section>
 
       <!-- Navigation Tabs -->
-      <section class="border-b border-slate-200 flex items-center gap-2 overflow-x-auto pb-1">
+      <section class="border-b border-slate-200 flex items-center gap-1.5 overflow-x-auto pb-1.5 scrollbar-thin">
         <button 
-          id="tab-btn-add" 
-          onclick="switchTab('add')" 
-          class="admin-tab active inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition"
+          id="tab-btn-home" 
+          onclick="switchTab('home')" 
+          class="admin-tab active inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm transition whitespace-nowrap"
         >
-          <i data-lucide="plus-circle" class="w-4 h-4"></i>
-          <span>+ เพิ่มเครดิตใหม่</span>
+          <i data-lucide="home" class="w-4 h-4"></i>
+          <span>หน้าแรก &amp; แบรนด์</span>
         </button>
         <button 
-          id="tab-btn-list" 
-          onclick="switchTab('list')" 
-          class="admin-tab inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition"
+          id="tab-btn-services" 
+          onclick="switchTab('services')" 
+          class="admin-tab inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition whitespace-nowrap"
         >
-          <i data-lucide="layers" class="w-4 h-4"></i>
-          <span>จัดการรายการเครดิต (<span id="tab-list-count">0</span>)</span>
+          <i data-lucide="wrench" class="w-4 h-4"></i>
+          <span>บริการ (<span id="tab-services-count">0</span>)</span>
+        </button>
+        <button 
+          id="tab-btn-pricing" 
+          onclick="switchTab('pricing')" 
+          class="admin-tab inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition whitespace-nowrap"
+        >
+          <i data-lucide="badge-dollar-sign" class="w-4 h-4"></i>
+          <span>ราคา (<span id="tab-pricing-count">0</span>)</span>
         </button>
         <button 
           id="tab-btn-portfolio" 
           onclick="switchTab('portfolio')" 
-          class="admin-tab inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition"
+          class="admin-tab inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition whitespace-nowrap"
         >
           <i data-lucide="palette" class="w-4 h-4"></i>
-          <span>จัดการผลงาน / Portfolio (<span id="tab-portfolio-count">0</span>)</span>
+          <span>ผลงาน (<span id="tab-portfolio-count">0</span>)</span>
+        </button>
+        <button 
+          id="tab-btn-socials" 
+          onclick="switchTab('socials')" 
+          class="admin-tab inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition whitespace-nowrap"
+        >
+          <i data-lucide="phone-call" class="w-4 h-4"></i>
+          <span>ติดต่อ &amp; โซเชียล</span>
+        </button>
+        <button 
+          id="tab-btn-add" 
+          onclick="switchTab('add')" 
+          class="admin-tab inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition whitespace-nowrap"
+        >
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>+ โพสต์เครดิต</span>
+        </button>
+        <button 
+          id="tab-btn-list" 
+          onclick="switchTab('list')" 
+          class="admin-tab inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition whitespace-nowrap"
+        >
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span>เครดิต (<span id="tab-list-count">0</span>)</span>
         </button>
         <button 
           id="tab-btn-reviews" 
           onclick="switchTab('reviews')" 
-          class="admin-tab inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition"
+          class="admin-tab inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition whitespace-nowrap"
         >
           <i data-lucide="message-square" class="w-4 h-4"></i>
-          <span>รีวิวลูกค้า (+1 / -1) (<span id="tab-reviews-count">0</span>)</span>
+          <span>รีวิว (+1/-1) (<span id="tab-reviews-count">0</span>)</span>
         </button>
         <button 
           id="tab-btn-settings" 
           onclick="switchTab('settings')" 
-          class="admin-tab inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition"
+          class="admin-tab inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition whitespace-nowrap"
         >
-          <i data-lucide="settings" class="w-4 h-4"></i>
-          <span>ตั้งค่าร้านค้า &amp; PIN</span>
-        </button>
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+          <span>PIN &amp; สำรองข้อมูล</span>
       </section>
 
-      <!-- TAB 1: ADD CREDIT FORM -->
-      <section id="tab-content-add" class="space-y-6">
+      <!-- TAB: HOME & GENERAL BRANDING -->
+      <section id="tab-content-home" class="space-y-6 max-w-4xl mx-auto">
+        <div class="clean-card p-6 sm:p-8 space-y-5">
+          <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
+            <div class="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shrink-0">
+              <i data-lucide="sparkles" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="font-heading font-extrabold text-lg text-slate-900">ข้อมูลแบรนด์ &amp; หน้าแรก (Branding &amp; Hero)</h3>
+              <p class="text-xs text-slate-500">ปรับเปลี่ยนชื่อร้าน สโลแกน แถบประกาศ และข้อความแนะนำตัวบนหน้าแรกได้ทันที</p>
+            </div>
+          </div>
+
+          <form id="form-general-settings" onsubmit="handleSaveGeneralSettings(event)" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">ชื่อแบรนด์ / สตูดิโอ <span class="text-rose-500">*</span></label>
+                <input type="text" id="home-shop-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition" required>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">สถานะร้านค้า (Badge)</label>
+                <input type="text" id="home-shop-status" placeholder="เช่น 🟢 เปิดรับออเดอร์ 24 ชม." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">สโลแกนหลัก (Tagline)</label>
+              <input type="text" id="home-tagline" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition">
+            </div>
+
+            <!-- Top Announcement Bar -->
+            <div class="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <i data-lucide="bell" class="w-3.5 h-3.5 text-amber-600"></i>
+                  <span>แถบประกาศด้านบนสุดของเว็บ (Top Announcement)</span>
+                </label>
+                <label class="inline-flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" id="home-show-announcement" class="w-4 h-4 text-amber-500 rounded border-slate-300">
+                  <span class="text-xs font-semibold text-slate-700">เปิดแสดงแถบนี้</span>
+                </label>
+              </div>
+              <input type="text" id="home-announcement" class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-amber-500 transition">
+            </div>
+
+            <!-- Hero Title parts -->
+            <div class="space-y-2 pt-2">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                หัวข้อตัวโตหน้าแรก (Hero Title 4 ท่อน)
+              </label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                <div>
+                  <span class="text-[11px] text-slate-400 font-medium">1. คำนำหน้า:</span>
+                  <input type="text" id="home-hero-lead" placeholder="เช่น เปลี่ยน" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white">
+                </div>
+                <div>
+                  <span class="text-[11px] text-amber-600 font-bold">2. ไฮไลต์สีส้ม:</span>
+                  <input type="text" id="home-hero-high1" placeholder="เช่น ไอเดียเล็ก ๆ" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white">
+                </div>
+                <div>
+                  <span class="text-[11px] text-slate-400 font-medium">3. คำเชื่อมกลาง:</span>
+                  <input type="text" id="home-hero-mid" placeholder="เช่น ให้กลายเป็นผลงานที่" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white">
+                </div>
+                <div>
+                  <span class="text-[11px] text-sky-600 font-bold">4. ไฮไลต์สีฟ้า:</span>
+                  <input type="text" id="home-hero-high2" placeholder="เช่น ไปได้ไกลกว่าที่คิด ✨" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white">
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                คำอธิบายแนะนำร้านในส่วน Hero
+              </label>
+              <textarea id="home-hero-desc" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"></textarea>
+            </div>
+
+            <!-- Trust Badges -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                  <span>💬</span> <span>ป้ายความมั่นใจ 1</span>
+                </span>
+                <input type="text" id="home-trust1-title" placeholder="หัวข้อ เช่น ปรึกษาฟรี ไม่มีค่าใช้จ่าย" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:border-amber-500">
+                <input type="text" id="home-trust1-sub" placeholder="คำอธิบายย่อย เช่น ส่งโจทย์มาคุยหรือประเมินราคาก่อนได้" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-[11px] text-slate-600 focus:border-amber-500">
+              </div>
+              <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                  <span>🎨</span> <span>ป้ายความมั่นใจ 2</span>
+                </span>
+                <input type="text" id="home-trust2-title" placeholder="หัวข้อ เช่น สไลด์ & โปสเตอร์ เริ่มต้น 49 ฿" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900 focus:border-amber-500">
+                <input type="text" id="home-trust2-sub" placeholder="คำอธิบายย่อย เช่น เรท ม.ปลาย - นักศึกษา สบายกระเป๋า" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-[11px] text-slate-600 focus:border-amber-500">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                คติประจำมาสคอต (Mascot Motto)
+              </label>
+              <input type="text" id="home-mascot-motto" placeholder="“เล็กแต่ตั้งใจ ทำด้วยหัวใจทุกชิ้น”" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition">
+            </div>
+
+            <div class="pt-3">
+              <button type="submit" id="btn-save-general" class="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-2xl text-sm shadow-md shadow-amber-500/20 transition flex items-center justify-center gap-2 cursor-pointer">
+                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                <span>บันทึกข้อมูลหน้าแรกทั้งหมด ✨</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- TAB: SERVICES MANAGEMENT -->
+      <section id="tab-content-services" class="hidden space-y-4 max-w-5xl mx-auto">
+        <div class="clean-card p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-2.5">
+            <span class="p-2.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 shrink-0">
+              <i data-lucide="wrench" class="w-5 h-5"></i>
+            </span>
+            <div>
+              <h2 class="font-heading font-extrabold text-base sm:text-lg text-slate-900">
+                จัดการบริการของเรา (Services Management)
+              </h2>
+              <p class="text-xs text-slate-500">
+                เพิ่ม ลบ แก้ไข รายการบริการ ราคาเริ่มต้น และจุดเด่น แสดงผลบนหน้าแรกทันที
+              </p>
+            </div>
+          </div>
+
+          <button type="button" onclick="openCreateServiceModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/20 transition flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>+ เพิ่มบริการใหม่</span>
+          </button>
+        </div>
+
+        <div id="admin-services-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Rendered by JS -->
+        </div>
+      </section>
+
+      <!-- TAB: PRICING MANAGEMENT -->
+      <section id="tab-content-pricing" class="hidden space-y-4 max-w-6xl mx-auto">
+        <div class="clean-card p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-2.5">
+            <span class="p-2.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 shrink-0">
+              <i data-lucide="badge-dollar-sign" class="w-5 h-5"></i>
+            </span>
+            <div>
+              <h2 class="font-heading font-extrabold text-base sm:text-lg text-slate-900">
+                จัดการแพ็กเกจราคา (Pricing Packages)
+              </h2>
+              <p class="text-xs text-slate-500">
+                ปรับแต่งอัตราค่าบริการ เรทนักเรียน/นักศึกษา สิ่งที่ลูกค้าจะได้รับ และป้ายแนะนำ
+              </p>
+            </div>
+          </div>
+
+          <button type="button" onclick="openCreatePricingModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/20 transition flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>+ เพิ่มแพ็กเกจราคาใหม่</span>
+          </button>
+        </div>
+
+        <div id="admin-pricing-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Rendered by JS -->
+        </div>
+      </section>
+
+      <!-- TAB: SOCIALS & CONTACTS -->
+      <section id="tab-content-socials" class="hidden max-w-3xl mx-auto space-y-6">
+        <div class="clean-card p-6 sm:p-8 space-y-5">
+          <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
+            <div class="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shrink-0">
+              <i data-lucide="phone-call" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="font-heading font-extrabold text-lg text-slate-900">ช่องทางติดต่อ &amp; โซเชียลมีเดีย (Contact &amp; Socials)</h3>
+              <p class="text-xs text-slate-500">ตั้งค่าลิงก์ LINE, Facebook, Discord, TikTok, Instagram ที่แสดงทั่วทั้งเว็บไซต์</p>
+            </div>
+          </div>
+
+          <form id="form-socials-settings" onsubmit="handleSaveSocialsSettings(event)" class="space-y-4">
+            <!-- Line -->
+            <div class="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-200/60 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
+                  <span>💬</span> <span>LINE Official / Line ID</span>
+                </span>
+                <label class="inline-flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" id="social-line-enabled" checked class="w-4 h-4 text-emerald-600 rounded">
+                  <span class="text-xs font-semibold text-emerald-800">เปิดใช้งาน</span>
+                </label>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <input type="text" id="social-line-label" placeholder="ข้อความ เช่น ID: luvxawrnrkc" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900">
+                <input type="text" id="social-line-url" placeholder="URL เช่น https://line.me/ti/p/~..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900">
+              </div>
+            </div>
+
+            <!-- Facebook -->
+            <div class="p-4 rounded-2xl bg-blue-50/50 border border-blue-200/60 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-blue-900 flex items-center gap-1.5">
+                  <span>📘</span> <span>Facebook Fanpage</span>
+                </span>
+                <label class="inline-flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" id="social-fb-enabled" checked class="w-4 h-4 text-blue-600 rounded">
+                  <span class="text-xs font-semibold text-blue-800">เปิดใช้งาน</span>
+                </label>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <input type="text" id="social-fb-label" placeholder="ชื่อเพจ เช่น SUNFZENITH Official" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900">
+                <input type="text" id="social-fb-url" placeholder="URL เช่น https://facebook.com/..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900">
+              </div>
+            </div>
+
+            <!-- Discord -->
+            <div class="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-200/60 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-indigo-900 flex items-center gap-1.5">
+                  <span>👾</span> <span>Discord Community</span>
+                </span>
+                <label class="inline-flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" id="social-discord-enabled" class="w-4 h-4 text-indigo-600 rounded">
+                  <span class="text-xs font-semibold text-indigo-800">เปิดใช้งาน</span>
+                </label>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <input type="text" id="social-discord-label" placeholder="เช่น Discord Server" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900">
+                <input type="text" id="social-discord-url" placeholder="URL เช่น https://discord.gg/..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900">
+              </div>
+            </div>
+
+            <!-- TikTok -->
+            <div class="p-4 rounded-2xl bg-rose-50/50 border border-rose-200/60 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-rose-900 flex items-center gap-1.5">
+                  <span>🎵</span> <span>TikTok</span>
+                </span>
+                <label class="inline-flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" id="social-tiktok-enabled" class="w-4 h-4 text-rose-600 rounded">
+                  <span class="text-xs font-semibold text-rose-800">เปิดใช้งาน</span>
+                </label>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <input type="text" id="social-tiktok-label" placeholder="เช่น TikTok @sunfzenith" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900">
+                <input type="text" id="social-tiktok-url" placeholder="URL เช่น https://tiktok.com/@..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900">
+              </div>
+            </div>
+
+            <!-- Instagram -->
+            <div class="p-4 rounded-2xl bg-pink-50/50 border border-pink-200/60 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-pink-900 flex items-center gap-1.5">
+                  <span>📷</span> <span>Instagram</span>
+                </span>
+                <label class="inline-flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" id="social-instagram-enabled" class="w-4 h-4 text-pink-600 rounded">
+                  <span class="text-xs font-semibold text-pink-800">เปิดใช้งาน</span>
+                </label>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <input type="text" id="social-instagram-label" placeholder="เช่น IG @sunfzenith" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900">
+                <input type="text" id="social-instagram-url" placeholder="URL เช่น https://instagram.com/..." class="w-full bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-900">
+              </div>
+            </div>
+
+            <div class="pt-3">
+              <button type="submit" id="btn-save-socials" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                <span>บันทึกช่องทางติดต่อทั้งหมด ✨</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- TAB: ADD CREDIT FORM -->
+      <section id="tab-content-add" class="hidden space-y-6">
         <div class="clean-card p-6 sm:p-8 max-w-3xl mx-auto">
           
           <div class="flex items-center gap-3 pb-5 mb-5 border-b border-slate-100">
@@ -986,6 +1294,286 @@
             >
               <i data-lucide="check" class="w-3.5 h-3.5"></i>
               <span>บันทึกผลงาน</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- 5. ADD / EDIT SERVICE MODAL -->
+  <!-- ============================================== -->
+  <div id="service-modal" class="fixed inset-0 z-50 clean-modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="relative w-full max-w-lg bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
+        <div class="flex items-center gap-2">
+          <i data-lucide="wrench" class="w-5 h-5 text-amber-500"></i>
+          <h3 id="service-modal-title" class="font-heading text-base font-bold text-slate-900">
+            เพิ่มบริการใหม่
+          </h3>
+        </div>
+        <button type="button" onclick="closeServiceModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-200/50 transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 overflow-y-auto flex-grow space-y-4">
+        <form id="service-form" onsubmit="handleServiceSubmit(event)" class="space-y-4">
+          <input type="hidden" id="service-form-id">
+
+          <div class="grid grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                อิโมจิไอคอน
+              </label>
+              <input 
+                type="text" 
+                id="service-form-icon" 
+                placeholder="🎨" 
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-center text-lg text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+              >
+            </div>
+            <div class="col-span-2">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                ป้ายกำกับ (Badge)
+              </label>
+              <input 
+                type="text" 
+                id="service-form-badge" 
+                placeholder="เช่น งานยอดฮิต, สบายใจหายห่วง" 
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+              >
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              ชื่อบริการ <span class="text-rose-500">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="service-form-title" 
+              required
+              placeholder="เช่น ป้ายเครดิต & ออกแบบกราฟิก" 
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+            >
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              ราคาเริ่มต้น <span class="text-rose-500">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="service-form-starting-price" 
+              required
+              placeholder="เช่น เริ่มต้น 59.-" 
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+            >
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              คำอธิบายบริการ
+            </label>
+            <textarea 
+              id="service-form-desc" 
+              rows="3" 
+              placeholder="อธิบายรายละเอียดบริการ จุดเด่น หรือเงื่อนไขสั้นๆ..."
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              จุดเด่น / รายการย่อย (1 บรรทัดต่อ 1 ข้อ)
+            </label>
+            <textarea 
+              id="service-form-bullets" 
+              rows="3" 
+              placeholder="ป้ายเครดิต & ลายน้ำร้าน&#10;แบนเนอร์โปรโมชั่น & โปสเตอร์&#10;ปกคอลเลกชัน & โลโก้แบบมินิมอล"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition font-mono"
+            ></textarea>
+          </div>
+
+          <!-- Footer Buttons -->
+          <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <button 
+              type="button" 
+              onclick="closeServiceModal()" 
+              class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-semibold transition cursor-pointer"
+            >
+              ยกเลิก
+            </button>
+            <button 
+              type="submit" 
+              id="btn-save-service"
+              class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/20 transition flex items-center gap-1.5 cursor-pointer"
+            >
+              <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              <span>บันทึกบริการ</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- 6. ADD / EDIT PRICING MODAL -->
+  <!-- ============================================== -->
+  <div id="pricing-modal" class="fixed inset-0 z-50 clean-modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="relative w-full max-w-lg bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
+        <div class="flex items-center gap-2">
+          <i data-lucide="badge-dollar-sign" class="w-5 h-5 text-amber-500"></i>
+          <h3 id="pricing-modal-title" class="font-heading text-base font-bold text-slate-900">
+            เพิ่มแพ็กเกจราคาใหม่
+          </h3>
+        </div>
+        <button type="button" onclick="closePricingModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-200/50 transition cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 overflow-y-auto flex-grow space-y-4">
+        <form id="pricing-form" onsubmit="handlePricingSubmit(event)" class="space-y-4">
+          <input type="hidden" id="pricing-form-id">
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                ชื่อแพ็กเกจ <span class="text-rose-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="pricing-form-title" 
+                required
+                placeholder="เช่น มินิสตูดิโอ (Starter)" 
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+              >
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                ป้ายกำกับ (Badge)
+              </label>
+              <input 
+                type="text" 
+                id="pricing-form-badge" 
+                placeholder="เช่น คุ้มสุดสำหรับเปิดร้าน, ยอดนิยม" 
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+              >
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                ราคาแสดงผล <span class="text-rose-500">*</span>
+              </label>
+              <input 
+                type="text" 
+                id="pricing-form-price" 
+                required
+                placeholder="เช่น 59 - 150 หรือ 990" 
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+              >
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                หน่วยราคา
+              </label>
+              <input 
+                type="text" 
+                id="pricing-form-unit" 
+                placeholder="เช่น บาท / งาน หรือ บาท / ชิ้น" 
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+              >
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              คำอธิบายแพ็กเกจ
+            </label>
+            <textarea 
+              id="pricing-form-desc" 
+              rows="2" 
+              placeholder="เหมาะสำหรับใคร หรือลักษณะงาน..."
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              รายการสิ่งที่ได้รับ (1 บรรทัดต่อ 1 ข้อ)
+            </label>
+            <textarea 
+              id="pricing-form-features" 
+              rows="4" 
+              placeholder="ป้ายเครดิตพร้อมใช้งาน 1 ชิ้น&#10;ปรับแก้ได้ 2 ครั้งฟรี&#10;ส่งไฟล์คมชัด PNG คุณภาพสูง&#10;ส่งด่วนภายใน 24 ชม."
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition font-mono"
+            ></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                ข้อความบนปุ่มกด (CTA Button Text)
+              </label>
+              <input 
+                type="text" 
+                id="pricing-form-cta-text" 
+                placeholder="เช่น ทักสั่งงานเริ่มต้น" 
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+              >
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                ลิงก์ของปุ่ม (CTA Button URL)
+              </label>
+              <input 
+                type="text" 
+                id="pricing-form-cta-url" 
+                placeholder="เช่น https://line.me/ti/p/~sunfzenith หรือ #contact" 
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-amber-500 focus:bg-white transition"
+              >
+            </div>
+          </div>
+
+          <!-- Popular Toggle -->
+          <div class="flex items-center gap-2 pt-1">
+            <input type="checkbox" id="pricing-form-popular" class="w-4 h-4 text-amber-500 rounded border-slate-300">
+            <label for="pricing-form-popular" class="text-xs font-semibold text-slate-700 cursor-pointer">
+              ⭐ ตั้งเป็นแพ็กเกจยอดนิยม (Popular Card ไฮไลต์เด่น)
+            </label>
+          </div>
+
+          <!-- Footer Buttons -->
+          <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+            <button 
+              type="button" 
+              onclick="closePricingModal()" 
+              class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 text-xs font-semibold transition cursor-pointer"
+            >
+              ยกเลิก
+            </button>
+            <button 
+              type="submit" 
+              id="btn-save-pricing"
+              class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold shadow-md shadow-amber-500/20 transition flex items-center gap-1.5 cursor-pointer"
+            >
+              <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              <span>บันทึกแพ็กเกจ</span>
             </button>
           </div>
         </form>

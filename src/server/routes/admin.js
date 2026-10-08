@@ -17,8 +17,21 @@ import {
   getPortfolioById,
   createPortfolio,
   updatePortfolio,
-  deletePortfolio
+  deletePortfolio,
+  savePortfolioList
 } from '../services/portfolioDb.js';
+import {
+  getSiteContent,
+  saveSiteContent,
+  updateGeneralContent,
+  updateSocialsContent,
+  createService,
+  updateService,
+  deleteService,
+  createPricing,
+  updatePricing,
+  deletePricing
+} from '../services/contentDb.js';
 
 export const adminRouter = express.Router();
 
@@ -437,6 +450,126 @@ adminRouter.delete('/portfolio/:id', requireAdmin, async (req, res) => {
   }
 });
 
+// ---------------- Site Content Management (Full CMS) ----------------
+adminRouter.get('/content', requireAdmin, (req, res) => {
+  try {
+    const content = getSiteContent();
+    res.json({ success: true, content });
+  } catch (err) {
+    console.error('[admin] Fetch content error:', err.message);
+    res.status(500).json({ success: false, message: 'ไม่สามารถโหลดข้อมูลเนื้อหาได้' });
+  }
+});
+
+adminRouter.put('/content/general', requireAdmin, async (req, res) => {
+  try {
+    const updates = req.body || {};
+    const updated = updateGeneralContent(updates);
+
+    const shopSettingsSync = {};
+    if (updates.shopName) shopSettingsSync.shopName = updates.shopName;
+    if (updates.tagline) shopSettingsSync.tagline = updates.tagline;
+    if (updates.announcement) shopSettingsSync.announcement = updates.announcement;
+    if (Object.keys(shopSettingsSync).length > 0) {
+      await db.updateShopSettings(shopSettingsSync);
+    }
+
+    res.json({
+      success: true,
+      general: updated,
+      message: 'บันทึกข้อมูลทั่วไปและส่วนหัวเว็บสำเร็จเรียบร้อยแล้ว ✨'
+    });
+  } catch (err) {
+    console.error('[admin] Update general content error:', err.message);
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล' });
+  }
+});
+
+adminRouter.put('/content/socials', requireAdmin, async (req, res) => {
+  try {
+    const updates = req.body || {};
+    const updated = updateSocialsContent(updates);
+    await db.updateShopSettings({ socials: updated });
+
+    res.json({
+      success: true,
+      socials: updated,
+      message: 'บันทึกช่องทางติดต่อและโซเชียลมีเดียเรียบร้อยแล้ว ✨'
+    });
+  } catch (err) {
+    console.error('[admin] Update socials error:', err.message);
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการบันทึกช่องทางติดต่อ' });
+  }
+});
+
+// Services CRUD
+adminRouter.post('/services', requireAdmin, (req, res) => {
+  try {
+    const { title, icon, badge, startingPrice, desc, features } = req.body;
+    if (!title || !title.trim()) {
+      return res.status(400).json({ success: false, message: 'กรุณากรอกชื่อบริการ' });
+    }
+    const newService = createService({ title, icon, badge, startingPrice, desc, features });
+    res.json({ success: true, service: newService, message: 'เพิ่มบริการใหม่เรียบร้อยแล้ว ✨' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการเพิ่มบริการ' });
+  }
+});
+
+adminRouter.put('/services/:id', requireAdmin, (req, res) => {
+  try {
+    const updated = updateService(req.params.id, req.body);
+    if (!updated) return res.status(404).json({ success: false, message: 'ไม่พบบริการนี้' });
+    res.json({ success: true, service: updated, message: 'อัปเดตบริการเรียบร้อยแล้ว ✨' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการแก้ไขบริการ' });
+  }
+});
+
+adminRouter.delete('/services/:id', requireAdmin, (req, res) => {
+  try {
+    const deleted = deleteService(req.params.id);
+    if (!deleted) return res.status(404).json({ success: false, message: 'ไม่พบบริการนี้' });
+    res.json({ success: true, message: 'ลบบริการเรียบร้อยแล้ว' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการลบบริการ' });
+  }
+});
+
+// Pricing CRUD
+adminRouter.post('/pricing', requireAdmin, (req, res) => {
+  try {
+    const { title, price, badge, desc, isHighlight, features, actionText, actionUrl } = req.body;
+    if (!title || !title.trim()) {
+      return res.status(400).json({ success: false, message: 'กรุณากรอกชื่อแพ็กเกจราคา' });
+    }
+    const newPricing = createPricing({ title, price, badge, desc, isHighlight, features, actionText, actionUrl });
+    res.json({ success: true, pricing: newPricing, message: 'เพิ่มแพ็กเกจราคาใหม่เรียบร้อยแล้ว ✨' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการเพิ่มแพ็กเกจ' });
+  }
+});
+
+adminRouter.put('/pricing/:id', requireAdmin, (req, res) => {
+  try {
+    const updated = updatePricing(req.params.id, req.body);
+    if (!updated) return res.status(404).json({ success: false, message: 'ไม่พบแพ็กเกจนี้' });
+    res.json({ success: true, pricing: updated, message: 'อัปเดตแพ็กเกจราคาเรียบร้อยแล้ว ✨' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการแก้ไขแพ็กเกจ' });
+  }
+});
+
+adminRouter.delete('/pricing/:id', requireAdmin, (req, res) => {
+  try {
+    const deleted = deletePricing(req.params.id);
+    if (!deleted) return res.status(404).json({ success: false, message: 'ไม่พบแพ็กเกจนี้' });
+    res.json({ success: true, message: 'ลบแพ็กเกจราคาเรียบร้อยแล้ว' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการลบแพ็กเกจ' });
+  }
+});
+
 adminRouter.post('/change-pin', requireAdmin, async (req, res) => {
   try {
     const { currentPin, newPin } = req.body;
@@ -466,10 +599,14 @@ adminRouter.get('/export', requireAdmin, async (req, res) => {
     const configData = await db.getShopConfig();
     const credits = await db.getCredits();
     const reviews = await db.getCustomerReviews();
+    const content = getSiteContent();
+    const portfolio = getAllPortfolio();
 
     const backup = {
       settings: configData.settings,
       categories: configData.categories,
+      content,
+      portfolio,
       credits,
       reviews,
       exportedAt: new Date().toISOString()
@@ -492,22 +629,32 @@ adminRouter.post(
       if (!req.file) {
         return res.status(400).json({ success: false, message: 'กรุณาเลือกไฟล์สำรองข้อมูล JSON' });
       }
-      const content = req.file.buffer.toString('utf8');
-      const parsed = JSON.parse(content);
-      if (!parsed.settings || !Array.isArray(parsed.credits)) {
+      const raw = req.file.buffer.toString('utf8');
+      const parsed = JSON.parse(raw);
+      if (!parsed.settings && !parsed.content && !Array.isArray(parsed.credits)) {
         return res.status(400).json({ success: false, message: 'รูปแบบไฟล์สำรองข้อมูลไม่ถูกต้อง' });
       }
 
-      await db.updateShopSettings(parsed.settings);
+      if (parsed.settings) {
+        await db.updateShopSettings(parsed.settings);
+      }
       if (parsed.categories) {
         await db.updateCategories(parsed.categories);
       }
-      for (const c of parsed.credits) {
-        const existing = await db.getCreditById(c.id);
-        if (existing) {
-          await db.updateCredit(c.id, c);
-        } else {
-          await db.createCredit(c);
+      if (parsed.content) {
+        saveSiteContent(parsed.content);
+      }
+      if (Array.isArray(parsed.portfolio)) {
+        savePortfolioList(parsed.portfolio);
+      }
+      if (Array.isArray(parsed.credits)) {
+        for (const c of parsed.credits) {
+          const existing = await db.getCreditById(c.id);
+          if (existing) {
+            await db.updateCredit(c.id, c);
+          } else {
+            await db.createCredit(c);
+          }
         }
       }
 

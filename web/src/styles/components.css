@@ -257,3 +257,21 @@
 .modal-backdrop.open .modal-box {
   transform: scale(1);
 }
+
+/* 7. ANNOUNCEMENT BANNER */
+.site-announcement-banner {
+  background: linear-gradient(90deg, #fef3c7 0%, #fde68a 50%, #fef3c7 100%);
+  color: #78350f;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 8px 16px;
+  text-align: center;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.25);
+  position: relative;
+  z-index: 100;
+}
+[data-theme="dark"] .site-announcement-banner {
+  background: linear-gradient(90deg, #1e293b 0%, #334155 50%, #1e293b 100%);
+  color: #fde68a;
+  border-bottom-color: rgba(251, 191, 36, 0.2);
+}

@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initScrollReveal();
   initPortfolioFilter();
   initDynamicPortfolio();
+  initDynamicSiteContent();
   initContactForm();
 });
 
@@ -168,6 +169,175 @@ async function initDynamicPortfolio() {
   } catch (err) {
     // If backend fetch fails, keep fallback static HTML
     console.debug('[portfolio] Using fallback static cards:', err);
+  }
+}
+
+// ---------------- 4.2 Dynamic Site Content (CMS Loader) ----------------
+async function initDynamicSiteContent() {
+  try {
+    const res = await fetch('/api/public/content');
+    const data = await res.json();
+    if (!data.success || !data.content) return;
+    const { general, socials, services, pricing } = data.content;
+
+    // 1. Branding & Hero
+    if (general) {
+      if (general.shopName) {
+        document.querySelectorAll('.brand-name').forEach((el) => {
+          el.textContent = general.shopName;
+        });
+      }
+      if (general.tagline) {
+        document.querySelectorAll('.brand-tagline').forEach((el) => {
+          el.textContent = general.tagline;
+        });
+      }
+
+      // Announcement Bar
+      let annBar = document.getElementById('site-announcement-bar');
+      if (general.showAnnouncement && general.announcement) {
+        if (!annBar) {
+          annBar = document.createElement('div');
+          annBar.id = 'site-announcement-bar';
+          annBar.className = 'site-announcement-banner';
+          document.body.insertBefore(annBar, document.body.firstChild);
+        }
+        annBar.innerHTML = `<span>${escapeHtml(general.announcement)}</span>`;
+        annBar.style.display = 'block';
+      } else if (annBar) {
+        annBar.style.display = 'none';
+      }
+
+      // Hero Title
+      if (general.heroTitleLead || general.heroTitleHighlight1 || general.heroTitleMid || general.heroTitleHighlight2) {
+        const heroTitleEl = document.querySelector('.hero-title');
+        if (heroTitleEl) {
+          heroTitleEl.innerHTML = `
+            ${escapeHtml(general.heroTitleLead || 'เปลี่ยน')}<span class="text-highlight-sun">${escapeHtml(general.heroTitleHighlight1 || 'ไอเดียเล็ก ๆ')}</span><br/>
+            ${escapeHtml(general.heroTitleMid || 'ให้กลายเป็นผลงานที่')}<br/>
+            <span class="text-highlight-sky">${escapeHtml(general.heroTitleHighlight2 || 'ไปได้ไกลกว่าที่คิด ✨')}</span>
+          `;
+        }
+      }
+
+      // Hero Desc
+      if (general.heroDesc) {
+        const heroDescEl = document.querySelector('.hero-desc');
+        if (heroDescEl) heroDescEl.textContent = general.heroDesc;
+      }
+
+      // Trust Badges
+      const trustItems = document.querySelectorAll('.hero-trust-bar .trust-item');
+      if (trustItems[0] && general.trustBadge1Title) {
+        const strong = trustItems[0].querySelector('strong');
+        const sub = trustItems[0].querySelector('.trust-sub');
+        if (strong) strong.textContent = general.trustBadge1Title;
+        if (sub && general.trustBadge1Sub) sub.textContent = general.trustBadge1Sub;
+      }
+      if (trustItems[1] && general.trustBadge2Title) {
+        const strong = trustItems[1].querySelector('strong');
+        const sub = trustItems[1].querySelector('.trust-sub');
+        if (strong) strong.textContent = general.trustBadge2Title;
+        if (sub && general.trustBadge2Sub) sub.textContent = general.trustBadge2Sub;
+      }
+
+      // Mascot Motto
+      if (general.mascotMotto) {
+        const mottoEl = document.querySelector('.stage-motto');
+        if (mottoEl) mottoEl.textContent = general.mascotMotto;
+      }
+    }
+
+    // 2. Services Grid
+    const servicesGrid = document.querySelector('#services .services-grid');
+    if (servicesGrid && Array.isArray(services) && services.length > 0) {
+      servicesGrid.innerHTML = services.map((s) => {
+        const feats = Array.isArray(s.features) ? s.features : [];
+        return `
+          <div class="card-glass card-interactive service-card reveal-on-scroll revealed">
+            <div class="service-card-top">
+              <div class="service-icon-box"><span class="service-icon-emoji">${escapeHtml(s.icon || '✨')}</span></div>
+              ${s.badge ? `<span class="badge-sky">${escapeHtml(s.badge)}</span>` : ''}
+            </div>
+            <h3 class="service-card-title">${escapeHtml(s.title || '')}</h3>
+            <p class="service-card-desc">${escapeHtml(s.desc || '')}</p>
+            ${feats.length > 0 ? `
+              <ul class="service-features-list">
+                ${feats.map((f) => `<li><span class="check-bullet">✓</span><span>${escapeHtml(f)}</span></li>`).join('')}
+              </ul>
+            ` : ''}
+            <div class="service-card-bottom">
+              <a href="#contact" class="btn btn-secondary btn-sm" onclick="selectServiceOption('${escapeHtml(s.id)}')">
+                <span>ปรึกษาบริการนี้ (${escapeHtml(s.startingPrice || 'เรทสบายกระเป๋า')})</span> <span>→</span>
+              </a>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Also update select options in contact form
+      const cfServiceSelect = document.getElementById('cf-service');
+      if (cfServiceSelect) {
+        const currentVal = cfServiceSelect.value;
+        cfServiceSelect.innerHTML = services.map((s) => `
+          <option value="${escapeHtml(s.id)}">${escapeHtml(s.title)} (${escapeHtml(s.startingPrice || '')})</option>
+        `).join('') + '<option value="other">อื่น ๆ / ยังไม่แน่ใจ</option>';
+        if (currentVal) cfServiceSelect.value = currentVal;
+      }
+    }
+
+    // 3. Pricing Grid
+    const pricingGrid = document.querySelector('#pricing .pricing-grid');
+    if (pricingGrid && Array.isArray(pricing) && pricing.length > 0) {
+      pricingGrid.innerHTML = pricing.map((p) => {
+        const feats = Array.isArray(p.features) ? p.features : [];
+        const isHighlight = Boolean(p.isHighlight);
+        return `
+          <div class="card-glass pricing-card reveal-on-scroll revealed ${isHighlight ? 'pricing-highlight' : ''}">
+            <div class="pricing-badge-row">
+              <span class="${isHighlight ? 'badge-sunny' : 'badge-sky'}">${escapeHtml(p.badge || 'เรทสบายกระเป๋า')}</span>
+            </div>
+            <h3 class="pricing-tier-title">${escapeHtml(p.title || '')}</h3>
+            <div class="pricing-price-text">${escapeHtml(p.price || '')}</div>
+            <p class="pricing-desc">${escapeHtml(p.desc || '')}</p>
+            ${feats.length > 0 ? `
+              <ul class="pricing-features-list">
+                ${feats.map((f) => `<li><span class="pricing-check">✓</span><span>${escapeHtml(f)}</span></li>`).join('')}
+              </ul>
+            ` : ''}
+            <div class="pricing-action">
+              <a href="${escapeHtml(p.actionUrl || '#contact')}" class="btn ${isHighlight ? 'btn-primary' : 'btn-secondary'}" style="width: 100%;">
+                <span>${escapeHtml(p.actionText || 'ปรึกษาฟรี')}</span>
+              </a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 4. Social Links
+    if (socials) {
+      if (socials.line?.url) {
+        document.querySelectorAll('a[href*="line.me"]').forEach((a) => {
+          a.href = socials.line.url;
+        });
+        const lineChannelVal = document.querySelector('.channel-line + .channel-text .channel-val');
+        if (lineChannelVal && socials.line.label) {
+          lineChannelVal.textContent = socials.line.label;
+        }
+      }
+      if (socials.facebook?.url) {
+        document.querySelectorAll('a[href*="facebook.com"]').forEach((a) => {
+          a.href = socials.facebook.url;
+        });
+        const fbChannelVal = document.querySelector('.channel-fb + .channel-text .channel-val');
+        if (fbChannelVal && socials.facebook.label) {
+          fbChannelVal.textContent = socials.facebook.label;
+        }
+      }
+    }
+  } catch (err) {
+    console.debug('[cms] Using fallback static site content:', err);
   }
 }
 

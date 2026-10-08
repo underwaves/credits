@@ -7,6 +7,7 @@ const adminState = {
   isAuthenticated: false,
   shopSlug: 'sunfz',
   shopName: 'SUNFZENITH',
+  content: null,
   credits: [],
   portfolio: [],
   portfolioFilter: 'all',
@@ -15,7 +16,7 @@ const adminState = {
   reviews: [],
   reviewFilter: 'all',
   settings: {},
-  activeTab: 'add',
+  activeTab: 'home',
   selectedFiles: [],
   // Edit mode state
   editingCredit: null,
@@ -209,12 +210,37 @@ async function handleLogout() {
 // Load all Dashboard data
 async function loadDashboardData() {
   await Promise.all([
+    fetchAdminContent(),
     fetchAdminCredits(),
     fetchAdminSettings(),
     fetchAdminReviews(),
     fetchAdminPortfolio()
   ]);
   updateDashboardStats();
+}
+
+// Fetch site CMS content (branding, services, pricing, socials)
+async function fetchAdminContent() {
+  try {
+    const res = await fetch('/api/admin/content', {
+      headers: getAdminHeaders()
+    });
+    const data = await res.json();
+    if (data.success && data.content) {
+      adminState.content = data.content;
+      populateGeneralForm();
+      populateSocialsForm();
+      renderAdminServices();
+      renderAdminPricing();
+
+      const srvCount = document.getElementById('tab-services-count');
+      const prcCount = document.getElementById('tab-pricing-count');
+      if (srvCount) srvCount.textContent = (data.content.services || []).length;
+      if (prcCount) prcCount.textContent = (data.content.pricing || []).length;
+    }
+  } catch (err) {
+    console.error('Failed to load admin site content:', err);
+  }
 }
 
 // Fetch all credits for this shop
@@ -270,7 +296,7 @@ function switchTab(tabId) {
   adminState.activeTab = tabId;
 
   // Toggle button styles
-  const tabs = ['add', 'list', 'portfolio', 'reviews', 'settings'];
+  const tabs = ['home', 'services', 'pricing', 'portfolio', 'socials', 'add', 'list', 'reviews', 'settings'];
   tabs.forEach(t => {
     const btn = document.getElementById(`tab-btn-${t}`);
     const content = document.getElementById(`tab-content-${t}`);
@@ -289,7 +315,15 @@ function switchTab(tabId) {
     }
   });
 
-  if (tabId === 'list') {
+  if (tabId === 'home') {
+    populateGeneralForm();
+  } else if (tabId === 'services') {
+    renderAdminServices();
+  } else if (tabId === 'pricing') {
+    renderAdminPricing();
+  } else if (tabId === 'socials') {
+    populateSocialsForm();
+  } else if (tabId === 'list') {
     renderCreditsList();
   } else if (tabId === 'portfolio') {
     fetchAdminPortfolio();
@@ -1488,6 +1522,611 @@ async function deletePortfolioItem(id, title) {
   } catch (err) {
     console.error('Delete portfolio error:', err);
     showAdminToast('เกิดข้อผิดพลาดในการลบผลงาน', 'error');
+  }
+}
+
+// ========================================================
+// Site Content & CMS Management (Branding, Services, Pricing, Socials)
+// ========================================================
+
+function populateGeneralForm() {
+  if (!adminState.content?.general) return;
+  const g = adminState.content.general;
+
+  const setVal = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val ?? '';
+  };
+  const setCheck = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.checked = Boolean(val);
+  };
+
+  setVal('home-shop-name', g.shopName);
+  setVal('home-shop-status', g.shopStatus);
+  setVal('home-tagline', g.tagline);
+  setCheck('home-show-announcement', g.showAnnouncement !== false);
+  setVal('home-announcement', g.announcement);
+  setVal('home-hero-lead', g.heroTitleLead);
+  setVal('home-hero-high1', g.heroTitleHighlight1);
+  setVal('home-hero-mid', g.heroTitleMid);
+  setVal('home-hero-high2', g.heroTitleHighlight2);
+  setVal('home-hero-desc', g.heroDesc);
+  setVal('home-trust1-title', g.trustBadge1Title);
+  setVal('home-trust1-sub', g.trustBadge1Sub);
+  setVal('home-trust2-title', g.trustBadge2Title);
+  setVal('home-trust2-sub', g.trustBadge2Sub);
+  setVal('home-mascot-motto', g.mascotMotto);
+}
+
+async function handleSaveGeneralSettings(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btn-save-general');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>กำลังบันทึก...</span>';
+  }
+
+  const payload = {
+    shopName: document.getElementById('home-shop-name')?.value.trim() || 'SUNFZENITH',
+    shopStatus: document.getElementById('home-shop-status')?.value.trim() || '',
+    tagline: document.getElementById('home-tagline')?.value.trim() || '',
+    showAnnouncement: document.getElementById('home-show-announcement')?.checked ?? true,
+    announcement: document.getElementById('home-announcement')?.value.trim() || '',
+    heroTitleLead: document.getElementById('home-hero-lead')?.value.trim() || '',
+    heroTitleHighlight1: document.getElementById('home-hero-high1')?.value.trim() || '',
+    heroTitleMid: document.getElementById('home-hero-mid')?.value.trim() || '',
+    heroTitleHighlight2: document.getElementById('home-hero-high2')?.value.trim() || '',
+    heroDesc: document.getElementById('home-hero-desc')?.value.trim() || '',
+    trustBadge1Title: document.getElementById('home-trust1-title')?.value.trim() || '',
+    trustBadge1Sub: document.getElementById('home-trust1-sub')?.value.trim() || '',
+    trustBadge2Title: document.getElementById('home-trust2-title')?.value.trim() || '',
+    trustBadge2Sub: document.getElementById('home-trust2-sub')?.value.trim() || '',
+    mascotMotto: document.getElementById('home-mascot-motto')?.value.trim() || ''
+  };
+
+  try {
+    const res = await fetch('/api/admin/content/general', {
+      method: 'PUT',
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.success) {
+      if (adminState.content) adminState.content.general = data.general;
+      showAdminToast('บันทึกข้อมูลหน้าแรกและแบรนด์เรียบร้อยแล้ว ✨');
+    } else {
+      showAdminToast(data.message || 'บันทึกข้อมูลไม่สำเร็จ', 'error');
+    }
+  } catch (err) {
+    console.error('Save general error:', err);
+    showAdminToast('เกิดข้อผิดพลาดในการบันทึกข้อมูล', 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `
+        <i data-lucide="check-circle" class="w-4 h-4"></i>
+        <span>บันทึกข้อมูลหน้าแรกทั้งหมด ✨</span>
+      `;
+      updateIcons();
+    }
+  }
+}
+
+function populateSocialsForm() {
+  if (!adminState.content?.socials) return;
+  const s = adminState.content.socials;
+
+  const setVal = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val ?? '';
+  };
+  const setCheck = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.checked = Boolean(val);
+  };
+
+  setCheck('social-line-enabled', s.line?.enabled);
+  setVal('social-line-id', s.line?.label);
+  setVal('social-line-url', s.line?.url);
+
+  setCheck('social-fb-enabled', s.facebook?.enabled);
+  setVal('social-fb-label', s.facebook?.label);
+  setVal('social-fb-url', s.facebook?.url);
+
+  setCheck('social-discord-enabled', s.discord?.enabled);
+  setVal('social-discord-label', s.discord?.label);
+  setVal('social-discord-url', s.discord?.url);
+
+  setCheck('social-tiktok-enabled', s.tiktok?.enabled);
+  setVal('social-tiktok-label', s.tiktok?.label);
+  setVal('social-tiktok-url', s.tiktok?.url);
+
+  setCheck('social-instagram-enabled', s.instagram?.enabled);
+  setVal('social-instagram-label', s.instagram?.label);
+  setVal('social-instagram-url', s.instagram?.url);
+}
+
+async function handleSaveSocialsSettings(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btn-save-socials');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>กำลังบันทึก...</span>';
+  }
+
+  const payload = {
+    line: {
+      enabled: document.getElementById('social-line-enabled')?.checked ?? true,
+      label: document.getElementById('social-line-id')?.value.trim() || '',
+      url: document.getElementById('social-line-url')?.value.trim() || ''
+    },
+    facebook: {
+      enabled: document.getElementById('social-fb-enabled')?.checked ?? true,
+      label: document.getElementById('social-fb-label')?.value.trim() || '',
+      url: document.getElementById('social-fb-url')?.value.trim() || ''
+    },
+    discord: {
+      enabled: document.getElementById('social-discord-enabled')?.checked ?? false,
+      label: document.getElementById('social-discord-label')?.value.trim() || '',
+      url: document.getElementById('social-discord-url')?.value.trim() || ''
+    },
+    tiktok: {
+      enabled: document.getElementById('social-tiktok-enabled')?.checked ?? false,
+      label: document.getElementById('social-tiktok-label')?.value.trim() || '',
+      url: document.getElementById('social-tiktok-url')?.value.trim() || ''
+    },
+    instagram: {
+      enabled: document.getElementById('social-instagram-enabled')?.checked ?? false,
+      label: document.getElementById('social-instagram-label')?.value.trim() || '',
+      url: document.getElementById('social-instagram-url')?.value.trim() || ''
+    }
+  };
+
+  try {
+    const res = await fetch('/api/admin/content/socials', {
+      method: 'PUT',
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.success) {
+      if (adminState.content) adminState.content.socials = data.socials;
+      showAdminToast('บันทึกข้อมูลช่องทางติดต่อเรียบร้อยแล้ว ✨');
+    } else {
+      showAdminToast(data.message || 'บันทึกไม่สำเร็จ', 'error');
+    }
+  } catch (err) {
+    console.error('Save socials error:', err);
+    showAdminToast('เกิดข้อผิดพลาดในการบันทึกช่องทางติดต่อ', 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `
+        <i data-lucide="save" class="w-4 h-4"></i>
+        <span>บันทึกช่องทางติดต่อทั้งหมด ✨</span>
+      `;
+      updateIcons();
+    }
+  }
+}
+
+// ---------------- Services Management ----------------
+function renderAdminServices() {
+  const container = document.getElementById('admin-services-container');
+  if (!container) return;
+
+  const services = adminState.content?.services || [];
+  if (services.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full clean-card p-10 text-center text-slate-400">
+        <i data-lucide="wrench" class="w-10 h-10 mx-auto mb-2 opacity-30"></i>
+        <p class="text-xs font-semibold text-slate-600">ยังไม่มีรายการบริการ</p>
+        <p class="text-[11px] text-slate-400 mt-1">คลิกปุ่ม "+ เพิ่มบริการใหม่" เพื่อเริ่มสร้าง</p>
+      </div>
+    `;
+    updateIcons();
+    return;
+  }
+
+  container.innerHTML = services.map(s => {
+    const bullets = Array.isArray(s.features) ? s.features : [];
+    return `
+      <div class="clean-card p-5 flex flex-col justify-between space-y-4 hover:shadow-md transition">
+        <div class="space-y-3">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+              <span class="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200 text-xl flex items-center justify-center shrink-0">
+                ${escapeHtml(s.icon || '✨')}
+              </span>
+              <div>
+                <h4 class="font-heading font-bold text-sm text-slate-900 leading-snug">
+                  ${escapeHtml(s.title || 'ไม่มีชื่อบริการ')}
+                </h4>
+                ${s.badge ? `
+                  <span class="inline-block mt-0.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100/80 text-amber-800">
+                    ${escapeHtml(s.badge)}
+                  </span>
+                ` : ''}
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-xl bg-slate-900 text-white font-black text-xs shrink-0">
+              ${escapeHtml(s.startingPrice || 'ติดต่อสอบถาม')}
+            </span>
+          </div>
+
+          <p class="text-xs text-slate-600 leading-relaxed">
+            ${escapeHtml(s.desc || '')}
+          </p>
+
+          ${bullets.length > 0 ? `
+            <ul class="space-y-1 text-xs text-slate-600 border-t border-slate-100 pt-2.5">
+              ${bullets.map(b => `
+                <li class="flex items-center gap-1.5">
+                  <span class="text-amber-500 font-bold">•</span>
+                  <span>${escapeHtml(b)}</span>
+                </li>
+              `).join('')}
+            </ul>
+          ` : ''}
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button 
+            type="button" 
+            onclick="openEditServiceModal('${s.id}')"
+            class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-50 hover:text-amber-700 text-slate-700 text-xs font-semibold flex items-center gap-1 transition cursor-pointer"
+          >
+            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+            <span>แก้ไข</span>
+          </button>
+          <button 
+            type="button" 
+            onclick="deleteServiceItem('${s.id}', '${escapeHtml(s.title || '')}')"
+            class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold flex items-center gap-1 transition cursor-pointer"
+          >
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            <span>ลบ</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  updateIcons();
+}
+
+function openCreateServiceModal() {
+  const modal = document.getElementById('service-modal');
+  const title = document.getElementById('service-modal-title');
+  const form = document.getElementById('service-form');
+  if (!modal || !form) return;
+
+  form.reset();
+  document.getElementById('service-form-id').value = '';
+  document.getElementById('service-form-icon').value = '✨';
+
+  if (title) title.textContent = 'เพิ่มบริการใหม่';
+  modal.classList.remove('hidden');
+  updateIcons();
+}
+
+function openEditServiceModal(id) {
+  const s = (adminState.content?.services || []).find(x => x.id === id);
+  if (!s) return;
+
+  const modal = document.getElementById('service-modal');
+  const title = document.getElementById('service-modal-title');
+  if (!modal) return;
+
+  document.getElementById('service-form-id').value = s.id;
+  document.getElementById('service-form-icon').value = s.icon || '✨';
+  document.getElementById('service-form-badge').value = s.badge || '';
+  document.getElementById('service-form-title').value = s.title || '';
+  document.getElementById('service-form-starting-price').value = s.startingPrice || '';
+  document.getElementById('service-form-desc').value = s.desc || '';
+  document.getElementById('service-form-bullets').value = Array.isArray(s.features) ? s.features.join('\n') : '';
+
+  if (title) title.textContent = 'แก้ไขบริการ: ' + (s.title || '');
+  modal.classList.remove('hidden');
+  updateIcons();
+}
+
+function closeServiceModal() {
+  const modal = document.getElementById('service-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function handleServiceSubmit(e) {
+  e.preventDefault();
+  const id = document.getElementById('service-form-id')?.value;
+  const isEditing = Boolean(id);
+  const btn = document.getElementById('btn-save-service');
+
+  const title = document.getElementById('service-form-title')?.value.trim();
+  const icon = document.getElementById('service-form-icon')?.value.trim() || '✨';
+  const badge = document.getElementById('service-form-badge')?.value.trim() || '';
+  const startingPrice = document.getElementById('service-form-starting-price')?.value.trim() || 'ติดต่อสอบถาม';
+  const desc = document.getElementById('service-form-desc')?.value.trim() || '';
+  const bulletsText = document.getElementById('service-form-bullets')?.value || '';
+  const features = bulletsText.split('\n').map(b => b.trim()).filter(Boolean);
+
+  if (!title) {
+    showAdminToast('กรุณากรอกชื่อบริการ', 'error');
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>กำลังบันทึก...</span>';
+  }
+
+  try {
+    const url = isEditing ? `/api/admin/services/${id}` : '/api/admin/services';
+    const method = isEditing ? 'PUT' : 'POST';
+
+    const res = await fetch(url, {
+      method,
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ title, icon, badge, startingPrice, desc, features })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showAdminToast(data.message || (isEditing ? 'แก้ไขบริการเรียบร้อยแล้ว!' : 'เพิ่มบริการใหม่สำเร็จ!'));
+      closeServiceModal();
+      await fetchAdminContent();
+    } else {
+      showAdminToast(data.message || 'บันทึกบริการไม่สำเร็จ', 'error');
+    }
+  } catch (err) {
+    console.error('Service submit error:', err);
+    showAdminToast('เกิดข้อผิดพลาดในการบันทึกบริการ', 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `
+        <i data-lucide="check" class="w-3.5 h-3.5"></i>
+        <span>บันทึกบริการ</span>
+      `;
+      updateIcons();
+    }
+  }
+}
+
+async function deleteServiceItem(id, title) {
+  if (!confirm(`คุณต้องการลบบริการ "${title}" ใช่หรือไม่?`)) return;
+
+  try {
+    const res = await fetch(`/api/admin/services/${id}`, {
+      method: 'DELETE',
+      headers: getAdminHeaders()
+    });
+    const data = await res.json();
+    if (data.success) {
+      showAdminToast(data.message || 'ลบบริการเรียบร้อยแล้ว!');
+      await fetchAdminContent();
+    } else {
+      showAdminToast(data.message || 'ลบบริการไม่สำเร็จ', 'error');
+    }
+  } catch (err) {
+    console.error('Delete service error:', err);
+    showAdminToast('เกิดข้อผิดพลาดในการลบบริการ', 'error');
+  }
+}
+
+// ---------------- Pricing Packages Management ----------------
+function renderAdminPricing() {
+  const container = document.getElementById('admin-pricing-container');
+  if (!container) return;
+
+  const list = adminState.content?.pricing || [];
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full clean-card p-10 text-center text-slate-400">
+        <i data-lucide="badge-dollar-sign" class="w-10 h-10 mx-auto mb-2 opacity-30"></i>
+        <p class="text-xs font-semibold text-slate-600">ยังไม่มีแพ็กเกจราคา</p>
+        <p class="text-[11px] text-slate-400 mt-1">คลิกปุ่ม "+ เพิ่มแพ็กเกจราคาใหม่" เพื่อเริ่มสร้าง</p>
+      </div>
+    `;
+    updateIcons();
+    return;
+  }
+
+  container.innerHTML = list.map(p => {
+    const features = Array.isArray(p.features) ? p.features : [];
+    return `
+      <div class="clean-card p-5 flex flex-col justify-between space-y-4 hover:shadow-md transition relative ${p.isHighlight ? 'ring-2 ring-amber-400 bg-amber-50/20' : ''}">
+        ${p.isHighlight ? `
+          <div class="absolute -top-3 right-4 px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-bold text-[10px] shadow-sm">
+            ⭐ ยอดนิยม
+          </div>
+        ` : ''}
+
+        <div class="space-y-3">
+          <div>
+            ${p.badge ? `
+              <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-800 mb-1">
+                ${escapeHtml(p.badge)}
+              </span>
+            ` : ''}
+            <h4 class="font-heading font-extrabold text-base text-slate-900 leading-snug">
+              ${escapeHtml(p.title || 'แพ็กเกจ')}
+            </h4>
+            <div class="mt-1 flex items-baseline gap-1">
+              <span class="font-heading font-black text-xl text-slate-900">${escapeHtml(p.price || 'ราคาคุยกันได้')}</span>
+            </div>
+          </div>
+
+          <p class="text-xs text-slate-600 leading-relaxed">
+            ${escapeHtml(p.desc || '')}
+          </p>
+
+          ${features.length > 0 ? `
+            <ul class="space-y-1.5 text-xs text-slate-600 border-t border-slate-100 pt-2.5">
+              ${features.map(f => `
+                <li class="flex items-center gap-1.5">
+                  <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500 shrink-0"></i>
+                  <span>${escapeHtml(f)}</span>
+                </li>
+              `).join('')}
+            </ul>
+          ` : ''}
+        </div>
+
+        <div class="space-y-2 pt-3 border-t border-slate-100">
+          <div class="text-[11px] text-slate-500 truncate flex items-center gap-1">
+            <span class="font-semibold text-slate-700">ปุ่ม:</span>
+            <span>${escapeHtml(p.actionText || 'ปรึกษาฟรี')}</span>
+            <span class="text-slate-400 font-mono text-[10px]">(${escapeHtml(p.actionUrl || '#contact')})</span>
+          </div>
+
+          <div class="flex items-center justify-end gap-2">
+            <button 
+              type="button" 
+              onclick="openEditPricingModal('${p.id}')"
+              class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-50 hover:text-amber-700 text-slate-700 text-xs font-semibold flex items-center gap-1 transition cursor-pointer"
+            >
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+              <span>แก้ไข</span>
+            </button>
+            <button 
+              type="button" 
+              onclick="deletePricingItem('${p.id}', '${escapeHtml(p.title || '')}')"
+              class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold flex items-center gap-1 transition cursor-pointer"
+            >
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              <span>ลบ</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  updateIcons();
+}
+
+function openCreatePricingModal() {
+  const modal = document.getElementById('pricing-modal');
+  const title = document.getElementById('pricing-modal-title');
+  const form = document.getElementById('pricing-form');
+  if (!modal || !form) return;
+
+  form.reset();
+  document.getElementById('pricing-form-id').value = '';
+  document.getElementById('pricing-form-popular').checked = false;
+  document.getElementById('pricing-form-cta-text').value = 'ทักปรึกษาฟรี';
+  document.getElementById('pricing-form-cta-url').value = '#contact';
+
+  if (title) title.textContent = 'เพิ่มแพ็กเกจราคาใหม่';
+  modal.classList.remove('hidden');
+  updateIcons();
+}
+
+function openEditPricingModal(id) {
+  const p = (adminState.content?.pricing || []).find(x => x.id === id);
+  if (!p) return;
+
+  const modal = document.getElementById('pricing-modal');
+  const title = document.getElementById('pricing-modal-title');
+  if (!modal) return;
+
+  document.getElementById('pricing-form-id').value = p.id;
+  document.getElementById('pricing-form-title').value = p.title || '';
+  document.getElementById('pricing-form-badge').value = p.badge || '';
+  document.getElementById('pricing-form-price').value = p.price || '';
+  document.getElementById('pricing-form-desc').value = p.desc || '';
+  document.getElementById('pricing-form-features').value = Array.isArray(p.features) ? p.features.join('\n') : '';
+  document.getElementById('pricing-form-cta-text').value = p.actionText || '';
+  document.getElementById('pricing-form-cta-url').value = p.actionUrl || '';
+  document.getElementById('pricing-form-popular').checked = Boolean(p.isHighlight);
+
+  if (title) title.textContent = 'แก้ไขแพ็กเกจราคา: ' + (p.title || '');
+  modal.classList.remove('hidden');
+  updateIcons();
+}
+
+function closePricingModal() {
+  const modal = document.getElementById('pricing-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function handlePricingSubmit(e) {
+  e.preventDefault();
+  const id = document.getElementById('pricing-form-id')?.value;
+  const isEditing = Boolean(id);
+  const btn = document.getElementById('btn-save-pricing');
+
+  const title = document.getElementById('pricing-form-title')?.value.trim();
+  const badge = document.getElementById('pricing-form-badge')?.value.trim() || '';
+  const price = document.getElementById('pricing-form-price')?.value.trim();
+  const desc = document.getElementById('pricing-form-desc')?.value.trim() || '';
+  const featuresText = document.getElementById('pricing-form-features')?.value || '';
+  const features = featuresText.split('\n').map(f => f.trim()).filter(Boolean);
+  const actionText = document.getElementById('pricing-form-cta-text')?.value.trim() || 'ปรึกษาฟรี';
+  const actionUrl = document.getElementById('pricing-form-cta-url')?.value.trim() || '#contact';
+  const isHighlight = document.getElementById('pricing-form-popular')?.checked ?? false;
+
+  if (!title || !price) {
+    showAdminToast('กรุณากรอกชื่อแพ็กเกจและราคา', 'error');
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span>กำลังบันทึก...</span>';
+  }
+
+  try {
+    const url = isEditing ? `/api/admin/pricing/${id}` : '/api/admin/pricing';
+    const method = isEditing ? 'PUT' : 'POST';
+
+    const res = await fetch(url, {
+      method,
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ title, badge, price, desc, isHighlight, features, actionText, actionUrl })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showAdminToast(data.message || (isEditing ? 'แก้ไขแพ็กเกจเรียบร้อยแล้ว!' : 'เพิ่มแพ็กเกจใหม่สำเร็จ!'));
+      closePricingModal();
+      await fetchAdminContent();
+    } else {
+      showAdminToast(data.message || 'บันทึกแพ็กเกจไม่สำเร็จ', 'error');
+    }
+  } catch (err) {
+    console.error('Pricing submit error:', err);
+    showAdminToast('เกิดข้อผิดพลาดในการบันทึกแพ็กเกจ', 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `
+        <i data-lucide="check" class="w-3.5 h-3.5"></i>
+        <span>บันทึกแพ็กเกจ</span>
+      `;
+      updateIcons();
+    }
+  }
+}
+
+async function deletePricingItem(id, title) {
+  if (!confirm(`คุณต้องการลบแพ็กเกจราคา "${title}" ใช่หรือไม่?`)) return;
+
+  try {
+    const res = await fetch(`/api/admin/pricing/${id}`, {
+      method: 'DELETE',
+      headers: getAdminHeaders()
+    });
+    const data = await res.json();
+    if (data.success) {
+      showAdminToast(data.message || 'ลบแพ็กเกจราคาเรียบร้อยแล้ว!');
+      await fetchAdminContent();
+    } else {
+      showAdminToast(data.message || 'ลบแพ็กเกจไม่สำเร็จ', 'error');
+    }
+  } catch (err) {
+    console.error('Delete pricing error:', err);
+    showAdminToast('เกิดข้อผิดพลาดในการลบแพ็กเกจ', 'error');
   }
 }
 
