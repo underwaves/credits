@@ -19,7 +19,7 @@ export function PortfolioSection() {
           ${
             item.demoUrl !== '#'
               ? `<div class="portfolio-link-wrap">
-                  <a href="${item.demoUrl}" class="btn btn-secondary btn-sm" ${item.demoUrl.startsWith('http') ? 'target="_blank" rel="noopener"' : ''}>
+                  <a href="${item.demoUrl}" class="btn btn-secondary btn-sm" ${item.demoUrl.startsWith('http') || item.demoUrl.startsWith('/images') ? 'target="_blank" rel="noopener"' : ''}>
                     <span>${item.demoLabel || 'ดูผลงานจริง'}</span> <span>→</span>
                   </a>
                  </div>`

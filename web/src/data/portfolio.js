@@ -94,5 +94,42 @@ export const PORTFOLIO_DATA = [
     demoUrl: 'https://github.com/underwaves',
     demoLabel: 'ดูโครงสร้างระบบ',
     isReal: true
+  },
+  {
+    id: 'p9',
+    title: 'ป้ายเครดิต & แบนเนอร์ซื้อขาย (Genshin Impact — Eula Theme)',
+    category: 'design',
+    categoryLabel: 'Graphic & Banner',
+    desc: 'งานออกแบบป้ายเครดิตการซื้อขายเกม Genshin Impact ธีม Eula โทนสีฟ้าน้ำแข็ง พรีเมียม พร้อมการ์ดสรุปประวัติความน่าเชื่อถือ +1 / -1 ชัดเจน โดดเด่น',
+    tech: ['Photoshop', 'Graphic Design', 'Banner Layout', 'Typography'],
+    image: '/images/portfolio-genshin-credit.png',
+    demoUrl: '/images/portfolio-genshin-credit.png',
+    demoLabel: 'ดูภาพผลงานเต็ม',
+    isReal: true
+  },
+  {
+    id: 'p10',
+    title: 'โปสเตอร์ & ปกการ์ดวันแม่ 12 สิงหาคม (Mother\'s Day Poster)',
+    category: 'design',
+    categoryLabel: 'Poster & Card',
+    desc: 'งานออกแบบโปสเตอร์และปกการ์ดวันแม่ โทนสีอบอุ่นสไตล์สีน้ำ (Watercolor) ภาพแม่โอบกอดลูกประดับซุ้มดอกมะลิ ให้ความรู้สึกละมุนและซาบซึ้งใจ',
+    tech: ['Poster Design', 'Watercolor Art', 'Typography', 'Print Ready'],
+    image: '/images/portfolio-mothers-day-poster.png',
+    demoUrl: '/images/portfolio-mothers-day-poster.png',
+    demoLabel: 'ดูภาพผลงานเต็ม',
+    isReal: true
+  },
+  {
+    id: 'p11',
+    title: 'การ์ดอวยพรวันแม่ พวงมาลัยดอกมะลิ (Mother\'s Day Greeting Card)',
+    category: 'design',
+    categoryLabel: 'Card & Letter Design',
+    desc: 'งานออกแบบการ์ดอวยพรวันแม่แบบกางสองหน้า ฝั่งซ้ายภาพวาดสีน้ำพวงมาลัยดอกมะลิวิจิตร ฝั่งขวาจัดวางเลย์เอาต์จดหมายบอกรักแม่ในกรอบพฤกษา เรียบหรูอบอุ่น',
+    tech: ['Card Spread', 'Botanical Art', 'Layout Design', 'Typography'],
+    image: '/images/portfolio-mothers-day-card.png',
+    demoUrl: '/images/portfolio-mothers-day-card.png',
+    demoLabel: 'ดูภาพผลงานเต็ม',
+    isReal: true
   }
 ];
+
