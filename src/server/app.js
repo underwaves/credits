@@ -97,6 +97,10 @@ export function createApp() {
     res.sendFile(creditsPath);
   });
 
+  app.get('/portfolio', (req, res) => {
+    res.redirect('/#portfolio');
+  });
+
   app.get('/admin', (req, res) => {
     const adminPath = fs.existsSync(path.join(publicDir, 'admin.html'))
       ? path.join(publicDir, 'admin.html')

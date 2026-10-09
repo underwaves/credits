@@ -79,6 +79,12 @@ describe('Server & Endpoints', () => {
       expect(res.text).toContain('สมุดรวมเครดิต');
     });
 
+    it('GET /portfolio redirects 302 to /#portfolio', async () => {
+      const res = await request(app).get('/portfolio');
+      expect(res.status).toBe(302);
+      expect(res.headers.location).toBe('/#portfolio');
+    });
+
     it('GET /admin returns 200 with HTML admin studio page', async () => {
       const res = await request(app).get('/admin');
       expect(res.status).toBe(200);

@@ -251,32 +251,22 @@ function writeLocalCredits(list) {
   }
 }
 
-let isSupabaseSeeded = false;
-async function ensureCreditsSeededInSupabase() {
-  if (!supabase || isSupabaseSeeded) return;
-  isSupabaseSeeded = true;
+let isPortfolioCleanedFromCredits = false;
+async function cleanPortfolioFromCreditsInSupabase() {
+  if (!supabase || isPortfolioCleanedFromCredits) return;
+  isPortfolioCleanedFromCredits = true;
   try {
-    const localList = readLocalCredits();
-    if (!localList || localList.length === 0) return;
-
-    const { data: existingRows, error } = await supabase.from('credits').select('id');
-    if (error) {
-      console.warn('[db] Read credits error during sync:', error.message);
-      return;
-    }
-    const existingIds = new Set((existingRows || []).map((r) => r.id));
-
-    const missingCredits = localList.filter((c) => !existingIds.has(c.id));
-    if (missingCredits.length > 0) {
-      const rowsToInsert = missingCredits.map(creditToRow);
-      for (let i = 0; i < rowsToInsert.length; i += 50) {
-        const chunk = rowsToInsert.slice(i, i + 50);
-        await supabase.from('credits').upsert(chunk, { onConflict: 'id' });
-      }
-      console.log(`[db] Successfully synced ${missingCredits.length} portfolio credits to Supabase!`);
+    const idsToRemove = [
+      'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10',
+      'c11', 'c12', 'c13', 'c14', 'c15', 'c16', 'c17', 'c18', 'c19', 'c20',
+      'c21', 'c22', 'c23', 'c24', 'c25', 'c26', 'c27', 'c28', 'c29'
+    ];
+    const { error } = await supabase.from('credits').delete().in('id', idsToRemove);
+    if (!error) {
+      console.log('[db] Successfully separated portfolio items from credits table in Supabase.');
     }
   } catch (err) {
-    console.warn('[db] Failed syncing credits to Supabase:', err.message);
+    console.warn('[db] Error cleaning portfolio items from credits in Supabase:', err.message);
   }
 }
 
@@ -313,7 +303,7 @@ export async function getCredits({ category, search, sort } = {}) {
     return items;
   }
 
-  await ensureCreditsSeededInSupabase();
+  await cleanPortfolioFromCreditsInSupabase();
 
   let q = supabase.from('credits').select('*');
 
