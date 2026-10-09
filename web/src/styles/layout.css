@@ -630,6 +630,7 @@ html[data-theme="dark"] .filter-tab.active {
   display: flex !important;
   flex-direction: column !important;
   height: 100%;
+  cursor: pointer;
 }
 
 .portfolio-card[style*="display: none"] {

@@ -250,35 +250,36 @@ function initPortfolioLightbox() {
       const card = e.target.closest('.portfolio-card');
       if (!card) return;
 
-      const thumbWrap = e.target.closest('.portfolio-thumb-wrap');
       const actionLink = e.target.closest('.portfolio-link-wrap a');
+      const linkHref = actionLink ? actionLink.getAttribute('href') : '';
+      const imgEl = card.querySelector('.portfolio-thumb-img');
+      const imgSrc = imgEl ? (imgEl.getAttribute('src') || imgEl.src) : '';
+      const targetUrl = linkHref || imgSrc;
 
-      if (thumbWrap || actionLink) {
-        const linkHref = actionLink ? actionLink.getAttribute('href') : '';
-        const imgEl = card.querySelector('.portfolio-thumb-img');
-        const imgSrc = imgEl ? imgEl.src : '';
-        const targetUrl = linkHref || imgSrc;
-
-        // If clicking thumbnail or clicking an image link, open in lightbox
-        if (thumbWrap || (targetUrl && targetUrl.match(/\.(png|webp|jpg|jpeg|svg)($|\?)/i))) {
-          if (actionLink && targetUrl && targetUrl.match(/\.(png|webp|jpg|jpeg|svg)($|\?)/i)) {
-            e.preventDefault();
-          }
-          const title = card.querySelector('.portfolio-title')?.textContent || '';
-          const desc = card.querySelector('.portfolio-desc')?.textContent || '';
-          const catLabel = card.querySelector('.portfolio-cat-badge')?.textContent || '';
-          const tags = Array.from(card.querySelectorAll('.tech-tag')).map((t) => t.textContent.trim());
-
-          openLightbox({
-            image: targetUrl && targetUrl.match(/\.(png|webp|jpg|jpeg|svg)($|\?)/i) ? targetUrl : imgSrc,
-            title,
-            desc,
-            categoryLabel: catLabel,
-            demoUrl: targetUrl || imgSrc,
-            tech: tags
-          });
-        }
+      // If clicked an action link that is an external website/page (not an image), allow normal navigation
+      if (actionLink && targetUrl && !targetUrl.match(/\.(png|webp|jpg|jpeg|svg)($|\?)/i) && (targetUrl.startsWith('http') || targetUrl.startsWith('/credits'))) {
+        return;
       }
+
+      // For all image works and card clicks, prevent default link navigation and open Lightbox modal
+      if (actionLink) {
+        e.preventDefault();
+      }
+
+      const title = card.querySelector('.portfolio-title')?.textContent || '';
+      const desc = card.querySelector('.portfolio-desc')?.textContent || '';
+      const catLabel = card.querySelector('.portfolio-cat-badge')?.textContent || '';
+      const tags = Array.from(card.querySelectorAll('.tech-tag')).map((t) => t.textContent.trim());
+      const fullImage = (linkHref && linkHref.match(/\.(png|webp|jpg|jpeg|svg)($|\?)/i)) ? linkHref : imgSrc;
+
+      openLightbox({
+        image: fullImage,
+        title,
+        desc,
+        categoryLabel: catLabel,
+        demoUrl: linkHref || fullImage,
+        tech: tags
+      });
     });
   }
 }
