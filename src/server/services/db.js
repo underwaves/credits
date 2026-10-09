@@ -251,6 +251,35 @@ function writeLocalCredits(list) {
   }
 }
 
+let isSupabaseSeeded = false;
+async function ensureCreditsSeededInSupabase() {
+  if (!supabase || isSupabaseSeeded) return;
+  isSupabaseSeeded = true;
+  try {
+    const localList = readLocalCredits();
+    if (!localList || localList.length === 0) return;
+
+    const { data: existingRows, error } = await supabase.from('credits').select('id');
+    if (error) {
+      console.warn('[db] Read credits error during sync:', error.message);
+      return;
+    }
+    const existingIds = new Set((existingRows || []).map((r) => r.id));
+
+    const missingCredits = localList.filter((c) => !existingIds.has(c.id));
+    if (missingCredits.length > 0) {
+      const rowsToInsert = missingCredits.map(creditToRow);
+      for (let i = 0; i < rowsToInsert.length; i += 50) {
+        const chunk = rowsToInsert.slice(i, i + 50);
+        await supabase.from('credits').upsert(chunk, { onConflict: 'id' });
+      }
+      console.log(`[db] Successfully synced ${missingCredits.length} portfolio credits to Supabase!`);
+    }
+  } catch (err) {
+    console.warn('[db] Failed syncing credits to Supabase:', err.message);
+  }
+}
+
 export async function getCredits({ category, search, sort } = {}) {
   if (!supabase) {
     let items = readLocalCredits().map(rowToCredit);
@@ -283,6 +312,8 @@ export async function getCredits({ category, search, sort } = {}) {
 
     return items;
   }
+
+  await ensureCreditsSeededInSupabase();
 
   let q = supabase.from('credits').select('*');
 
