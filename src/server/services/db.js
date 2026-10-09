@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config } from '../config.js';
+import { hashPin } from '../middleware/security.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,7 +28,7 @@ export const DEFAULT_SETTINGS = {
   shopName: 'SUNFZENITH',
   tagline: 'Small Dream, Big Zenith',
   announcement: '✨ ยินดีต้อนรับสู่ SUNFZENITH สตูดิโอสร้างสรรค์งานดิจิทัล เว็บไซต์ และดีไซน์',
-  adminPin: '3645',
+  adminPinHash: null,
   socials: {
     line: {
       url: 'https://line.me/R/ti/p/@419ajynp',
@@ -95,8 +96,21 @@ function creditToRow(c) {
 
 // ---------------- Shop Config ----------------
 
+let localSettings = { ...DEFAULT_SETTINGS };
+
+export function _resetLocalSettings() {
+  localSettings = { ...DEFAULT_SETTINGS };
+}
+
 export async function getShopConfig() {
-  if (!supabase) return { settings: { ...DEFAULT_SETTINGS }, categories: ['ทั้งหมด', 'ทั่วไป', 'เว็บไซต์', 'ดีไซน์'] };
+  const fallbackHash = config.adminPinFallback || null;
+  if (!supabase) {
+    const adminPinHash = localSettings.adminPinHash || fallbackHash;
+    return {
+      settings: { ...localSettings, adminPinHash },
+      categories: ['ทั้งหมด', 'ทั่วไป', 'เว็บไซต์', 'ดีไซน์']
+    };
+  }
 
   try {
     const data = check(
@@ -104,14 +118,36 @@ export async function getShopConfig() {
       'read shop_config'
     );
 
-    if (!data) return { settings: { ...DEFAULT_SETTINGS }, categories: ['ทั้งหมด', 'ทั่วไป', 'เว็บไซต์', 'ดีไซน์'] };
+    if (!data) {
+      return {
+        settings: { ...DEFAULT_SETTINGS, adminPinHash: fallbackHash },
+        categories: ['ทั้งหมด', 'ทั่วไป', 'เว็บไซต์', 'ดีไซน์']
+      };
+    }
+
+    const storedPin = data.admin_pin_hash || data.admin_pin || null;
+    let adminPinHash = null;
+    if (storedPin && typeof storedPin === 'string') {
+      const trimmed = storedPin.trim();
+      if (trimmed !== '3645' && trimmed !== '1234') {
+        if (trimmed.startsWith('scrypt:')) {
+          adminPinHash = trimmed;
+        } else {
+          // Compatibility with legacy database that had custom plain pin
+          adminPinHash = trimmed;
+        }
+      }
+    }
+    if (!adminPinHash && fallbackHash) {
+      adminPinHash = fallbackHash;
+    }
 
     return {
       settings: {
         shopName: data.shop_name || DEFAULT_SETTINGS.shopName,
         tagline: data.tagline || DEFAULT_SETTINGS.tagline,
         announcement: data.announcement || DEFAULT_SETTINGS.announcement,
-        adminPin: data.admin_pin || config.adminPinFallback || DEFAULT_SETTINGS.adminPin,
+        adminPinHash,
         socials: data.socials || DEFAULT_SETTINGS.socials,
         stats: data.stats || DEFAULT_SETTINGS.stats
       },
@@ -119,23 +155,51 @@ export async function getShopConfig() {
     };
   } catch (err) {
     console.warn('[db] getShopConfig fallback:', err.message);
-    return { settings: { ...DEFAULT_SETTINGS }, categories: ['ทั้งหมด', 'ทั่วไป'] };
+    return { settings: { ...DEFAULT_SETTINGS, adminPinHash: fallbackHash }, categories: ['ทั้งหมด', 'ทั่วไป'] };
   }
 }
 
 export async function updateShopSettings(newSettings) {
-  if (!supabase) return { ...DEFAULT_SETTINGS, ...newSettings };
+  if (!supabase) {
+    if (newSettings.adminPin !== undefined && newSettings.adminPin !== null) {
+      const cleanPin = String(newSettings.adminPin).trim();
+      if (cleanPin) {
+        localSettings.adminPinHash = hashPin(cleanPin);
+      }
+    } else if (newSettings.adminPinHash !== undefined) {
+      localSettings.adminPinHash = newSettings.adminPinHash;
+    }
+    if (newSettings.shopName !== undefined) localSettings.shopName = newSettings.shopName;
+    if (newSettings.tagline !== undefined) localSettings.tagline = newSettings.tagline;
+    if (newSettings.announcement !== undefined) localSettings.announcement = newSettings.announcement;
+    if (newSettings.socials !== undefined) localSettings.socials = newSettings.socials;
+    if (newSettings.stats !== undefined) localSettings.stats = newSettings.stats;
+    const { adminPin, adminPinHash, ...safeSettings } = localSettings;
+    return safeSettings;
+  }
 
   const row = { id: 'main', updated_at: new Date().toISOString() };
   if (newSettings.shopName !== undefined) row.shop_name = newSettings.shopName;
   if (newSettings.tagline !== undefined) row.tagline = newSettings.tagline;
   if (newSettings.announcement !== undefined) row.announcement = newSettings.announcement;
-  if (newSettings.adminPin !== undefined) row.admin_pin = newSettings.adminPin;
+
+  // Only write to admin_pin_hash (new schema does not have admin_pin column)
+  if (newSettings.adminPin !== undefined && newSettings.adminPin !== null) {
+    const cleanPin = String(newSettings.adminPin).trim();
+    if (cleanPin) {
+      row.admin_pin_hash = hashPin(cleanPin);
+    }
+  } else if (newSettings.adminPinHash !== undefined) {
+    row.admin_pin_hash = newSettings.adminPinHash;
+  }
+
   if (newSettings.socials !== undefined) row.socials = newSettings.socials;
   if (newSettings.stats !== undefined) row.stats = newSettings.stats;
 
   check(await supabase.from('shop_config').upsert(row, { onConflict: 'id' }), 'update settings');
-  return (await getShopConfig()).settings;
+  const freshSettings = (await getShopConfig()).settings;
+  const { adminPin, adminPinHash, ...safeSettings } = freshSettings;
+  return safeSettings;
 }
 
 export async function updateCategories(categories) {

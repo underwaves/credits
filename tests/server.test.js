@@ -1,9 +1,61 @@
-import { describe, it, expect } from 'vitest';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { createApp } from '../src/server/app.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Temporary isolated data directory for integration testing (never touches src/server/data)
+const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sunfzenith-test-'));
+const srcDataDir = path.resolve(__dirname, '../src/server/data');
+if (fs.existsSync(srcDataDir)) {
+  fs.cpSync(srcDataDir, tempDir, { recursive: true });
+}
+process.env.DATA_DIR = tempDir;
+
+const TEST_PIN = 'test-suite-secure-admin-pin-2026';
+process.env.ADMIN_PIN = TEST_PIN;
+
+const { readEnv } = await import('../src/server/config.js');
+const { createApp } = await import('../src/server/app.js');
 
 describe('Server & Endpoints', () => {
   const app = createApp();
+
+  let initialContentStat = null;
+  let initialPortfolioStat = null;
+
+  beforeAll(() => {
+    // Record baseline timestamps and contents of production data files
+    const contentPath = path.join(srcDataDir, 'content.json');
+    const portfolioPath = path.join(srcDataDir, 'portfolio.json');
+    if (fs.existsSync(contentPath)) {
+      initialContentStat = fs.readFileSync(contentPath, 'utf8');
+    }
+    if (fs.existsSync(portfolioPath)) {
+      initialPortfolioStat = fs.readFileSync(portfolioPath, 'utf8');
+    }
+  });
+
+  afterAll(() => {
+    // 1. Verify production data files were NEVER modified during tests
+    const contentPath = path.join(srcDataDir, 'content.json');
+    const portfolioPath = path.join(srcDataDir, 'portfolio.json');
+    if (initialContentStat !== null) {
+      expect(fs.readFileSync(contentPath, 'utf8')).toBe(initialContentStat);
+    }
+    if (initialPortfolioStat !== null) {
+      expect(fs.readFileSync(portfolioPath, 'utf8')).toBe(initialPortfolioStat);
+    }
+
+    // 2. Remove temporary test fixtures directory
+    try {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    } catch (e) {}
+  });
 
   describe('Static & Pages Routing', () => {
     it('GET / returns 200 with HTML brand studio page', async () => {
@@ -72,6 +124,8 @@ describe('Server & Endpoints', () => {
     });
   });
 
+  let adminCookie = null;
+
   describe('Public API', () => {
     it('GET /api/public/settings returns shop settings', async () => {
       const res = await request(app).get('/api/public/settings');
@@ -79,10 +133,12 @@ describe('Server & Endpoints', () => {
       expect(res.body.success).toBe(true);
       expect(res.body.settings).toBeDefined();
       expect(res.body.settings.shopName).toBe('SUNFZENITH');
+      expect(res.body.settings.adminPin).toBeUndefined();
+      expect(res.body.settings.adminPinHash).toBeUndefined();
     });
   });
 
-  describe('Admin Auth', () => {
+  describe('Admin Auth & Session Security', () => {
     it('POST /api/admin/login fails with wrong PIN', async () => {
       const res = await request(app)
         .post('/api/admin/login')
@@ -93,14 +149,71 @@ describe('Server & Endpoints', () => {
       expect(res.body.message).toContain('ไม่ถูกต้อง');
     });
 
-    it('POST /api/admin/login succeeds with correct PIN 3645', async () => {
+    it('POST /api/admin/login rejects insecure legacy fallback PINs (1234, 3645)', async () => {
+      const res1 = await request(app).post('/api/admin/login').send({ pin: '1234' });
+      expect(res1.status).toBe(401);
+    });
+
+    it('POST /api/admin/login succeeds with configured PIN and issues HttpOnly cookie without token in JSON', async () => {
       const res = await request(app)
         .post('/api/admin/login')
-        .send({ pin: '3645' });
+        .send({ pin: TEST_PIN });
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
+      // Requirement 4: token must NOT be returned in JSON response
+      expect(res.body.token).toBeUndefined();
       expect(res.headers['set-cookie']).toBeDefined();
+      expect(res.headers['set-cookie'][0]).toContain('admin_token');
+      expect(res.headers['set-cookie'][0]).toContain('HttpOnly');
+      adminCookie = res.headers['set-cookie'];
+    });
+
+    it('Admin can change PIN and login with the new PIN', async () => {
+      // 1. Initial login with current TEST_PIN
+      const loginRes = await request(app)
+        .post('/api/admin/login')
+        .send({ pin: TEST_PIN });
+      expect(loginRes.status).toBe(200);
+      const sessionCookie = loginRes.headers['set-cookie'];
+
+      // 2. Change PIN via POST /api/admin/change-pin
+      const NEW_PIN = 'new-super-secure-pin-2026';
+      const changeRes = await request(app)
+        .post('/api/admin/change-pin')
+        .set('Cookie', sessionCookie)
+        .send({
+          currentPin: TEST_PIN,
+          newPin: NEW_PIN
+        });
+      expect(changeRes.status).toBe(200);
+      expect(changeRes.body.success).toBe(true);
+
+      // 3. Old PIN login should fail
+      const loginOldRes = await request(app)
+        .post('/api/admin/login')
+        .send({ pin: TEST_PIN });
+      expect(loginOldRes.status).toBe(401);
+      expect(loginOldRes.body.success).toBe(false);
+
+      // 4. New PIN login should succeed
+      const loginNewRes = await request(app)
+        .post('/api/admin/login')
+        .send({ pin: NEW_PIN });
+      expect(loginNewRes.status).toBe(200);
+      expect(loginNewRes.body.success).toBe(true);
+      expect(loginNewRes.headers['set-cookie']).toBeDefined();
+
+      // 5. Restore PIN back to TEST_PIN for subsequent tests
+      const restoreRes = await request(app)
+        .post('/api/admin/change-pin')
+        .set('Cookie', loginNewRes.headers['set-cookie'])
+        .send({
+          currentPin: NEW_PIN,
+          newPin: TEST_PIN
+        });
+      expect(restoreRes.status).toBe(200);
+      expect(restoreRes.body.success).toBe(true);
     });
   });
 
@@ -126,12 +239,7 @@ describe('Server & Endpoints', () => {
     });
 
     it('Admin can CRUD portfolio items', async () => {
-      // 1. Login
-      const loginRes = await request(app)
-        .post('/api/admin/login')
-        .send({ pin: '3645' });
-      expect(loginRes.status).toBe(200);
-      const cookie = loginRes.headers['set-cookie'];
+      const cookie = adminCookie;
 
       // 2. GET /api/admin/portfolio
       const listRes = await request(app)
@@ -175,11 +283,7 @@ describe('Server & Endpoints', () => {
     });
 
     it('CMS Content, Services & Pricing CRUD workflow', async () => {
-      // Login
-      const loginRes = await request(app)
-        .post('/api/admin/login')
-        .send({ pin: '3645' });
-      const cookie = loginRes.headers['set-cookie'];
+      const cookie = adminCookie;
 
       // 1. GET /api/public/content
       const publicContentRes = await request(app).get('/api/public/content');
@@ -276,16 +380,63 @@ describe('Server & Endpoints', () => {
         .set('Cookie', cookie);
       expect(delPricingRes.status).toBe(200);
       expect(delPricingRes.body.success).toBe(true);
+    });
+  });
 
-      // Clean up test data
-      await request(app)
-        .put('/api/admin/content/general')
-        .set('Cookie', cookie)
-        .send({ tagline: 'Small Dream, Big Zenith — เปลี่ยนไอเดียเล็ก ๆ ให้กลายเป็นผลงานที่ไปได้ไกลกว่าที่คิด' });
-      await request(app)
-        .put('/api/admin/content/socials')
-        .set('Cookie', cookie)
-        .send({ discord: { url: '', label: 'Discord Server', enabled: false } });
+  describe('Configuration & Production Key Enforcement', () => {
+    const validSecret = 'a'.repeat(32);
+
+    it('throws error in production if SUPABASE_URL is set but SUPABASE_SERVICE_ROLE_KEY is missing (even with legacy anon JWT in SUPABASE_KEY)', () => {
+      const legacyAnonJwt = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTYyMDAwMDAwMH0.signature';
+
+      expect(() => {
+        readEnv({
+          NODE_ENV: 'production',
+          SESSION_SECRET: validSecret,
+          SUPABASE_URL: 'https://test-project.supabase.co',
+          SUPABASE_KEY: legacyAnonJwt
+        });
+      }).toThrow(/SUPABASE_SERVICE_ROLE_KEY must be configured/);
+    });
+
+    it('throws error in production if SUPABASE_URL is set and publishable key is passed in SUPABASE_KEY', () => {
+      expect(() => {
+        readEnv({
+          NODE_ENV: 'production',
+          SESSION_SECRET: validSecret,
+          SUPABASE_URL: 'https://test-project.supabase.co',
+          SUPABASE_KEY: 'sb_publishable_test_key_12345'
+        });
+      }).toThrow(/SUPABASE_SERVICE_ROLE_KEY must be configured/);
+    });
+
+    it('succeeds in production when SUPABASE_SERVICE_ROLE_KEY is provided', () => {
+      const cfg = readEnv({
+        NODE_ENV: 'production',
+        SESSION_SECRET: validSecret,
+        SUPABASE_URL: 'https://test-project.supabase.co',
+        SUPABASE_SERVICE_ROLE_KEY: 'test-service-role-secret-key-prod'
+      });
+      expect(cfg.supabaseKey).toBe('test-service-role-secret-key-prod');
+    });
+
+    it('succeeds in production when SUPABASE_SECRET_KEY is provided', () => {
+      const cfg = readEnv({
+        NODE_ENV: 'production',
+        SESSION_SECRET: validSecret,
+        SUPABASE_URL: 'https://test-project.supabase.co',
+        SUPABASE_SECRET_KEY: 'test-secret-key-prod'
+      });
+      expect(cfg.supabaseKey).toBe('test-secret-key-prod');
+    });
+
+    it('allows SUPABASE_KEY in development mode', () => {
+      const cfg = readEnv({
+        NODE_ENV: 'development',
+        SUPABASE_URL: 'https://test-project.supabase.co',
+        SUPABASE_KEY: 'legacy-anon-jwt-or-publishable-key'
+      });
+      expect(cfg.supabaseKey).toBe('legacy-anon-jwt-or-publishable-key');
     });
   });
 });

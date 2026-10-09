@@ -39,14 +39,14 @@ function detectShopSlug() {
 // Initialize Admin App
 document.addEventListener('DOMContentLoaded', async () => {
   setupUploadDropzone();
-  
+
   // Pre-fill shop slug if in URL
   const slugInput = document.getElementById('login-shop-slug');
   const detected = detectShopSlug();
   if (slugInput && detected) {
     slugInput.value = detected;
   }
-  
+
   await checkSession();
   updateIcons();
 });
@@ -88,12 +88,7 @@ function showAdminToast(message, type = 'success') {
 
 // Admin API Headers helper
 function getAdminHeaders(extra = {}) {
-  const token = localStorage.getItem('admin_token');
-  const headers = { ...extra };
-  if (token) {
-    headers['x-admin-token'] = token;
-  }
-  return headers;
+  return { ...extra };
 }
 
 // Check session
@@ -166,9 +161,6 @@ async function handleLoginSubmit(e) {
     const data = await res.json();
 
     if (data.success) {
-      if (data.token) {
-        localStorage.setItem('admin_token', data.token);
-      }
       adminState.shopSlug = data.shopSlug;
       adminState.shopName = data.shopName;
       errorAlert.classList.add('hidden');
@@ -202,7 +194,6 @@ async function handleLogout() {
       headers: getAdminHeaders()
     });
   } catch (e) {}
-  localStorage.removeItem('admin_token');
   showLoginView();
   showAdminToast('ออกจากระบบเรียบร้อยแล้ว');
 }
@@ -417,17 +408,19 @@ function renderAdminReviews() {
           ${images.length > 0 ? `
             <div class="flex flex-wrap items-center gap-2 pt-1">
               <span class="text-[11px] font-semibold text-slate-500">รูปภาพหลักฐาน (${images.length}):</span>
-              ${images.map(img => `
-                <a href="${img}" target="_blank" class="block w-14 h-14 rounded-lg overflow-hidden border border-slate-200 hover:border-amber-500 transition">
-                  <img src="${img}" class="w-full h-full object-cover">
+              ${images.map(img => {
+                const safeImg = sanitizeImageUrl(img);
+                return `
+                <a href="${escapeHtml(safeImg)}" target="_blank" rel="noopener" class="block w-14 h-14 rounded-lg overflow-hidden border border-slate-200 hover:border-amber-500 transition">
+                  <img src="${escapeHtml(safeImg)}" class="w-full h-full object-cover">
                 </a>
-              `).join('')}
+              `;}).join('')}
             </div>
           ` : ''}
         </div>
 
         <div class="shrink-0 flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2">
-          <button 
+          <button
             onclick="deleteAdminReview('${r.id}')"
             class="px-3 py-1.5 rounded-xl text-rose-600 hover:bg-rose-50 border border-rose-200 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
             title="ลบรีวิวนี้"
@@ -528,9 +521,9 @@ function renderUploadPreviews() {
     return `
       <div class="relative w-20 h-20 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 group shadow-sm">
         <img src="${objectUrl}" class="w-full h-full object-cover">
-        <button 
-          type="button" 
-          onclick="removeSelectedFile(${idx})" 
+        <button
+          type="button"
+          onclick="removeSelectedFile(${idx})"
           class="absolute top-1 right-1 w-5 h-5 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center shadow transition"
           title="ลบรูปนี้"
         >
@@ -592,7 +585,7 @@ async function handleCreateCredit(e) {
 
     if (data.success) {
       showAdminToast('✨ เพิ่มและโพสต์เครดิตสำเร็จเรียบร้อย!');
-      
+
       // Reset form
       document.getElementById('new-credit-form').reset();
       adminState.selectedFiles = [];
@@ -632,7 +625,7 @@ function renderCreditsList() {
 
   let filtered = [...adminState.credits];
   if (adminSearchQuery) {
-    filtered = filtered.filter(c => 
+    filtered = filtered.filter(c =>
       (c.title && c.title.toLowerCase().includes(adminSearchQuery)) ||
       (c.customer && c.customer.toLowerCase().includes(adminSearchQuery)) ||
       (c.description && c.description.toLowerCase().includes(adminSearchQuery)) ||
@@ -657,7 +650,8 @@ function renderCreditsList() {
   }
 
   container.innerHTML = filtered.map(credit => {
-    const mainImg = (credit.images && credit.images.length > 0) ? credit.images[0] : '/images/placeholder-credit.svg';
+    const rawImg = (credit.images && credit.images.length > 0) ? credit.images[0] : '/images/placeholder-credit.svg';
+    const mainImg = sanitizeImageUrl(rawImg);
     const imgCount = credit.images ? credit.images.length : 1;
     const formattedPrice = credit.price ? `฿${Number(credit.price).toLocaleString('th-TH')}` : 'ไม่ระบุราคา';
     const customer = credit.customer ? escapeHtml(credit.customer) : 'ลูกค้า';
@@ -665,13 +659,13 @@ function renderCreditsList() {
 
     return `
       <div class="clean-card p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition hover:border-slate-300">
-        
+
         <!-- Thumbnail & Info -->
         <div class="flex items-center gap-3.5 min-w-0 w-full sm:w-auto flex-grow">
           <div class="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
-            <img 
-              src="${mainImg}" 
-              alt="${escapeHtml(credit.title)}" 
+            <img
+              src="${escapeHtml(mainImg)}"
+              alt="${escapeHtml(credit.title)}"
               class="w-full h-full object-cover"
               onerror="this.src='/images/placeholder-credit.svg'"
             >
@@ -712,8 +706,8 @@ function renderCreditsList() {
 
         <!-- Action Buttons -->
         <div class="flex items-center gap-1.5 self-end sm:self-center shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 w-full sm:w-auto justify-end">
-          <button 
-            onclick="togglePin('${credit.id}')" 
+          <button
+            onclick="togglePin('${credit.id}')"
             class="px-2.5 py-1.5 rounded-xl border border-slate-200 hover:border-amber-400 hover:bg-amber-50 text-xs font-semibold flex items-center gap-1 transition ${credit.isPinned ? 'text-amber-600 bg-amber-50 border-amber-300' : 'text-slate-600'}"
             title="${credit.isPinned ? 'ยกเลิกปักหมุด' : 'ปักหมุดขึ้นบนสุด'}"
           >
@@ -721,8 +715,8 @@ function renderCreditsList() {
             <span>${credit.isPinned ? 'ปักหมุดแล้ว' : 'ปักหมุด'}</span>
           </button>
 
-          <button 
-            onclick="openEditModal('${credit.id}')" 
+          <button
+            onclick="openEditModal('${credit.id}')"
             class="px-2.5 py-1.5 rounded-xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50 text-blue-600 text-xs font-semibold flex items-center gap-1 transition"
             title="แก้ไขรายละเอียด"
           >
@@ -730,8 +724,8 @@ function renderCreditsList() {
             <span>แก้ไข</span>
           </button>
 
-          <button 
-            onclick="deleteCredit('${credit.id}')" 
+          <button
+            onclick="deleteCredit('${credit.id}')"
             class="px-2.5 py-1.5 rounded-xl border border-slate-200 hover:border-rose-400 hover:bg-rose-50 text-rose-600 text-xs font-semibold flex items-center gap-1 transition"
             title="ลบเครดิตนี้"
           >
@@ -828,12 +822,13 @@ function renderEditImagesPreview() {
 
   // Existing images
   adminState.editRemainingImages.forEach((src, idx) => {
+    const safeSrc = sanitizeImageUrl(src);
     html += `
       <div class="relative w-16 h-16 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 shadow-sm">
-        <img src="${src}" class="w-full h-full object-cover">
-        <button 
-          type="button" 
-          onclick="removeEditRemainingImage(${idx})" 
+        <img src="${escapeHtml(safeSrc)}" class="w-full h-full object-cover">
+        <button
+          type="button"
+          onclick="removeEditRemainingImage(${idx})"
           class="absolute top-1 right-1 w-4 h-4 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center shadow"
           title="ลบรูปนี้"
         >
@@ -850,9 +845,9 @@ function renderEditImagesPreview() {
       <div class="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-amber-400 bg-slate-100 shadow-sm">
         <img src="${url}" class="w-full h-full object-cover">
         <span class="absolute bottom-0 left-0 right-0 bg-amber-500 text-white text-[9px] text-center font-bold">ใหม่</span>
-        <button 
-          type="button" 
-          onclick="removeEditNewFile(${idx})" 
+        <button
+          type="button"
+          onclick="removeEditNewFile(${idx})"
           class="absolute top-1 right-1 w-4 h-4 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center shadow"
           title="ยกเลิกรูปนี้"
         >
@@ -1194,15 +1189,17 @@ function renderAdminPortfolio() {
   container.innerHTML = list.map(item => {
     const techArray = Array.isArray(item.tech) ? item.tech : (item.tech ? String(item.tech).split(',') : []);
     const badgeColor = catBadgeColors[item.category] || 'bg-slate-100 text-slate-700 border-slate-200';
-    const hasDemo = item.demoUrl && item.demoUrl !== '#';
+    const safeImage = sanitizeImageUrl(item.image);
+    const safeDemoUrl = item.demoUrl ? sanitizeUrl(item.demoUrl) : '#';
+    const hasDemo = safeDemoUrl !== '#';
 
     return `
       <div class="clean-card overflow-hidden flex flex-col group hover:shadow-lg transition">
         <!-- Thumbnail -->
         <div class="relative aspect-video bg-slate-100 overflow-hidden border-b border-slate-100">
-          <img 
-            src="${escapeHtml(item.image)}" 
-            alt="${escapeHtml(item.title)}" 
+          <img
+            src="${escapeHtml(safeImage)}"
+            alt="${escapeHtml(item.title)}"
             class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
             onerror="this.src='/images/placeholder-credit.svg'"
           >
@@ -1246,9 +1243,9 @@ function renderAdminPortfolio() {
           <!-- Footer Actions -->
           <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
             ${hasDemo ? `
-              <a 
-                href="${escapeHtml(item.demoUrl)}" 
-                target="_blank" 
+              <a
+                href="${escapeHtml(safeDemoUrl)}"
+                target="_blank"
                 rel="noopener"
                 class="px-2.5 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 text-[11px] font-semibold flex items-center gap-1 transition"
               >
@@ -1258,8 +1255,8 @@ function renderAdminPortfolio() {
             ` : `<div></div>`}
 
             <div class="flex items-center gap-1.5">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onclick="openEditPortfolioModal('${item.id}')"
                 class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-50 hover:text-amber-700 text-slate-700 text-xs font-semibold flex items-center gap-1 transition cursor-pointer"
                 title="แก้ไขผลงานนี้"
@@ -1267,9 +1264,9 @@ function renderAdminPortfolio() {
                 <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
                 <span>แก้ไข</span>
               </button>
-              <button 
-                type="button" 
-                onclick="deletePortfolioItem('${item.id}', '${escapeHtml(item.title)}')"
+              <button
+                type="button"
+                onclick="deletePortfolioItem('${item.id}')"
                 class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold flex items-center gap-1 transition cursor-pointer"
                 title="ลบผลงานนี้"
               >
@@ -1501,7 +1498,9 @@ async function handlePortfolioSubmit(e) {
   }
 }
 
-async function deletePortfolioItem(id, title) {
+async function deletePortfolioItem(id) {
+  const item = (adminState.portfolio || []).find(p => p.id === id);
+  const title = item ? item.title : 'ผลงาน';
   if (!confirm(`คุณต้องการลบผลงาน "${title}" ใช่หรือไม่?\nการกระทำนี้ไม่สามารถย้อนกลับได้`)) {
     return;
   }
@@ -1772,17 +1771,17 @@ function renderAdminServices() {
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-          <button 
-            type="button" 
+          <button
+            type="button"
             onclick="openEditServiceModal('${s.id}')"
             class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-50 hover:text-amber-700 text-slate-700 text-xs font-semibold flex items-center gap-1 transition cursor-pointer"
           >
             <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
             <span>แก้ไข</span>
           </button>
-          <button 
-            type="button" 
-            onclick="deleteServiceItem('${s.id}', '${escapeHtml(s.title || '')}')"
+          <button
+            type="button"
+            onclick="deleteServiceItem('${s.id}')"
             class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold flex items-center gap-1 transition cursor-pointer"
           >
             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
@@ -1893,7 +1892,9 @@ async function handleServiceSubmit(e) {
   }
 }
 
-async function deleteServiceItem(id, title) {
+async function deleteServiceItem(id) {
+  const item = (adminState.content?.services || []).find(s => s.id === id);
+  const title = item ? item.title : 'บริการ';
   if (!confirm(`คุณต้องการลบบริการ "${title}" ใช่หรือไม่?`)) return;
 
   try {
@@ -1981,17 +1982,17 @@ function renderAdminPricing() {
           </div>
 
           <div class="flex items-center justify-end gap-2">
-            <button 
-              type="button" 
+            <button
+              type="button"
               onclick="openEditPricingModal('${p.id}')"
               class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-amber-50 hover:text-amber-700 text-slate-700 text-xs font-semibold flex items-center gap-1 transition cursor-pointer"
             >
               <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
               <span>แก้ไข</span>
             </button>
-            <button 
-              type="button" 
-              onclick="deletePricingItem('${p.id}', '${escapeHtml(p.title || '')}')"
+            <button
+              type="button"
+              onclick="deletePricingItem('${p.id}')"
               class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold flex items-center gap-1 transition cursor-pointer"
             >
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
@@ -2109,7 +2110,9 @@ async function handlePricingSubmit(e) {
   }
 }
 
-async function deletePricingItem(id, title) {
+async function deletePricingItem(id) {
+  const item = (adminState.content?.pricing || []).find(p => p.id === id);
+  const title = item ? item.title : 'แพ็กเกจราคา';
   if (!confirm(`คุณต้องการลบแพ็กเกจราคา "${title}" ใช่หรือไม่?`)) return;
 
   try {
@@ -2130,13 +2133,36 @@ async function deletePricingItem(id, title) {
   }
 }
 
-// Utility: HTML Escaping
+// Utility: HTML Escaping & URL Sanitization
 function escapeHtml(str) {
-  if (!str) return '';
-  return str
+  if (str === null || str === undefined) return '';
+  return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+function sanitizeUrl(rawUrl, fallback = '#') {
+  if (!rawUrl || typeof rawUrl !== 'string') return fallback;
+  const trimmed = rawUrl.trim();
+  if (!trimmed || /[\u0000-\u001F\u007F-\u009F]/.test(trimmed)) return fallback;
+  if (trimmed.startsWith('#')) return /^#[a-zA-Z0-9_\-\u0E00-\u0E7F]*$/.test(trimmed) ? trimmed : fallback;
+  if (trimmed.startsWith('/')) {
+    if (trimmed.startsWith('//') || trimmed.startsWith('/\\')) return fallback;
+    return trimmed;
+  }
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol === 'https:' || parsed.protocol === 'http:') return parsed.href;
+    return fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function sanitizeImageUrl(rawUrl, fallback = '/images/placeholder-credit.svg') {
+  const safe = sanitizeUrl(rawUrl, fallback);
+  return (safe === '#' || !safe) ? fallback : safe;
 }

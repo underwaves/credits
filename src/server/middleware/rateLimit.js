@@ -43,7 +43,7 @@ export function createRateLimiter({ windowMs, max, message }) {
 
 export const loginLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  max: process.env.NODE_ENV === 'test' ? 100 : 5,
   message: 'คุณพยายามเข้าสู่ระบบมากเกินไป กรุณารอ 15 นาทีแล้วลองใหม่อีกครั้ง'
 });
 

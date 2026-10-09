@@ -7,7 +7,10 @@ import {
   checkSpamSignals,
   isValidIdempotencyKey,
   validateReview,
-  validateImageFiles
+  validateImageFiles,
+  escapeHtml,
+  sanitizeUrl,
+  sanitizeImageUrl
 } from '../src/shared/validation.js';
 
 describe('Shared Validation Utils', () => {
@@ -37,10 +40,10 @@ describe('Shared Validation Utils', () => {
     });
 
     it('validates Thai phone numbers', () => {
-      expect(isValidThaiPhone('0812345678')).toBe(true);
-      expect(isValidThaiPhone('099-123-4567')).toBe(true);
-      expect(isValidThaiPhone('+66812345678')).toBe(true);
-      expect(isValidThaiPhone('12345')).toBe(false);
+      expect(isValidThaiPhone('0898765432')).toBe(true);
+      expect(isValidThaiPhone('099-987-6543')).toBe(true);
+      expect(isValidThaiPhone('+66898765432')).toBe(true);
+      expect(isValidThaiPhone('98765')).toBe(false);
       expect(isValidThaiPhone('abcdefghij')).toBe(false);
     });
 
@@ -135,6 +138,46 @@ describe('Shared Validation Utils', () => {
           { name: 'doc.pdf', type: 'application/pdf', size: 1024 * 100 }
         ])
       ).toBeTruthy();
+    });
+  });
+
+  describe('Sanitization & URL Security', () => {
+    it('escapes HTML special characters correctly', () => {
+      expect(escapeHtml('<script>alert("xss")</script>')).toBe('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;');
+      expect(escapeHtml("Tom & 'Jerry'")).toBe('Tom &amp; &#039;Jerry&#039;');
+      expect(escapeHtml(null)).toBe('');
+      expect(escapeHtml(undefined)).toBe('');
+    });
+
+    it('sanitizes URLs and blocks dangerous protocols and injections', () => {
+      expect(sanitizeUrl('https://example.com/test')).toBe('https://example.com/test');
+      expect(sanitizeUrl('/credits')).toBe('/credits');
+      expect(sanitizeUrl('#pricing')).toBe('#pricing');
+
+      // Blocks javascript: pseudo-protocol
+      expect(sanitizeUrl('javascript:alert(1)')).toBe('#');
+      expect(sanitizeUrl('   JAVASCRIPT:alert(document.cookie)  ')).toBe('#');
+
+      // Blocks data: and vbscript:
+      expect(sanitizeUrl('data:text/html,<script>alert(1)</script>')).toBe('#');
+      expect(sanitizeUrl('vbscript:msgbox(1)')).toBe('#');
+
+      // Blocks protocol-relative and backslash traversal
+      expect(sanitizeUrl('//malicious.com')).toBe('#');
+      expect(sanitizeUrl('/\\malicious.com')).toBe('#');
+
+      // Blocks control characters
+      expect(sanitizeUrl('https://example.com\u0000/evil')).toBe('#');
+      expect(sanitizeUrl('')).toBe('#');
+      expect(sanitizeUrl(null)).toBe('#');
+    });
+
+    it('sanitizes image URLs and falls back safely', () => {
+      expect(sanitizeImageUrl('https://example.com/photo.png')).toBe('https://example.com/photo.png');
+      expect(sanitizeImageUrl('/images/logo.png')).toBe('/images/logo.png');
+      expect(sanitizeImageUrl('javascript:alert(1)')).toBe('/images/placeholder-credit.svg');
+      expect(sanitizeImageUrl('')).toBe('/images/placeholder-credit.svg');
+      expect(sanitizeImageUrl(null)).toBe('/images/placeholder-credit.svg');
     });
   });
 });

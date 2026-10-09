@@ -6,13 +6,13 @@ const path = require('path');
 const crypto = require('crypto');
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_KEY;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_KEY;
 const BUCKET = 'credit-images';
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.error('\n❌ ไม่พบ SUPABASE_URL หรือ SUPABASE_KEY');
+  console.error('\n❌ ไม่พบ SUPABASE_URL หรือ SUPABASE_KEY / SUPABASE_SERVICE_ROLE_KEY');
   console.error('   - ในเครื่อง: ใส่ค่าในไฟล์ .env');
-  console.error('   - บน Render: ไปที่ Environment แล้วเพิ่มทั้ง 2 ตัว\n');
+  console.error('   - บน Render / Production: เพิ่ม SUPABASE_URL และ SUPABASE_SERVICE_ROLE_KEY ใน Environment Variables\n');
   process.exit(1);
 }
 
@@ -28,7 +28,6 @@ const DEFAULT_SETTINGS = {
   shopName: 'SUNFZENITH',
   tagline: 'รวมหลักฐานและเครดิตการซื้อขายจริง เช็คประวัติได้ที่นี่ 100%',
   announcement: '✨ รวมเครดิตซื้อขายร้าน SUNFZENITH ซื้อขายปลอดภัย มีหลักฐานทุกรายการ!',
-  adminPin: '3645',
   socials: {
     line: {
       url: 'https://line.me/R/ti/p/@419ajynp',
@@ -106,7 +105,6 @@ async function getShopConfig() {
       shopName: data.shop_name || DEFAULT_SETTINGS.shopName,
       tagline: data.tagline || DEFAULT_SETTINGS.tagline,
       announcement: data.announcement || DEFAULT_SETTINGS.announcement,
-      adminPin: data.admin_pin || DEFAULT_SETTINGS.adminPin,
       socials: data.socials || DEFAULT_SETTINGS.socials,
       stats: data.stats || DEFAULT_SETTINGS.stats
     },
@@ -119,7 +117,6 @@ async function updateShopSettings(s) {
   if (s.shopName !== undefined) row.shop_name = s.shopName;
   if (s.tagline !== undefined) row.tagline = s.tagline;
   if (s.announcement !== undefined) row.announcement = s.announcement;
-  if (s.adminPin !== undefined) row.admin_pin = s.adminPin;
   if (s.socials !== undefined) row.socials = s.socials;
   if (s.stats !== undefined) row.stats = s.stats;
   check(await supabase.from('shop_config').upsert(row, { onConflict: 'id' }), 'update settings');

@@ -37,7 +37,7 @@ function validateContactValue(channel, value) {
     case 'email':
       return isValidEmail(value) ? null : 'รูปแบบอีเมลไม่ถูกต้อง เช่น you@example.com';
     case 'phone':
-      return isValidThaiPhone(value) ? null : 'เบอร์โทรไม่ถูกต้อง (เช่น 0812345678)';
+      return isValidThaiPhone(value) ? null : 'เบอร์โทรไม่ถูกต้อง (เช่น 0898765432)';
     case 'line':
       return LINE_ID_RE.test(value) ? null : 'LINE ID ใช้ได้เฉพาะ a-z, 0-9, จุด, ขีด (2–40 ตัว)';
     case 'facebook':
@@ -126,4 +126,62 @@ export function validateImageFiles(files) {
     if (f.size > LIMITS.reviewMaxFileBytes) return `ไฟล์ "${f.name}" ใหญ่เกิน 5MB`;
   }
   return null;
+}
+
+/**
+ * HTML entity escaping to prevent XSS and attribute breakout.
+ */
+export function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+/**
+ * Validate and sanitize URLs for href and src attributes.
+ * Allows only safe schemes: https: (and http: for dev/local), internal relative paths (/...),
+ * and anchor identifiers (#...).
+ * Strictly disallows javascript:, data:, vbscript:, file:, and protocol-relative URLs (//...).
+ */
+export function sanitizeUrl(rawUrl, fallback = '#') {
+  if (!rawUrl || typeof rawUrl !== 'string') return fallback;
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return fallback;
+
+  // Block control characters and unicode control ranges
+  if (/[\u0000-\u001F\u007F-\u009F]/.test(trimmed)) return fallback;
+
+  // Safe internal anchor: #section
+  if (trimmed.startsWith('#')) {
+    return /^#[a-zA-Z0-9_\-\u0E00-\u0E7F]*$/.test(trimmed) ? trimmed : fallback;
+  }
+
+  // Safe relative paths: /path/to/page (strictly block protocol-relative //evil.com or /\)
+  if (trimmed.startsWith('/')) {
+    if (trimmed.startsWith('//') || trimmed.startsWith('/\\')) return fallback;
+    return trimmed;
+  }
+
+  // Parse absolute URL
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+      return parsed.href;
+    }
+    return fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+/**
+ * Validate and sanitize image URLs.
+ */
+export function sanitizeImageUrl(rawUrl, fallback = '/images/placeholder-credit.svg') {
+  const safe = sanitizeUrl(rawUrl, fallback);
+  return (safe === '#' || !safe) ? fallback : safe;
 }

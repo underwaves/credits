@@ -28,7 +28,7 @@
 
 ## 📖 Overview
 
-**SUNFZ Store** is a full-stack, proof-of-delivery credit showcase web application built for digital commerce sellers (game accounts, premium accounts, digital items, and online services). 
+**SUNFZ Store** is a full-stack, proof-of-delivery credit showcase web application built for digital commerce sellers (game accounts, premium accounts, digital items, and online services).
 
 Designed around the **"Clean Trust & Proof-First"** design philosophy, it allows sellers to upload and organize payment slips, handover screenshots, and customer chat proofs into an elegant, high-converting public catalog with zero clutter.
 
@@ -124,7 +124,7 @@ npm start
 ```
 The server will start at:
 - **Public Customer Site:** `http://localhost:3000`
-- **Admin Studio:** `http://localhost:3000/admin` (Default PIN: `1234`)
+- **Admin Studio:** `http://localhost:3000/admin`
 
 For development with live reloading:
 ```bash
@@ -136,7 +136,7 @@ npm run dev
 ## 🔑 Admin Guide
 
 1. Navigate to `http://localhost:3000/admin` in your browser.
-2. Enter the admin PIN (Default: `1234`).
+2. Enter the admin PIN configured in your `.env` (`ADMIN_PIN`) or production environment variables.
 3. Inside the Admin Studio, you can:
    - **Upload Credits:** Drop proof screenshots into the dropzone, fill in details, and click submit.
    - **Pin Items:** Click the star icon to pin important transactions to the top.

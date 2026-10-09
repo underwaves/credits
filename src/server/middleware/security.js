@@ -102,10 +102,55 @@ export function sameOriginGuard(req, res, next) {
 }
 
 /**
- * Middleware requiring authenticated admin session.
+ * Securely hash admin PIN with scrypt and a random salt.
+ * Returns format: scrypt:<salt_hex>:<hash_hex>
+ */
+export function hashPin(pin) {
+  if (!pin || (typeof pin !== 'string' && typeof pin !== 'number')) {
+    throw new Error('PIN must be a non-empty string or number');
+  }
+  const pinStr = String(pin).trim();
+  const salt = crypto.randomBytes(16).toString('hex');
+  const derivedKey = crypto.scryptSync(pinStr, salt, 64).toString('hex');
+  return `scrypt:${salt}:${derivedKey}`;
+}
+
+/**
+ * Constant-time verification of an input PIN against stored scrypt hash or env ADMIN_PIN.
+ */
+export function verifyPin(inputPin, storedValue) {
+  if (!inputPin || !storedValue || typeof storedValue !== 'string') return false;
+  const pinStr = String(inputPin).trim();
+  const storedStr = storedValue.trim();
+
+  // If stored as scrypt hash
+  if (storedStr.startsWith('scrypt:')) {
+    const parts = storedStr.split(':');
+    if (parts.length === 3) {
+      const [, salt, expectedKey] = parts;
+      try {
+        const derivedKey = crypto.scryptSync(pinStr, salt, 64).toString('hex');
+        return timingSafeEqualString(derivedKey, expectedKey);
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  }
+
+  // Strictly disallow known insecure fallback PINs even if present in environment
+  if (['3645', '1234', 'admin', 'password', '0000', '123456'].includes(storedStr)) {
+    return false;
+  }
+
+  return timingSafeEqualString(pinStr, storedStr);
+}
+
+/**
+ * Middleware requiring authenticated admin session via HttpOnly cookie.
  */
 export function requireAdmin(req, res, next) {
-  const token = req.cookies?.['admin_token'] || req.headers['x-admin-token'];
+  const token = req.cookies?.['admin_token'];
   if (!token || !verifySessionToken(token)) {
     return res.status(401).json({
       success: false,

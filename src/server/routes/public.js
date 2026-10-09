@@ -1,7 +1,7 @@
 import express from 'express';
 import { imageUpload, detectImageMime, MAX_FILES } from '../middleware/upload.js';
 import { reviewLimiter } from '../middleware/rateLimit.js';
-import { validateReview, validateImageFiles } from '../../shared/validation.js';
+import { validateReview, validateImageFiles, sanitizeUrl } from '../../shared/validation.js';
 import * as db from '../services/db.js';
 import { getAllPortfolio } from '../services/portfolioDb.js';
 import { getSiteContent } from '../services/contentDb.js';
@@ -50,13 +50,24 @@ publicRouter.get('/settings', async (req, res) => {
     const siteContent = getSiteContent();
     const allCredits = await db.getCredits();
 
+    const rawSocials = siteContent.socials || config.settings.socials || {};
+    const safeSocials = {};
+    for (const [key, val] of Object.entries(rawSocials)) {
+      if (val && typeof val === 'object') {
+        safeSocials[key] = {
+          ...val,
+          url: val.url ? sanitizeUrl(String(val.url).trim(), '') : ''
+        };
+      }
+    }
+
     const safeSettings = {
       shopName: siteContent.general?.shopName || config.settings.shopName,
       tagline: siteContent.general?.tagline || config.settings.tagline,
       announcement: siteContent.general?.announcement || config.settings.announcement,
       showAnnouncement: siteContent.general?.showAnnouncement !== false,
       shopStatus: siteContent.general?.shopStatus || '🟢 เปิดรับออเดอร์ 24 ชม.',
-      socials: siteContent.socials || config.settings.socials,
+      socials: safeSocials,
       stats: {
         ratingScore: siteContent.general?.ratingScore || config.settings.stats?.ratingScore || '5.0',
         totalOrders: config.settings.stats?.totalOrders || '100% คุณภาพ',

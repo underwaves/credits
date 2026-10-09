@@ -5,8 +5,14 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '../../../');
-const dataDir = path.join(rootDir, 'src', 'server', 'data');
-const portfolioFilePath = path.join(dataDir, 'portfolio.json');
+
+function getDataDir() {
+  return process.env.DATA_DIR || path.join(rootDir, 'src', 'server', 'data');
+}
+
+function getPortfolioFilePath() {
+  return path.join(getDataDir(), 'portfolio.json');
+}
 
 export const SEED_PORTFOLIO = [
   {
@@ -155,18 +161,27 @@ export const SEED_PORTFOLIO = [
 ];
 
 function ensureDataFile() {
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
+  const dir = getDataDir();
+  const file = getPortfolioFilePath();
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
   }
-  if (!fs.existsSync(portfolioFilePath)) {
-    fs.writeFileSync(portfolioFilePath, JSON.stringify(SEED_PORTFOLIO, null, 2), 'utf8');
+  if (!fs.existsSync(file)) {
+    const defaultSource = path.join(rootDir, 'src', 'server', 'data', 'portfolio.json');
+    let seedToUse = SEED_PORTFOLIO;
+    if (fs.existsSync(defaultSource)) {
+      try {
+        seedToUse = JSON.parse(fs.readFileSync(defaultSource, 'utf8'));
+      } catch {}
+    }
+    fs.writeFileSync(file, JSON.stringify(seedToUse, null, 2), 'utf8');
   }
 }
 
 export function getAllPortfolio() {
   try {
     ensureDataFile();
-    const raw = fs.readFileSync(portfolioFilePath, 'utf8');
+    const raw = fs.readFileSync(getPortfolioFilePath(), 'utf8');
     const list = JSON.parse(raw);
     return Array.isArray(list) ? list : [...SEED_PORTFOLIO];
   } catch (err) {
@@ -182,7 +197,7 @@ export function getPortfolioById(id) {
 
 export function savePortfolioList(list) {
   ensureDataFile();
-  fs.writeFileSync(portfolioFilePath, JSON.stringify(list, null, 2), 'utf8');
+  fs.writeFileSync(getPortfolioFilePath(), JSON.stringify(list, null, 2), 'utf8');
 }
 
 export function createPortfolio(data) {

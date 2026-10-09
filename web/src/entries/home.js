@@ -106,13 +106,36 @@ function applyPortfolioFilter(filter) {
 
 // ---------------- 4.1 Dynamic Portfolio Loader ----------------
 function escapeHtml(str) {
-  if (!str) return '';
+  if (str === null || str === undefined) return '';
   return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+function sanitizeUrl(rawUrl, fallback = '#') {
+  if (!rawUrl || typeof rawUrl !== 'string') return fallback;
+  const trimmed = rawUrl.trim();
+  if (!trimmed || /[\u0000-\u001F\u007F-\u009F]/.test(trimmed)) return fallback;
+  if (trimmed.startsWith('#')) return /^#[a-zA-Z0-9_\-\u0E00-\u0E7F]*$/.test(trimmed) ? trimmed : fallback;
+  if (trimmed.startsWith('/')) {
+    if (trimmed.startsWith('//') || trimmed.startsWith('/\\')) return fallback;
+    return trimmed;
+  }
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol === 'https:' || parsed.protocol === 'http:') return parsed.href;
+    return fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function sanitizeImageUrl(rawUrl, fallback = '/images/placeholder-credit.svg') {
+  const safe = sanitizeUrl(rawUrl, fallback);
+  return (safe === '#' || !safe) ? fallback : safe;
 }
 
 async function initDynamicPortfolio() {
@@ -128,8 +151,8 @@ async function initDynamicPortfolio() {
         const catLabel = escapeHtml(item.categoryLabel || item.category || 'ผลงาน');
         const title = escapeHtml(item.title || '');
         const desc = escapeHtml(item.desc || '');
-        const image = escapeHtml(item.image || '/images/placeholder-credit.svg');
-        const demoUrl = escapeHtml(item.demoUrl || item.image || '#');
+        const image = escapeHtml(sanitizeImageUrl(item.image));
+        const demoUrl = escapeHtml(sanitizeUrl(item.demoUrl || item.image));
         const demoLabel = escapeHtml(item.demoLabel || 'ดูภาพผลงานเต็ม');
         const techList = Array.isArray(item.tech) ? item.tech : (item.tech ? String(item.tech).split(',') : []);
 
@@ -292,7 +315,8 @@ async function initDynamicSiteContent() {
           : (p.id === 'prc-poster' || p.id === 'poster' || p.id === 'p2' || (p.title && p.title.includes('โปสเตอร์')))
           ? 'poster'
           : 'web';
-        const targetUrl = (p.actionUrl && p.actionUrl !== '#contact') ? p.actionUrl : 'https://line.me/R/ti/p/@419ajynp';
+        const rawActionUrl = (p.actionUrl && p.actionUrl !== '#contact') ? p.actionUrl : 'https://line.me/R/ti/p/@419ajynp';
+        const targetUrl = sanitizeUrl(rawActionUrl, 'https://line.me/R/ti/p/@419ajynp');
         return `
           <div class="card-glass pricing-card reveal-on-scroll revealed ${isHighlight ? 'pricing-highlight' : ''}">
             <div class="pricing-badge-row">
@@ -322,18 +346,24 @@ async function initDynamicSiteContent() {
     // 4. Social Links
     if (socials) {
       if (socials.line?.url) {
-        document.querySelectorAll('a[href*="line.me"]').forEach((a) => {
-          a.href = socials.line.url;
-        });
+        const safeLine = sanitizeUrl(socials.line.url);
+        if (safeLine !== '#') {
+          document.querySelectorAll('a[href*="line.me"]').forEach((a) => {
+            a.href = safeLine;
+          });
+        }
         const lineChannelVal = document.querySelector('.channel-line + .channel-text .channel-val');
         if (lineChannelVal && socials.line.label) {
           lineChannelVal.textContent = socials.line.label;
         }
       }
       if (socials.facebook?.url) {
-        document.querySelectorAll('a[href*="facebook.com"]').forEach((a) => {
-          a.href = socials.facebook.url;
-        });
+        const safeFb = sanitizeUrl(socials.facebook.url);
+        if (safeFb !== '#') {
+          document.querySelectorAll('a[href*="facebook.com"]').forEach((a) => {
+            a.href = safeFb;
+          });
+        }
         const fbChannelVal = document.querySelector('.channel-fb + .channel-text .channel-val');
         if (fbChannelVal && socials.facebook.label) {
           fbChannelVal.textContent = socials.facebook.label;

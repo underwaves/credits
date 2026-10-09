@@ -8,8 +8,11 @@ import {
   verifySessionToken,
   revokeToken,
   requireAdmin,
-  timingSafeEqualString
+  timingSafeEqualString,
+  hashPin,
+  verifyPin
 } from '../middleware/security.js';
+import { sanitizeUrl, sanitizeImageUrl } from '../../shared/validation.js';
 import { config } from '../config.js';
 import * as db from '../services/db.js';
 import {
@@ -63,15 +66,22 @@ async function processUploadedImages(files) {
 adminRouter.post('/login', loginLimiter, async (req, res) => {
   try {
     const { pin } = req.body;
-    const shopCfg = await db.getShopConfig();
-    const adminPin = (shopCfg.settings?.adminPin || config.adminPinFallback || '3645').toString();
-
     if (!pin || (typeof pin !== 'string' && typeof pin !== 'number')) {
       return res.status(400).json({ success: false, message: 'กรุณากรอกรหัส PIN' });
     }
 
+    const shopCfg = await db.getShopConfig();
+    const storedHash = shopCfg.settings?.adminPinHash || (config.adminPinFallback ? config.adminPinFallback : null);
+
+    if (!storedHash) {
+      return res.status(401).json({
+        success: false,
+        message: 'ระบบยังไม่ได้ตั้งค่ารหัสผ่านแอดมิน (กรุณาตั้งค่า ADMIN_PIN ในระบบก่อนเข้าสู่ระบบ)'
+      });
+    }
+
     const inputPinStr = pin.toString().trim();
-    if (!timingSafeEqualString(inputPinStr, adminPin)) {
+    if (!verifyPin(inputPinStr, storedHash)) {
       return res.status(401).json({ success: false, message: 'รหัสผ่าน / PIN แอดมินไม่ถูกต้อง' });
     }
 
@@ -80,28 +90,45 @@ adminRouter.post('/login', loginLimiter, async (req, res) => {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
       sameSite: 'lax',
-      secure: config.isProd
+      secure: config.isProd,
+      path: '/'
     });
 
-    res.json({ success: true, token, message: 'เข้าสู่ระบบแอดมินสำเร็จ' });
+    res.json({
+      success: true,
+      shopSlug: 'sunfz',
+      shopName: shopCfg.settings?.shopName || 'SUNFZ',
+      message: 'เข้าสู่ระบบแอดมินสำเร็จ'
+    });
   } catch (err) {
     console.error('[admin] Login error:', err.message);
     res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ' });
   }
 });
 
-adminRouter.get('/check', (req, res) => {
-  const token = req.cookies?.['admin_token'] || req.headers['x-admin-token'];
+adminRouter.get('/check', async (req, res) => {
+  const token = req.cookies?.['admin_token'];
   if (token && verifySessionToken(token)) {
-    return res.json({ success: true, isAdmin: true });
+    const shopCfg = await db.getShopConfig();
+    return res.json({
+      success: true,
+      isAdmin: true,
+      shopSlug: 'sunfz',
+      shopName: shopCfg.settings?.shopName || 'SUNFZ'
+    });
   }
   res.json({ success: false, isAdmin: false });
 });
 
 adminRouter.post('/logout', (req, res) => {
-  const token = req.cookies?.['admin_token'] || req.headers['x-admin-token'];
+  const token = req.cookies?.['admin_token'];
   if (token) revokeToken(token);
-  res.clearCookie('admin_token');
+  res.clearCookie('admin_token', {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: config.isProd,
+    path: '/'
+  });
   res.json({ success: true, message: 'ออกจากระบบเรียบร้อย' });
 });
 
@@ -240,7 +267,7 @@ adminRouter.delete('/reviews/:id', requireAdmin, async (req, res) => {
   }
 });
 
-// ---------------- Settings & PIN ----------------
+// ---------------- Settings ----------------
 adminRouter.put('/settings', requireAdmin, async (req, res) => {
   try {
     const { shopName, tagline, announcement, socials, stats, categories } = req.body;
@@ -250,7 +277,21 @@ adminRouter.put('/settings', requireAdmin, async (req, res) => {
     if (shopName) newSettings.shopName = shopName.trim().slice(0, 100);
     if (tagline !== undefined) newSettings.tagline = tagline.trim().slice(0, 200);
     if (announcement !== undefined) newSettings.announcement = announcement.trim().slice(0, 300);
-    if (socials && typeof socials === 'object') newSettings.socials = { ...configData.settings.socials, ...socials };
+
+    if (socials && typeof socials === 'object') {
+      const sanitizedSocials = { ...configData.settings.socials };
+      for (const [key, val] of Object.entries(socials)) {
+        if (val && typeof val === 'object') {
+          sanitizedSocials[key] = {
+            ...sanitizedSocials[key],
+            ...val,
+            url: val.url !== undefined ? (val.url ? sanitizeUrl(String(val.url).trim(), '') : '') : sanitizedSocials[key]?.url
+          };
+        }
+      }
+      newSettings.socials = sanitizedSocials;
+    }
+
     if (stats && typeof stats === 'object') newSettings.stats = { ...configData.settings.stats, ...stats };
 
     const updatedSettings = await db.updateShopSettings(newSettings);
@@ -260,7 +301,8 @@ adminRouter.put('/settings', requireAdmin, async (req, res) => {
       await db.updateCategories(sanitizedCategories);
     }
 
-    res.json({ success: true, settings: updatedSettings, message: 'บันทึกการตั้งค่าร้านค้าเรียบร้อยแล้ว' });
+    const { adminPin, adminPinHash, ...safeSettings } = updatedSettings;
+    res.json({ success: true, settings: safeSettings, message: 'บันทึกการตั้งค่าร้านค้าเรียบร้อยแล้ว' });
   } catch (err) {
     console.error('[admin] Settings update error:', err.message);
     res.status(500).json({ success: false, message: 'บันทึกการตั้งค่าไม่สำเร็จ' });
@@ -335,14 +377,17 @@ adminRouter.post('/portfolio', requireAdmin, imageUpload.single('image'), async 
         : 'ดูภาพผลงานเต็ม';
     }
 
+    const safeImage = sanitizeImageUrl(finalImageUrl);
+    const safeDemo = demoUrl ? sanitizeUrl(demoUrl.trim(), safeImage) : safeImage;
+
     const newItem = createPortfolio({
       title: title.trim(),
       category: cat,
       categoryLabel: catLabel,
       desc: desc ? desc.trim() : '',
       tech: tech || '',
-      image: finalImageUrl,
-      demoUrl: demoUrl ? demoUrl.trim() : finalImageUrl,
+      image: safeImage,
+      demoUrl: safeDemo,
       demoLabel: finalDemoLabel,
       isReal: isReal !== 'false' && isReal !== false
     });
@@ -406,8 +451,8 @@ adminRouter.put('/portfolio/:id', requireAdmin, imageUpload.single('image'), asy
     if (categoryLabel !== undefined) updates.categoryLabel = categoryLabel.trim();
     if (desc !== undefined) updates.desc = desc.trim();
     if (tech !== undefined) updates.tech = tech;
-    if (finalImageUrl) updates.image = finalImageUrl;
-    if (demoUrl !== undefined) updates.demoUrl = demoUrl.trim();
+    if (finalImageUrl) updates.image = sanitizeImageUrl(finalImageUrl);
+    if (demoUrl !== undefined) updates.demoUrl = sanitizeUrl(demoUrl.trim(), updates.image || existing.image);
     if (demoLabel !== undefined) updates.demoLabel = demoLabel.trim();
     if (isReal !== undefined) updates.isReal = isReal !== 'false' && isReal !== false;
 
@@ -543,7 +588,8 @@ adminRouter.post('/pricing', requireAdmin, (req, res) => {
     if (!title || !title.trim()) {
       return res.status(400).json({ success: false, message: 'กรุณากรอกชื่อแพ็กเกจราคา' });
     }
-    const newPricing = createPricing({ title, price, badge, desc, isHighlight, features, actionText, actionUrl });
+    const safeActionUrl = actionUrl ? sanitizeUrl(actionUrl.trim(), '#contact') : '#contact';
+    const newPricing = createPricing({ title, price, badge, desc, isHighlight, features, actionText, actionUrl: safeActionUrl });
     res.json({ success: true, pricing: newPricing, message: 'เพิ่มแพ็กเกจราคาใหม่เรียบร้อยแล้ว ✨' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการเพิ่มแพ็กเกจ' });
@@ -552,7 +598,11 @@ adminRouter.post('/pricing', requireAdmin, (req, res) => {
 
 adminRouter.put('/pricing/:id', requireAdmin, (req, res) => {
   try {
-    const updated = updatePricing(req.params.id, req.body);
+    const payload = { ...req.body };
+    if (payload.actionUrl !== undefined) {
+      payload.actionUrl = sanitizeUrl(String(payload.actionUrl).trim(), '#contact');
+    }
+    const updated = updatePricing(req.params.id, payload);
     if (!updated) return res.status(404).json({ success: false, message: 'ไม่พบแพ็กเกจนี้' });
     res.json({ success: true, pricing: updated, message: 'อัปเดตแพ็กเกจราคาเรียบร้อยแล้ว ✨' });
   } catch (err) {
@@ -574,18 +624,27 @@ adminRouter.post('/change-pin', requireAdmin, async (req, res) => {
   try {
     const { currentPin, newPin } = req.body;
     const configData = await db.getShopConfig();
-    const adminPin = (configData.settings?.adminPin || config.adminPinFallback || '3645').toString();
+    const storedHash = configData.settings?.adminPinHash || (config.adminPinFallback ? config.adminPinFallback : null);
 
-    if (!currentPin || !timingSafeEqualString(currentPin.toString().trim(), adminPin)) {
+    if (!storedHash) {
+      return res.status(400).json({ success: false, message: 'ไม่พบข้อมูล PIN เดิมในระบบ' });
+    }
+
+    if (!currentPin || !verifyPin(String(currentPin).trim(), storedHash)) {
       return res.status(400).json({ success: false, message: 'PIN ปัจจุบันไม่ถูกต้อง' });
     }
 
     const cleanNewPin = newPin?.toString().trim();
-    if (!cleanNewPin || cleanNewPin.length < 4 || cleanNewPin.length > 20) {
-      return res.status(400).json({ success: false, message: 'PIN ใหม่ต้องมีความยาวระหว่าง 4 ถึง 20 ตัวอักษร' });
+    if (!cleanNewPin || cleanNewPin.length < 6 || cleanNewPin.length > 64) {
+      return res.status(400).json({ success: false, message: 'PIN ใหม่ต้องมีความยาวระหว่าง 6 ถึง 64 ตัวอักษร' });
     }
 
-    await db.updateShopSettings({ adminPin: cleanNewPin });
+    if (['1234', '123456', '3645', '0000', '1111', '000000', 'password'].includes(cleanNewPin)) {
+      return res.status(400).json({ success: false, message: 'PIN ใหม่มีความปลอดภัยต่ำเกินไป กรุณาใช้รหัสที่คาดเดายากขึ้น' });
+    }
+
+    const hashed = hashPin(cleanNewPin);
+    await db.updateShopSettings({ adminPinHash: hashed });
     res.json({ success: true, message: 'เปลี่ยนรหัสผ่าน / PIN แอดมินสำเร็จแล้ว' });
   } catch (err) {
     console.error('[admin] Change PIN error:', err.message);

@@ -21,7 +21,7 @@ const state = {
 document.addEventListener('DOMContentLoaded', async () => {
   await fetchSettings();
   await Promise.all([fetchCredits(), fetchReviews()]);
-  
+
   // Check deep-link ?credit=id
   try {
     const urlParams = new URLSearchParams(window.location.search);
@@ -168,7 +168,7 @@ async function retryFetchAll() {
   const loading = document.getElementById('loading-state');
   if (errorEl) errorEl.classList.add('hidden');
   if (loading) loading.classList.remove('hidden');
-  
+
   await fetchSettings();
   await Promise.all([fetchCredits(), fetchReviews()]);
   updateIcons();
@@ -215,7 +215,7 @@ function renderSettings() {
 
   const currentShop = shopName || 'SUNFZENITH';
   document.title = `${currentShop} - รวมเครดิตการซื้อขาย`;
-  
+
   const navName = document.getElementById('nav-shop-name');
   const footerName = document.getElementById('footer-shop-name');
   if (navName) navName.textContent = currentShop;
@@ -239,28 +239,37 @@ function renderSettings() {
   if (socialContainer && socials) {
     let html = '';
     if (socials.line && socials.line.enabled && socials.line.url) {
-      html += `
-        <a href="${socials.line.url}" target="_blank" rel="noopener" class="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 hover:border-emerald-500 hover:text-emerald-600 text-slate-700 font-medium text-xs flex items-center gap-1.5 shadow-sm transition">
-          <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-500"></i>
-          <span>${socials.line.label || 'LINE'}</span>
-        </a>
-      `;
+      const safeUrl = sanitizeUrl(socials.line.url);
+      if (safeUrl !== '#') {
+        html += `
+          <a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener" class="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 hover:border-emerald-500 hover:text-emerald-600 text-slate-700 font-medium text-xs flex items-center gap-1.5 shadow-sm transition">
+            <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-500"></i>
+            <span>${escapeHtml(socials.line.label || 'LINE')}</span>
+          </a>
+        `;
+      }
     }
     if (socials.facebook && socials.facebook.enabled && socials.facebook.url) {
-      html += `
-        <a href="${socials.facebook.url}" target="_blank" rel="noopener" class="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 hover:border-blue-500 hover:text-blue-600 text-slate-700 font-medium text-xs flex items-center gap-1.5 shadow-sm transition">
-          <i data-lucide="facebook" class="w-3.5 h-3.5 text-blue-500"></i>
-          <span>${socials.facebook.label || 'Facebook'}</span>
-        </a>
-      `;
+      const safeUrl = sanitizeUrl(socials.facebook.url);
+      if (safeUrl !== '#') {
+        html += `
+          <a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener" class="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 hover:border-blue-500 hover:text-blue-600 text-slate-700 font-medium text-xs flex items-center gap-1.5 shadow-sm transition">
+            <i data-lucide="facebook" class="w-3.5 h-3.5 text-blue-500"></i>
+            <span>${escapeHtml(socials.facebook.label || 'Facebook')}</span>
+          </a>
+        `;
+      }
     }
     if (socials.discord && socials.discord.enabled && socials.discord.url) {
-      html += `
-        <a href="${socials.discord.url}" target="_blank" rel="noopener" class="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 hover:border-indigo-500 hover:text-indigo-600 text-slate-700 font-medium text-xs flex items-center gap-1.5 shadow-sm transition">
-          <i data-lucide="disc" class="w-3.5 h-3.5 text-indigo-500"></i>
-          <span>${socials.discord.label || 'Discord'}</span>
-        </a>
-      `;
+      const safeUrl = sanitizeUrl(socials.discord.url);
+      if (safeUrl !== '#') {
+        html += `
+          <a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener" class="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 hover:border-indigo-500 hover:text-indigo-600 text-slate-700 font-medium text-xs flex items-center gap-1.5 shadow-sm transition">
+            <i data-lucide="disc" class="w-3.5 h-3.5 text-indigo-500"></i>
+            <span>${escapeHtml(socials.discord.label || 'Discord')}</span>
+          </a>
+        `;
+      }
     }
     socialContainer.innerHTML = html;
   }
@@ -313,7 +322,8 @@ function renderFeed() {
     if (empty) empty.classList.add('hidden');
 
     grid.innerHTML = items.map(credit => {
-      const mainImage = (credit.images && credit.images.length > 0) ? credit.images[0] : '/images/placeholder-credit.svg';
+      const rawImage = (credit.images && credit.images.length > 0) ? credit.images[0] : '/images/placeholder-credit.svg';
+      const mainImage = sanitizeImageUrl(rawImage);
       const imageCount = credit.images ? credit.images.length : 1;
       const formattedPrice = credit.price ? `฿${Number(credit.price).toLocaleString('th-TH')}` : '';
       const displayTime = formatRelativeTime(credit.date || credit.createdAt);
@@ -321,15 +331,15 @@ function renderFeed() {
 
       return `
         <div class="clean-card overflow-hidden flex flex-col justify-between group">
-          <div 
+          <div
             onclick="openLightbox('${credit.id}')"
             class="relative w-full h-64 sm:h-72 bg-slate-100 cursor-pointer overflow-hidden"
           >
-            <img 
-              src="${mainImage}" 
-              alt="${escapeHtml(credit.title)}" 
-              class="w-full h-full object-cover zoomable-thumb" 
-              loading="lazy" 
+            <img
+              src="${escapeHtml(mainImage)}"
+              alt="${escapeHtml(credit.title)}"
+              class="w-full h-full object-cover zoomable-thumb"
+              loading="lazy"
               onerror="this.src='/images/placeholder-credit.svg'"
             >
             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition flex items-center justify-center">
@@ -390,14 +400,14 @@ function renderFeed() {
 
     if (state.searchQuery) {
       const q = state.searchQuery.toLowerCase();
-      filtered = filtered.filter(r => 
+      filtered = filtered.filter(r =>
         (r.customerName && r.customerName.toLowerCase().includes(q)) ||
         (r.message && r.message.toLowerCase().includes(q))
       );
     }
 
     if (countLabel) {
-      countLabel.textContent = targetType === '+1' 
+      countLabel.textContent = targetType === '+1'
         ? `รีวิว +1 จากลูกค้า: ${filtered.length} รายการ`
         : `รายงาน -1 พร้อมหลักฐาน: ${filtered.length} รายการ`;
     }
@@ -420,21 +430,21 @@ function renderFeed() {
     grid.innerHTML = filtered.map(rev => {
       const isPlus = (rev.type === '+1');
       const hasImages = rev.images && rev.images.length > 0;
-      const mainImg = hasImages ? rev.images[0] : null;
+      const mainImg = hasImages ? sanitizeImageUrl(rev.images[0]) : null;
       const initial = (rev.customerName || 'ล').charAt(0).toUpperCase();
 
       return `
         <div class="clean-card overflow-hidden flex flex-col justify-between group ${isPlus ? 'border-emerald-100 hover:border-emerald-300' : 'border-rose-200 hover:border-rose-300'}">
-          
+
           ${hasImages ? `
-            <div 
+            <div
               onclick="openLightbox('${rev.id}')"
               class="relative w-full h-60 sm:h-64 bg-slate-100 cursor-pointer overflow-hidden"
             >
-              <img 
-                src="${mainImg}" 
-                alt="หลักฐานรีวิว" 
-                class="w-full h-full object-cover zoomable-thumb" 
+              <img
+                src="${escapeHtml(mainImg)}"
+                alt="หลักฐานรีวิว"
+                class="w-full h-full object-cover zoomable-thumb"
                 loading="lazy"
               >
               <div class="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition flex items-center justify-center">
@@ -657,9 +667,9 @@ function renderReviewPreviews() {
     return `
       <div class="relative w-16 h-16 rounded-xl overflow-hidden border border-slate-200 group">
         <img src="${url}" class="w-full h-full object-cover">
-        <button 
-          type="button" 
-          onclick="removeReviewFile(${idx})" 
+        <button
+          type="button"
+          onclick="removeReviewFile(${idx})"
           class="absolute top-1 right-1 w-5 h-5 bg-black/70 hover:bg-rose-600 text-white rounded-full flex items-center justify-center text-xs transition cursor-pointer"
         >
           &times;
@@ -810,7 +820,7 @@ function updateLightboxImage() {
   if (!item || !item.images || item.images.length === 0) return;
 
   const currentIdx = state.lightbox.currentImageIndex;
-  const currentSrc = item.images[currentIdx] || '/images/placeholder-credit.svg';
+  const currentSrc = sanitizeImageUrl(item.images[currentIdx]);
 
   const imgEl = document.getElementById('lightbox-img');
   const openExt = document.getElementById('lightbox-open-external');
@@ -822,7 +832,10 @@ function updateLightboxImage() {
     imgEl.src = currentSrc;
     imgEl.style.transform = 'scale(1)';
   }
-  if (openExt) openExt.href = currentSrc;
+  if (openExt) {
+    const safeExt = sanitizeUrl(currentSrc);
+    openExt.href = safeExt !== '#' ? safeExt : '#';
+  }
 
   // Multiple images navigation
   if (item.images.length > 1) {
@@ -832,8 +845,8 @@ function updateLightboxImage() {
     if (thumbStrip) {
       thumbStrip.classList.remove('hidden');
       thumbStrip.innerHTML = item.images.map((img, i) => `
-        <img 
-          src="${img}" 
+        <img
+          src="${escapeHtml(sanitizeImageUrl(img))}"
           onclick="setLightboxImageIndex(${i})"
           class="w-12 h-12 rounded-lg object-cover cursor-pointer border-2 transition ${i === currentIdx ? 'border-amber-500 scale-105' : 'border-transparent opacity-60 hover:opacity-100'}"
         >
@@ -912,13 +925,36 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Utility: HTML Escaping
+// Utility: HTML Escaping & URL Sanitization
 function escapeHtml(str) {
-  if (!str) return '';
-  return str
+  if (str === null || str === undefined) return '';
+  return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+function sanitizeUrl(rawUrl, fallback = '#') {
+  if (!rawUrl || typeof rawUrl !== 'string') return fallback;
+  const trimmed = rawUrl.trim();
+  if (!trimmed || /[\u0000-\u001F\u007F-\u009F]/.test(trimmed)) return fallback;
+  if (trimmed.startsWith('#')) return /^#[a-zA-Z0-9_\-\u0E00-\u0E7F]*$/.test(trimmed) ? trimmed : fallback;
+  if (trimmed.startsWith('/')) {
+    if (trimmed.startsWith('//') || trimmed.startsWith('/\\')) return fallback;
+    return trimmed;
+  }
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol === 'https:' || parsed.protocol === 'http:') return parsed.href;
+    return fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function sanitizeImageUrl(rawUrl, fallback = '/images/placeholder-credit.svg') {
+  const safe = sanitizeUrl(rawUrl, fallback);
+  return (safe === '#' || !safe) ? fallback : safe;
 }

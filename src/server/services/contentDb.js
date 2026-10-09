@@ -5,8 +5,14 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '../../../');
-const dataDir = path.join(rootDir, 'src', 'server', 'data');
-const contentFilePath = path.join(dataDir, 'content.json');
+
+function getDataDir() {
+  return process.env.DATA_DIR || path.join(rootDir, 'src', 'server', 'data');
+}
+
+function getContentFilePath() {
+  return path.join(getDataDir(), 'content.json');
+}
 
 export const DEFAULT_CONTENT = {
   general: {
@@ -203,18 +209,27 @@ export const DEFAULT_CONTENT = {
 };
 
 function ensureDataFile() {
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
+  const dir = getDataDir();
+  const file = getContentFilePath();
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
   }
-  if (!fs.existsSync(contentFilePath)) {
-    fs.writeFileSync(contentFilePath, JSON.stringify(DEFAULT_CONTENT, null, 2), 'utf8');
+  if (!fs.existsSync(file)) {
+    const defaultSource = path.join(rootDir, 'src', 'server', 'data', 'content.json');
+    let contentToSeed = DEFAULT_CONTENT;
+    if (fs.existsSync(defaultSource)) {
+      try {
+        contentToSeed = JSON.parse(fs.readFileSync(defaultSource, 'utf8'));
+      } catch {}
+    }
+    fs.writeFileSync(file, JSON.stringify(contentToSeed, null, 2), 'utf8');
   }
 }
 
 export function getSiteContent() {
   try {
     ensureDataFile();
-    const raw = fs.readFileSync(contentFilePath, 'utf8');
+    const raw = fs.readFileSync(getContentFilePath(), 'utf8');
     const parsed = JSON.parse(raw);
     return {
       general: { ...DEFAULT_CONTENT.general, ...(parsed.general || {}) },
@@ -230,7 +245,7 @@ export function getSiteContent() {
 
 export function saveSiteContent(fullContent) {
   ensureDataFile();
-  fs.writeFileSync(contentFilePath, JSON.stringify(fullContent, null, 2), 'utf8');
+  fs.writeFileSync(getContentFilePath(), JSON.stringify(fullContent, null, 2), 'utf8');
 }
 
 export function updateGeneralContent(updates) {
