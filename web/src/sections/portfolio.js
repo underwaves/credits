@@ -48,10 +48,9 @@ export function PortfolioSection() {
         <!-- Category Filters -->
         <div class="portfolio-filter-tabs reveal-on-scroll">
           <button class="filter-tab active" data-filter="all">ทั้งหมด</button>
-          <button class="filter-tab" data-filter="website">เว็บไซต์ & แอพ</button>
-          <button class="filter-tab" data-filter="coding">โปรแกรม & API</button>
-          <button class="filter-tab" data-filter="design">กราฟิก & ดีไซน์</button>
-          <button class="filter-tab" data-filter="presentation">สไลด์พรีเซนต์</button>
+          <button class="filter-tab" data-filter="design">🎨 กราฟิก &amp; ดีไซน์</button>
+          <button class="filter-tab" data-filter="presentation">📊 สไลด์ &amp; สื่อการสอน</button>
+          <button class="filter-tab" data-filter="website">💻 เว็บไซต์ &amp; Web App</button>
         </div>
 
         <div class="portfolio-grid" id="portfolio-grid">

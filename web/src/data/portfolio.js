@@ -1,135 +1,657 @@
 export const PORTFOLIO_DATA = [
   {
-    id: 'p1',
-    title: 'Smart Pharmacy Locker — ตู้รับยาอัจฉริยะ IoT',
-    category: 'website',
-    categoryLabel: 'Web App & IoT',
-    desc: 'นวัตกรรมตู้รับยาอัตโนมัติพร้อมระบบสายพานลำเลียง จุดตรวจความปลอดภัย 5 Rights และระบบเสียงพูดภาษาไทยแนะนำวิธีทานยาเพื่อผู้สูงอายุ',
-    tech: ['React 19', 'Tailwind CSS', 'ESP32 IoT', 'Web Speech API', 'Vite'],
-    image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=800&q=80',
-    demoUrl: 'https://github.com/underwaves/smart-pharmacy-locker',
-    demoLabel: 'ดูโปรเจกต์บน GitHub',
-    isReal: true
+    "id": "g1",
+    "title": "โปสเตอร์การแข่งขันกีฬาสี ราชพฤกษ์เกมส์ (Ratchapruek Game)",
+    "category": "design",
+    "categoryLabel": "Poster & Event",
+    "desc": "งานออกแบบโปสเตอร์การแข่งขันกีฬาสีราชพฤกษ์เกมส์ เทิดไท้องค์ราชัน วัฒนธรรม 4 ภาค โรงเรียนบ้านนาสาร โทนสีคอนทราสต์สดใส สะดุดตา",
+    "tech": [
+      "Photoshop",
+      "Poster Design",
+      "Event Artwork",
+      "Typography"
+    ],
+    "image": "/images/portfolio/portfolio-poster-ratchapruek-game.webp",
+    "demoUrl": "/images/portfolio/portfolio-poster-ratchapruek-game.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T08:00:00.000Z"
   },
   {
-    id: 'p2',
-    title: 'SUNFZENITH Credits & Review Platform',
-    category: 'website',
-    categoryLabel: 'Live Web Platform',
-    desc: 'แพลตฟอร์มสมุดรวมเครดิตการซื้อขายออนไลน์แบบเรียลไทม์ พร้อมระบบส่งสลิปหลักฐานยืนยันความปลอดภัย เช็คประวัติได้โปร่งใส 100%',
-    tech: ['Node.js', 'Express', 'Supabase PostgreSQL', 'Storage', 'Vanilla JS'],
-    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
-    demoUrl: '/credits',
-    demoLabel: 'เข้าชมระบบจริง',
-    isReal: true
+    "id": "g2",
+    "title": "โปสเตอร์คอนเสิร์ต BEAT OF LUV วันวาเลนไทน์",
+    "category": "design",
+    "categoryLabel": "Concert Poster",
+    "desc": "งานออกแบบโปสเตอร์กิจกรรมคอนเสิร์ต Beat of Luv สไตล์ Dreamy Night ผสานดนตรีแจ๊สและเครื่องเป่าทองเหลือง บรรยากาศอบอุ่นน่าประทับใจ",
+    "tech": [
+      "Illustrator",
+      "Concert Poster",
+      "Vector Art",
+      "Typography"
+    ],
+    "image": "/images/portfolio/portfolio-poster-concert-beat-of-luv.webp",
+    "demoUrl": "/images/portfolio/portfolio-poster-concert-beat-of-luv.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T07:50:00.000Z"
   },
   {
-    id: 'p3',
-    title: 'DocuMind — Enterprise Document Platform',
-    category: 'website',
-    categoryLabel: 'Document & Knowledge Platform',
-    desc: 'แพลตฟอร์มคลังความรู้และตอบคำถามสืบค้นเอกสารองค์กรด้วย Clean Architecture บน FastAPI, pgvector พร้อม Real-time SSE Streaming',
-    tech: ['Python', 'FastAPI', 'PostgreSQL (pgvector)', 'Vector Search', 'Docker'],
-    image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
-    demoUrl: 'https://github.com/underwaves',
-    demoLabel: 'ดูสถาปัตยกรรมระบบ',
-    isReal: true
+    "id": "g3",
+    "title": "ป้ายเครดิตซื้อขายร้านค้าออนไลน์ (+1 ไม่โกง คุยง่าย — Raiden Shogun Theme)",
+    "category": "design",
+    "categoryLabel": "Shop Credit Banner",
+    "desc": "ออกแบบป้ายเครดิตร้านค้าออนไลน์ธีม Raiden Shogun สไตล์กล่องข้อความพรีเมียม ระบุเบอร์พร้อมเพย์และช่องทางติดต่อชัดเจน สร้างความน่าเชื่อถือ 100%",
+    "tech": [
+      "Photoshop",
+      "Credit Banner",
+      "Game Theme",
+      "Brand Identity"
+    ],
+    "image": "/images/portfolio/portfolio-banner-credit-raiden-shogun.webp",
+    "demoUrl": "/images/portfolio/portfolio-banner-credit-raiden-shogun.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T07:40:00.000Z"
   },
   {
-    id: 'p4',
-    title: 'Semantic Firewall & Fact-Checking Engine (งานวิจัยตีพิมพ์ AUCC)',
-    category: 'website',
-    categoryLabel: 'Research & Data Engine',
-    desc: 'บทความวิจัยและระบบตรวจสอบความถูกต้องของข้อมูล (Fact-Checking) ตรวจสอบความถูกต้องของข้อความอย่างแม่นยำ นำเสนอในการประชุมวิชาการ AUCC',
-    tech: ['Python', 'Fact-Checking Engine', 'Information Retrieval', 'Search API', 'FastAPI'],
-    image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80',
-    demoUrl: 'https://github.com/underwaves',
-    demoLabel: 'ดูรายละเอียดงานวิจัย',
-    isReal: true
+    "id": "g4",
+    "title": "สไลด์นำเสนอโครงงานนวัตกรรม DailyRipe บรรจุภัณฑ์กล้วยอัจฉริยะ",
+    "category": "presentation",
+    "categoryLabel": "Slide Deck & Innovation",
+    "desc": "งานออกแบบสไลด์นำเสนอโครงงานนวัตกรรม DailyRipe และบรรจุภัณฑ์กล้วยเรียงระดับความสุก กราฟิกย่อยข้อมูลง่าย เล่าเรื่องชัดเจน โทนสีและเลย์เอาต์ระดับมืออาชีพ",
+    "tech": [
+      "PowerPoint",
+      "Canva",
+      "Graphic Layout",
+      "Data Visualization"
+    ],
+    "image": "/images/portfolio/portfolio-slide-dailyripe-packaging.webp",
+    "demoUrl": "/images/portfolio/portfolio-slide-dailyripe-packaging.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T07:30:00.000Z"
   },
   {
-    id: 'p5',
-    title: 'สไลด์นำเสนอโครงงานนวัตกรรม DailyRipe & บรรจุภัณฑ์กล้วย',
-    category: 'presentation',
-    categoryLabel: 'Slide Deck & Presentation',
-    desc: 'งานออกแบบสไลด์นำเสนอโครงงานนวัตกรรมบรรจุภัณฑ์กล้วยและ DailyRipe กราฟิกย่อยข้อมูลง่าย เล่าเรื่องชัดเจน โทนสีและเลย์เอาต์ระดับมืออาชีพ',
-    tech: ['PowerPoint', 'Canva', 'Graphic Layout', 'Data Visualization'],
-    image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=800&q=80',
-    demoUrl: 'https://line.me/R/ti/p/@419ajynp',
-    demoLabel: 'ปรึกษางานสไลด์',
-    isReal: true
+    "id": "g5",
+    "title": "สไลด์สื่อการสอนคณิตศาสตร์ เรื่อง วงรี (Ellipse Slide Deck 46 แผ่น)",
+    "category": "presentation",
+    "categoryLabel": "Educational Slide Deck",
+    "desc": "ชุดสไลด์ประกอบการสอนคณิตศาสตร์เรื่องนิยามและสมการวงรี 46 สไลด์ จัดวางภาพประกอบและกราฟิกช่วยอธิบายสมการ เข้าใจง่ายและน่าติดตาม",
+    "tech": [
+      "PowerPoint",
+      "Slide Design",
+      "Educational Graphic",
+      "Mathematics"
+    ],
+    "image": "/images/portfolio/portfolio-slide-math-ellipse.webp",
+    "demoUrl": "/images/portfolio/portfolio-slide-math-ellipse.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T07:20:00.000Z"
   },
   {
-    id: 'p6',
-    title: 'Part-Time Job Matching System (ระบบจัดหางานพาร์ตไทม์)',
-    category: 'website',
-    categoryLabel: 'Web Application',
-    desc: 'ระบบจับคู่งานพาร์ตไทม์สำหรับนักศึกษาเพื่อหารายได้ระหว่างเรียน ค้นหาตามเขตพื้นที่ สมัครงานออนไลน์ และแดชบอร์ดหลังบ้านสำหรับนายจ้าง',
-    tech: ['PHP', 'MySQL', 'JavaScript', 'Bootstrap', 'HTML5 / CSS3'],
-    image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=80',
-    demoUrl: 'https://github.com/underwaves',
-    demoLabel: 'ดูโครงสร้างโปรเจกต์',
-    isReal: true
+    "id": "g6",
+    "title": "โปสเตอร์กราฟิก Kuroko no Basket (Generation of Miracles)",
+    "category": "design",
+    "categoryLabel": "Anime & Fanart Poster",
+    "desc": "งานออกแบบโปสเตอร์สไตล์มินิมอลเท่ Kuroko no Basket รวม 5 ผู้เล่นยุคปาฏิหาริย์ พร้อมการจัดวางตัวอักษรภาษาอังกฤษโมเดิร์น",
+    "tech": [
+      "Photoshop",
+      "Graphic Layout",
+      "Anime Poster",
+      "Minimalist"
+    ],
+    "image": "/images/portfolio/portfolio-poster-kuroko-no-basket.webp",
+    "demoUrl": "/images/portfolio/portfolio-poster-kuroko-no-basket.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T07:10:00.000Z"
   },
   {
-    id: 'p7',
-    title: 'FruitLeaf 3D — ข้อมูลโรคผลไม้ไทย & Interactive Model',
-    category: 'design',
-    categoryLabel: '3D Model & Web UI',
-    desc: 'เว็บแอปพลิเคชันสืบค้นข้อมูลโรคผลไม้ไทยพร้อมโมเดลผลไม้ 3 มิติแบบหมุนโต้ตอบได้ด้วย Three.js Low-Poly Procedural Viewer และฐานข้อมูลโรคพืช',
-    tech: ['Three.js', 'Python', 'Flask', '3D Low-Poly', 'UI/UX Design'],
-    image: 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=800&q=80',
-    demoUrl: 'https://github.com/underwaves',
-    demoLabel: 'ดูรายละเอียด 3D UI',
-    isReal: true
+    "id": "g7",
+    "title": "ตราสัญลักษณ์ & แบนเนอร์สาขาวิศวกรรมปัญญาประดิษฐ์ (AI Engineering & DI)",
+    "category": "design",
+    "categoryLabel": "Brand & Identity",
+    "desc": "งานออกแบบแบรนด์ดิ้งและตราสัญลักษณ์สาขาวิศวกรรมปัญญาประดิษฐ์และนวัตกรรมดิจิทัล (AI Engineering and Digital Innovation) ไฮเทคและทันสมัย",
+    "tech": [
+      "Illustrator",
+      "Brand Logo",
+      "Identity Design",
+      "Tech Vector"
+    ],
+    "image": "/images/portfolio/portfolio-ai-engineering-identity.webp",
+    "demoUrl": "/images/portfolio/portfolio-ai-engineering-identity.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T07:00:00.000Z"
   },
   {
-    id: 'p8',
-    title: 'ระบบบริหารจัดการกระชังปลา (Fish Cage Dashboard & DB)',
-    category: 'website',
-    categoryLabel: 'Web Dashboard & DB',
-    desc: 'ระบบฐานข้อมูลและเว็บแอปพลิเคชันบริหารจัดการกระชังปลา ติดตามต้นทุน รายรับ-กำไรขาดทุนแต่ละกระชัง พร้อม SQL Stored Procedure & ERD',
-    tech: ['Node.js', 'Express', 'MySQL', 'ERD Design', 'SQL Stored Procedure'],
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80',
-    demoUrl: 'https://github.com/underwaves',
-    demoLabel: 'ดูโครงสร้างระบบ',
-    isReal: true
+    "id": "g8",
+    "title": "ปก & รูปเล่ม E-Book วิชา Front Office Operations (มทร.ศรีวิชัย)",
+    "category": "presentation",
+    "categoryLabel": "Academic E-Book",
+    "desc": "ออกแบบปกและรูปเล่มสื่อการสอนวิชา Front Office Operations คณะศิลปศาสตร์ มทร.ศรีวิชัย จัดวางเนื้อหาและรูปเล่มมาตรฐานสิ่งพิมพ์วิชาการ",
+    "tech": [
+      "Editorial Design",
+      "E-Book Layout",
+      "Typography",
+      "Academic Book"
+    ],
+    "image": "/images/portfolio/portfolio-ebook-front-office-operations.webp",
+    "demoUrl": "/images/portfolio/portfolio-ebook-front-office-operations.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T06:50:00.000Z"
   },
   {
-    id: 'p9',
-    title: 'ป้ายเครดิต & แบนเนอร์ซื้อขาย (Genshin Impact — Eula Theme)',
-    category: 'design',
-    categoryLabel: 'Graphic & Banner',
-    desc: 'งานออกแบบป้ายเครดิตการซื้อขายเกม Genshin Impact ธีม Eula โทนสีฟ้าน้ำแข็ง พรีเมียม พร้อมการ์ดสรุปประวัติความน่าเชื่อถือ +1 / -1 ชัดเจน โดดเด่น',
-    tech: ['Photoshop', 'Graphic Design', 'Banner Layout', 'Typography'],
-    image: '/images/portfolio-genshin-credit.png',
-    demoUrl: '/images/portfolio-genshin-credit.png',
-    demoLabel: 'ดูภาพผลงานเต็ม',
-    isReal: true
+    "id": "g9",
+    "title": "ปก & รูปเล่ม E-Book สื่อการสอนการจัดการฝ่ายห้องพัก (มทร.ศรีวิชัย)",
+    "category": "presentation",
+    "categoryLabel": "Academic E-Book",
+    "desc": "ออกแบบปกและจัดวางเลย์เอาต์ E-Book สื่อการสอนรายวิชาการจัดการฝ่ายห้องพัก โทนสีสุภาพ ภาพประกอบคมชัด เหมาะสำหรับการเรียนการสอน",
+    "tech": [
+      "InDesign",
+      "Canva",
+      "Book Cover",
+      "Editorial Layout"
+    ],
+    "image": "/images/portfolio/portfolio-ebook-room-division-management.webp",
+    "demoUrl": "/images/portfolio/portfolio-ebook-room-division-management.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T06:40:00.000Z"
   },
   {
-    id: 'p10',
-    title: 'โปสเตอร์ & ปกการ์ดวันแม่ 12 สิงหาคม (Mother\'s Day Poster)',
-    category: 'design',
-    categoryLabel: 'Poster & Card',
-    desc: 'งานออกแบบโปสเตอร์และปกการ์ดวันแม่ โทนสีอบอุ่นสไตล์สีน้ำ (Watercolor) ภาพแม่โอบกอดลูกประดับซุ้มดอกมะลิ ให้ความรู้สึกละมุนและซาบซึ้งใจ',
-    tech: ['Poster Design', 'Watercolor Art', 'Typography', 'Print Ready'],
-    image: '/images/portfolio-mothers-day-poster.png',
-    demoUrl: '/images/portfolio-mothers-day-poster.png',
-    demoLabel: 'ดูภาพผลงานเต็ม',
-    isReal: true
+    "id": "g10",
+    "title": "ปก & รูปเล่ม E-Book วิชาการดำเนินงานและการจัดการงานแม่บ้าน (Housekeeping Operations)",
+    "category": "presentation",
+    "categoryLabel": "Academic E-Book",
+    "desc": "ออกแบบปกและจัดรูปเล่ม E-Book ตำราเรียนวิชา Housekeeping Operations and Management ครบถ้วน 18 หน้า ดีไซน์สะอาดตาและเป็นระเบียบ",
+    "tech": [
+      "Book Cover",
+      "Publication Design",
+      "E-Book Layout",
+      "Typography"
+    ],
+    "image": "/images/portfolio/portfolio-ebook-housekeeping-operations.webp",
+    "demoUrl": "/images/portfolio/portfolio-ebook-housekeeping-operations.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T06:30:00.000Z"
   },
   {
-    id: 'p11',
-    title: 'การ์ดอวยพรวันแม่ พวงมาลัยดอกมะลิ (Mother\'s Day Greeting Card)',
-    category: 'design',
-    categoryLabel: 'Card & Letter Design',
-    desc: 'งานออกแบบการ์ดอวยพรวันแม่แบบกางสองหน้า ฝั่งซ้ายภาพวาดสีน้ำพวงมาลัยดอกมะลิวิจิตร ฝั่งขวาจัดวางเลย์เอาต์จดหมายบอกรักแม่ในกรอบพฤกษา เรียบหรูอบอุ่น',
-    tech: ['Card Spread', 'Botanical Art', 'Layout Design', 'Typography'],
-    image: '/images/portfolio-mothers-day-card.png',
-    demoUrl: '/images/portfolio-mothers-day-card.png',
-    demoLabel: 'ดูภาพผลงานเต็ม',
-    isReal: true
+    "id": "g11",
+    "title": "ป้ายช่องทางชำระเงิน How to Pay (SCB QR Scan & Transfer)",
+    "category": "design",
+    "categoryLabel": "Payment Slip Design",
+    "desc": "ป้ายแจ้งเลขบัญชีและช่องทางชำระเงิน How to Pay พร้อมกรอบสแกน QR Code ธนาคารไทยพาณิชย์ ช่วยให้ลูกค้าโอนเงินสะดวกและน่าเชื่อถือ",
+    "tech": [
+      "Canva",
+      "Payment Card",
+      "QR Scan Layout",
+      "Social Graphic"
+    ],
+    "image": "/images/portfolio/portfolio-how-to-pay-scb-qr.webp",
+    "demoUrl": "/images/portfolio/portfolio-how-to-pay-scb-qr.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T06:20:00.000Z"
+  },
+  {
+    "id": "g12",
+    "title": "เซ็ตป้าย How to Pay ธนาคารกสิกรไทย & TrueMoney Wallet",
+    "category": "design",
+    "categoryLabel": "Payment Guide Set",
+    "desc": "ชุดป้ายแจ้งชำระเงิน 2 ช่องทาง (กสิกรไทย & True Wallet) ดีไซน์เป็นระเบียบ อ่านง่าย สบายตา ตกแต่งด้วยไอคอนโมเดิร์น",
+    "tech": [
+      "Graphic Layout",
+      "Bank Slip Card",
+      "Typography",
+      "Minimal"
+    ],
+    "image": "/images/portfolio/portfolio-how-to-pay-kbank-wallet-set.webp",
+    "demoUrl": "/images/portfolio/portfolio-how-to-pay-kbank-wallet-set.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T06:10:00.000Z"
+  },
+  {
+    "id": "g13",
+    "title": "ป้าย How to Pay ธนาคารไทยพาณิชย์ & TrueMoney Wallet สไตล์น่ารัก",
+    "category": "design",
+    "categoryLabel": "Payment Card Design",
+    "desc": "ป้ายช่องทางชำระเงินดีไซน์ตัวอักษรน่ารัก แจ้งเลขบัญชี SCB และ TrueMoney Wallet พร้อมคำแนะนำแนบสลิปทุกครั้งหลังโอน",
+    "tech": [
+      "Graphic Design",
+      "Cute Typography",
+      "Payment Card",
+      "Social Shop"
+    ],
+    "image": "/images/portfolio/portfolio-how-to-pay-scb-wallet-cute.webp",
+    "demoUrl": "/images/portfolio/portfolio-how-to-pay-scb-wallet-cute.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T06:00:00.000Z"
+  },
+  {
+    "id": "g14",
+    "title": "ป้าย How to Pay โทนสีฟ้าพาสเทล พร้อมกรอบสแกน QR",
+    "category": "design",
+    "categoryLabel": "Pastel Payment Card",
+    "desc": "งานออกแบบป้ายแจ้งโอนเงินโทนสีฟ้าละมุน สไตล์มินิมอลโมเดิร์น พร้อมสัญลักษณ์ Scan QR ชัดเจน เหมาะกับร้านค้าออนไลน์",
+    "tech": [
+      "Canva",
+      "Payment Banner",
+      "Pastel Style",
+      "Social Media"
+    ],
+    "image": "/images/portfolio/portfolio-how-to-pay-pastel-blue.webp",
+    "demoUrl": "/images/portfolio/portfolio-how-to-pay-pastel-blue.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T05:50:00.000Z"
+  },
+  {
+    "id": "g15",
+    "title": "ป้ายแจ้งชำระเงินและช่องทางติดต่อ (Payment Guide Banner)",
+    "category": "design",
+    "categoryLabel": "Payment Notice",
+    "desc": "งานออกแบบป้ายช่องทางการโอนเงิน แจ้งสลิปทุกครั้งหลังโอน ดีไซน์เรียบหรู ป้องกันความผิดพลาดในการโอน",
+    "tech": [
+      "Graphic Design",
+      "Payment Notice",
+      "Typography",
+      "Minimal"
+    ],
+    "image": "/images/portfolio/portfolio-how-to-pay-minimal-notice.webp",
+    "demoUrl": "/images/portfolio/portfolio-how-to-pay-minimal-notice.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T05:40:00.000Z"
+  },
+  {
+    "id": "g16",
+    "title": "ป้ายเรทราคาบริการเกม Genshin Impact ครบวงจร (ชุด 9 รายการ)",
+    "category": "design",
+    "categoryLabel": "Game Service Menu Set",
+    "desc": "เซ็ตงานออกแบบตารางเรทราคางานบริการเกม Genshin Impact ครบวงจร ทั้งลงดันอาร์ติแฟก บอสสัปดาห์ อัพเสาลม/หิน/ไฟฟ้า และเรทเวล",
+    "tech": [
+      "Photoshop",
+      "Game UI Graphic",
+      "Price Sheet Set",
+      "Typography"
+    ],
+    "image": "/images/portfolio/portfolio-genshin-service-price-set.webp",
+    "demoUrl": "/images/portfolio/portfolio-genshin-service-price-set.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T05:30:00.000Z"
+  },
+  {
+    "id": "g17",
+    "title": "ป้ายเรทราคาลงดัน & บอสสัปดาห์ Genshin Impact",
+    "category": "design",
+    "categoryLabel": "Game Price List",
+    "desc": "งานออกแบบป้ายราคาแบบกระชับ ชี้แจงเรทลงดันเจี้ยน อาร์ติแฟก และบอสสัปดาห์ ตกแต่งด้วยธีมและสีประจำเกม",
+    "tech": [
+      "Graphic Design",
+      "Genshin Theme",
+      "Price Table",
+      "Game Art"
+    ],
+    "image": "/images/portfolio/portfolio-genshin-dungeon-boss-rates.webp",
+    "demoUrl": "/images/portfolio/portfolio-genshin-dungeon-boss-rates.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T05:20:00.000Z"
+  },
+  {
+    "id": "g18",
+    "title": "ป้ายเรทราคาอัพเสาลม เสาหิน เสาไฟฟ้า Genshin Impact",
+    "category": "design",
+    "categoryLabel": "Game Service Banner",
+    "desc": "ป้ายเรทราคาบริการเก็บเสาและปลดล็อกเสาเทเลพอร์ต จัดวางเลย์เอาต์ราคาต่อลูกและราคาเหมา สบายตา",
+    "tech": [
+      "Canva",
+      "Banner Design",
+      "Price Card",
+      "Game Asset"
+    ],
+    "image": "/images/portfolio/portfolio-genshin-statue-unlock-rates.webp",
+    "demoUrl": "/images/portfolio/portfolio-genshin-statue-unlock-rates.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T05:10:00.000Z"
+  },
+  {
+    "id": "g19",
+    "title": "ป้ายเรทราคาบริการเกม & รับปั๊มเต๋า (Damian Game Service)",
+    "category": "design",
+    "categoryLabel": "Game Rate Card",
+    "desc": "ป้ายแสดงเรทราคาบริการรับปั๊มเต๋าและเกมออนไลน์ จัดวางลำดับราคาต่อลูก พร้อมเงื่อนไขโปรโมชั่นของแถมชัดเจน",
+    "tech": [
+      "Photoshop",
+      "Price Menu",
+      "Game Service",
+      "Graphic Layout"
+    ],
+    "image": "/images/portfolio/portfolio-rate-card-dice-service.webp",
+    "demoUrl": "/images/portfolio/portfolio-rate-card-dice-service.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T05:00:00.000Z"
+  },
+  {
+    "id": "g20",
+    "title": "ป้ายโปรเปิดร้าน & เรทราคาซื้อขายเกม (Special Promotion Banner)",
+    "category": "design",
+    "categoryLabel": "Promo & Price Card",
+    "desc": "งานออกแบบป้ายโปรเปิดร้านและตารางเรทราคาสินค้าดิจิทัล โทนสีสดใส ตัวเลขอ่านง่าย สรุปราคาชัดเจน",
+    "tech": [
+      "Photoshop",
+      "Promo Banner",
+      "Pricing Table",
+      "Typography"
+    ],
+    "image": "/images/portfolio/portfolio-banner-promo-rates.webp",
+    "demoUrl": "/images/portfolio/portfolio-banner-promo-rates.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T04:50:00.000Z"
+  },
+  {
+    "id": "g21",
+    "title": "โปสเตอร์กิจกรรมนิทรรศการ Computer Engineering (3 กิจกรรมไฮไลต์)",
+    "category": "design",
+    "categoryLabel": "Exhibition Flyer & Poster",
+    "desc": "ชุดโปสเตอร์นิทรรศการคอมพิวเตอร์: ระบบสแกนใบหน้าวิเคราะห์อารมณ์, สาธิต 3D Printer และจุดถ่ายภาพรับเกียรติบัตร กราฟิกสีสันสดใส",
+    "tech": [
+      "Canva",
+      "Exhibition Poster",
+      "Flyer Design",
+      "Creative Layout"
+    ],
+    "image": "/images/portfolio/portfolio-flyer-computer-engineering.webp",
+    "demoUrl": "/images/portfolio/portfolio-flyer-computer-engineering.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T04:40:00.000Z"
+  },
+  {
+    "id": "g22",
+    "title": "ตราสัญลักษณ์ & แบนเนอร์ สมาคมพยาบาลจังหวัดอุดรธานี",
+    "category": "design",
+    "categoryLabel": "Organization Identity",
+    "desc": "งานออกแบบตราสัญลักษณ์และสื่อแบนเนอร์ทางการของสมาคมพยาบาลจังหวัดอุดรธานี (The Nurses Association of Udon Thani) สวยงาม เรียบร้อย",
+    "tech": [
+      "Illustrator",
+      "Logo Design",
+      "Identity",
+      "Vector Badge"
+    ],
+    "image": "/images/portfolio/portfolio-logo-nurse-association.webp",
+    "demoUrl": "/images/portfolio/portfolio-logo-nurse-association.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T04:30:00.000Z"
+  },
+  {
+    "id": "g23",
+    "title": "ป้ายแบนเนอร์ประชาสัมพันธ์โรงเรียน (Bannasan School Banner)",
+    "category": "design",
+    "categoryLabel": "School PR Banner",
+    "desc": "งานออกแบบป้ายแบนเนอร์และกราฟิกประชาสัมพันธ์โรงเรียนบ้านนาสาร โทนสีน้ำเงิน-ทอง สื่อสารข้อมูลองค์กรอย่างเป็นมืออาชีพ",
+    "tech": [
+      "Photoshop",
+      "PR Banner",
+      "Corporate Design",
+      "Typography"
+    ],
+    "image": "/images/portfolio/portfolio-banner-bannasan-school.webp",
+    "demoUrl": "/images/portfolio/portfolio-banner-bannasan-school.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T04:20:00.000Z"
+  },
+  {
+    "id": "g24",
+    "title": "แฟ้มสะสมผลงาน Portfolio คอมพิวเตอร์ธุรกิจและการโรงแรม",
+    "category": "presentation",
+    "categoryLabel": "Student Portfolio",
+    "desc": "งานออกแบบ Portfolio แฟ้มสะสมผลงาน แนะนำประวัติการศึกษา ประสบการณ์ฝึกงาน และผลงานเด่น เลย์เอาต์สวยงาม เรียบร้อย",
+    "tech": [
+      "Portfolio Layout",
+      "Canva",
+      "Resume Design",
+      "Editorial"
+    ],
+    "image": "/images/portfolio/portfolio-student-folio-business-computer.webp",
+    "demoUrl": "/images/portfolio/portfolio-student-folio-business-computer.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T04:10:00.000Z"
+  },
+  {
+    "id": "g25",
+    "title": "แฟ้มสะสมผลงาน Portfolio สาขาวิชาการจัดการโลจิสติกส์ (12 หน้า)",
+    "category": "presentation",
+    "categoryLabel": "Comprehensive Portfolio",
+    "desc": "เล่ม Portfolio รวมผลงานและกิจกรรม 12 หน้า สาขาโลจิสติกส์ จัดเรียงไทม์ไลน์ ผลการเรียน กิจกรรม และใบประกาศนียบัตรอย่างเป็นหมวดหมู่",
+    "tech": [
+      "Multi-page Portfolio",
+      "Typography",
+      "Graphic Layout",
+      "Print Ready"
+    ],
+    "image": "/images/portfolio/portfolio-student-folio-logistics.webp",
+    "demoUrl": "/images/portfolio/portfolio-student-folio-logistics.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T04:00:00.000Z"
+  },
+  {
+    "id": "g26",
+    "title": "โปสเตอร์ศิลปะจัดวาง & กราฟิกดีไซน์ร่วมสมัย (Modern Aesthetic Poster)",
+    "category": "design",
+    "categoryLabel": "Modern Graphic Poster",
+    "desc": "งานออกแบบโปสเตอร์กราฟิกคุมโทน ผสมผสานองค์ประกอบศิลป์และการจัดวางแบบ Minimal Dark Aesthetic",
+    "tech": [
+      "Photoshop",
+      "Abstract Art",
+      "Poster Design",
+      "Creative Composition"
+    ],
+    "image": "/images/portfolio/portfolio-poster-modern-aesthetic.webp",
+    "demoUrl": "/images/portfolio/portfolio-poster-modern-aesthetic.webp",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-09T03:50:00.000Z"
+  },
+  {
+    "id": "p1",
+    "title": "Smart Pharmacy Locker — ตู้รับยาอัจฉริยะ IoT",
+    "category": "website",
+    "categoryLabel": "Web App & IoT",
+    "desc": "นวัตกรรมตู้รับยาอัตโนมัติพร้อมระบบสายพานลำเลียง จุดตรวจความปลอดภัย 5 Rights และระบบเสียงพูดภาษาไทยแนะนำวิธีทานยาเพื่อผู้สูงอายุ",
+    "tech": [
+      "React 19",
+      "Tailwind CSS",
+      "ESP32 IoT",
+      "Web Speech API",
+      "Vite"
+    ],
+    "image": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=800&q=80",
+    "demoUrl": "https://github.com/underwaves/smart-pharmacy-locker",
+    "demoLabel": "ดูโปรเจกต์บน GitHub",
+    "isReal": true,
+    "createdAt": "2026-09-01T00:00:00.000Z"
+  },
+  {
+    "id": "p2",
+    "title": "SUNFZENITH Credits & Review Platform",
+    "category": "website",
+    "categoryLabel": "Live Web Platform",
+    "desc": "แพลตฟอร์มสมุดรวมเครดิตการซื้อขายออนไลน์แบบเรียลไทม์ พร้อมระบบส่งสลิปหลักฐานยืนยันความปลอดภัย เช็คประวัติได้โปร่งใส 100%",
+    "tech": [
+      "Node.js",
+      "Express",
+      "Supabase PostgreSQL",
+      "Storage",
+      "Vanilla JS"
+    ],
+    "image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
+    "demoUrl": "/credits",
+    "demoLabel": "เข้าชมระบบจริง",
+    "isReal": true,
+    "createdAt": "2026-09-05T00:00:00.000Z"
+  },
+  {
+    "id": "p3",
+    "title": "DocuMind — Enterprise Document Platform",
+    "category": "website",
+    "categoryLabel": "Document & Knowledge Platform",
+    "desc": "แพลตฟอร์มคลังความรู้และตอบคำถามสืบค้นเอกสารองค์กรด้วย Clean Architecture บน FastAPI, pgvector พร้อม Real-time SSE Streaming",
+    "tech": [
+      "Python",
+      "FastAPI",
+      "PostgreSQL (pgvector)",
+      "Vector Search",
+      "Docker"
+    ],
+    "image": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80",
+    "demoUrl": "https://github.com/underwaves",
+    "demoLabel": "ดูสถาปัตยกรรมระบบ",
+    "isReal": true,
+    "createdAt": "2026-09-10T00:00:00.000Z"
+  },
+  {
+    "id": "p4",
+    "title": "Semantic Firewall & Fact-Checking Engine (งานวิจัยตีพิมพ์ AUCC)",
+    "category": "website",
+    "categoryLabel": "Research & Data Engine",
+    "desc": "บทความวิจัยและระบบตรวจสอบความถูกต้องของข้อมูล (Fact-Checking) ตรวจสอบความถูกต้องของข้อความอย่างแม่นยำ นำเสนอในการประชุมวิชาการ AUCC",
+    "tech": [
+      "Python",
+      "Fact-Checking Engine",
+      "Information Retrieval",
+      "Search API",
+      "FastAPI"
+    ],
+    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
+    "demoUrl": "https://github.com/underwaves",
+    "demoLabel": "ดูรายละเอียดงานวิจัย",
+    "isReal": true,
+    "createdAt": "2026-09-15T00:00:00.000Z"
+  },
+  {
+    "id": "p6",
+    "title": "Part-Time Job Matching System (ระบบจัดหางานพาร์ตไทม์)",
+    "category": "website",
+    "categoryLabel": "Web Application",
+    "desc": "ระบบจับคู่งานพาร์ตไทม์สำหรับนักศึกษาเพื่อหารายได้ระหว่างเรียน ค้นหาตามเขตพื้นที่ สมัครงานออนไลน์ และแดชบอร์ดหลังบ้านสำหรับนายจ้าง",
+    "tech": [
+      "PHP",
+      "MySQL",
+      "JavaScript",
+      "Bootstrap",
+      "HTML5 / CSS3"
+    ],
+    "image": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=80",
+    "demoUrl": "https://github.com/underwaves",
+    "demoLabel": "ดูโครงสร้างโปรเจกต์",
+    "isReal": true,
+    "createdAt": "2026-09-25T00:00:00.000Z"
+  },
+  {
+    "id": "p7",
+    "title": "FruitLeaf 3D — ข้อมูลโรคผลไม้ไทย & Interactive Model",
+    "category": "website",
+    "categoryLabel": "3D Model & Web UI",
+    "desc": "เว็บแอปพลิเคชันสืบค้นข้อมูลโรคผลไม้ไทยพร้อมโมเดลผลไม้ 3 มิติแบบหมุนโต้ตอบได้ด้วย Three.js Low-Poly Procedural Viewer และฐานข้อมูลโรคพืช",
+    "tech": [
+      "Three.js",
+      "Python",
+      "Flask",
+      "3D Low-Poly",
+      "UI/UX Design"
+    ],
+    "image": "https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=800&q=80",
+    "demoUrl": "https://github.com/underwaves",
+    "demoLabel": "ดูรายละเอียด 3D UI",
+    "isReal": true,
+    "createdAt": "2026-10-01T00:00:00.000Z"
+  },
+  {
+    "id": "p8",
+    "title": "ระบบบริหารจัดการกระชังปลา (Fish Cage Dashboard & DB)",
+    "category": "website",
+    "categoryLabel": "Web Dashboard & DB",
+    "desc": "ระบบฐานข้อมูลและเว็บแอปพลิเคชันบริหารจัดการกระชังปลา ติดตามต้นทุน รายรับ-กำไรขาดทุนแต่ละกระชัง พร้อม SQL Stored Procedure & ERD",
+    "tech": [
+      "Node.js",
+      "Express",
+      "MySQL",
+      "ERD Design",
+      "SQL Stored Procedure"
+    ],
+    "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80",
+    "demoUrl": "https://github.com/underwaves",
+    "demoLabel": "ดูโครงสร้างระบบ",
+    "isReal": true,
+    "createdAt": "2026-10-03T00:00:00.000Z"
+  },
+  {
+    "id": "p9",
+    "title": "ป้ายเครดิต & แบนเนอร์ซื้อขาย (Genshin Impact — Eula Theme)",
+    "category": "design",
+    "categoryLabel": "Graphic & Banner",
+    "desc": "งานออกแบบป้ายเครดิตการซื้อขายเกม Genshin Impact ธีม Eula โทนสีฟ้าน้ำแข็ง พรีเมียม พร้อมการ์ดสรุปประวัติความน่าเชื่อถือ +1 / -1 ชัดเจน โดดเด่น",
+    "tech": [
+      "Photoshop",
+      "Graphic Design",
+      "Banner Layout",
+      "Typography"
+    ],
+    "image": "/images/portfolio-genshin-credit.png",
+    "demoUrl": "/images/portfolio-genshin-credit.png",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-08T00:00:00.000Z"
+  },
+  {
+    "id": "p10",
+    "title": "โปสเตอร์ & ปกการ์ดวันแม่ 12 สิงหาคม (Mother's Day Poster)",
+    "category": "design",
+    "categoryLabel": "Poster & Card",
+    "desc": "งานออกแบบโปสเตอร์และปกการ์ดวันแม่ โทนสีอบอุ่นสไตล์สีน้ำ (Watercolor) ภาพแม่โอบกอดลูกประดับซุ้มดอกมะลิ ให้ความรู้สึกละมุนและซาบซึ้งใจ",
+    "tech": [
+      "Poster Design",
+      "Watercolor Art",
+      "Typography",
+      "Print Ready"
+    ],
+    "image": "/images/portfolio-mothers-day-poster.png",
+    "demoUrl": "/images/portfolio-mothers-day-poster.png",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-08T00:00:01.000Z"
+  },
+  {
+    "id": "p11",
+    "title": "การ์ดอวยพรวันแม่ พวงมาลัยดอกมะลิ (Mother's Day Greeting Card)",
+    "category": "design",
+    "categoryLabel": "Card & Letter Design",
+    "desc": "งานออกแบบการ์ดอวยพรวันแม่แบบกางสองหน้า ฝั่งซ้ายภาพวาดสีน้ำพวงมาลัยดอกมะลิวิจิตร ฝั่งขวาจัดวางเลย์เอาต์จดหมายบอกรักแม่ในกรอบพฤกษา เรียบหรูอบอุ่น",
+    "tech": [
+      "Card Spread",
+      "Botanical Art",
+      "Layout Design",
+      "Typography"
+    ],
+    "image": "/images/portfolio-mothers-day-card.png",
+    "demoUrl": "/images/portfolio-mothers-day-card.png",
+    "demoLabel": "ดูภาพผลงานเต็ม",
+    "isReal": true,
+    "createdAt": "2026-10-08T00:00:02.000Z"
   }
 ];
-

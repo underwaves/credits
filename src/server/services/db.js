@@ -213,8 +213,76 @@ export async function updateCategories(categories) {
 
 // ---------------- Credits ----------------
 
+function getDataDir() {
+  return process.env.DATA_DIR || path.join(rootDir, 'src', 'server', 'data');
+}
+
+function getCreditsFilePath() {
+  return path.join(getDataDir(), 'credits.json');
+}
+
+function readLocalCredits() {
+  try {
+    const file = getCreditsFilePath();
+    if (fs.existsSync(file)) {
+      const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+      if (Array.isArray(data)) return data;
+    }
+    const defaultFile = path.join(rootDir, 'src', 'server', 'data', 'credits.json');
+    if (fs.existsSync(defaultFile)) {
+      const data = JSON.parse(fs.readFileSync(defaultFile, 'utf8'));
+      if (Array.isArray(data)) return data;
+    }
+  } catch (err) {
+    console.warn('[db] Failed reading local credits:', err.message);
+  }
+  return [];
+}
+
+function writeLocalCredits(list) {
+  try {
+    const dir = getDataDir();
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(getCreditsFilePath(), JSON.stringify(list, null, 2), 'utf8');
+  } catch (err) {
+    console.warn('[db] Failed writing local credits:', err.message);
+  }
+}
+
 export async function getCredits({ category, search, sort } = {}) {
-  if (!supabase) return [];
+  if (!supabase) {
+    let items = readLocalCredits().map(rowToCredit);
+
+    if (category && category !== 'ทั้งหมด') {
+      items = items.filter(c => c.game === category);
+    }
+
+    if (search && search.trim()) {
+      const s = search.trim().toLowerCase();
+      items = items.filter(c => 
+        (c.title && c.title.toLowerCase().includes(s)) ||
+        (c.customer && c.customer.toLowerCase().includes(s)) ||
+        (c.description && c.description.toLowerCase().includes(s))
+      );
+    }
+
+    if (sort === 'price-high') {
+      items.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
+    } else if (sort === 'price-low') {
+      items.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+    } else {
+      items.sort((a, b) => {
+        if (Boolean(b.isPinned) !== Boolean(a.isPinned)) {
+          return Boolean(b.isPinned) ? 1 : -1;
+        }
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      });
+    }
+
+    return items;
+  }
 
   let q = supabase.from('credits').select('*');
 
@@ -238,7 +306,11 @@ export async function getCredits({ category, search, sort } = {}) {
 }
 
 export async function getCreditById(id) {
-  if (!supabase || !id) return null;
+  if (!id) return null;
+  if (!supabase) {
+    const list = readLocalCredits().map(rowToCredit);
+    return list.find(c => String(c.id) === String(id)) || null;
+  }
   const data = check(
     await supabase.from('credits').select('*').eq('id', id).maybeSingle(),
     'read credit by id'
@@ -247,7 +319,18 @@ export async function getCreditById(id) {
 }
 
 export async function createCredit(credit) {
-  if (!supabase) return credit;
+  if (!supabase) {
+    const list = readLocalCredits();
+    const id = credit.id || `c-${Date.now()}`;
+    const newCredit = {
+      ...credit,
+      id,
+      createdAt: credit.createdAt || new Date().toISOString()
+    };
+    list.unshift(newCredit);
+    writeLocalCredits(list);
+    return rowToCredit(newCredit);
+  }
   const data = check(
     await supabase.from('credits').insert(creditToRow(credit)).select().single(),
     'create credit'
@@ -256,7 +339,15 @@ export async function createCredit(credit) {
 }
 
 export async function updateCredit(id, updates) {
-  if (!supabase) return null;
+  if (!id) return null;
+  if (!supabase) {
+    const list = readLocalCredits();
+    const idx = list.findIndex(c => String(c.id) === String(id));
+    if (idx === -1) return null;
+    list[idx] = { ...list[idx], ...updates, id };
+    writeLocalCredits(list);
+    return rowToCredit(list[idx]);
+  }
   const row = creditToRow(updates);
   delete row.id;
   const data = check(
@@ -267,7 +358,17 @@ export async function updateCredit(id, updates) {
 }
 
 export async function deleteCredit(id) {
-  if (!supabase) return true;
+  if (!id) return true;
+  if (!supabase) {
+    const list = readLocalCredits();
+    const existing = list.find(c => String(c.id) === String(id));
+    const filtered = list.filter(c => String(c.id) !== String(id));
+    writeLocalCredits(filtered);
+    if (existing && existing.images) {
+      await deleteImagesFromStorage(existing.images);
+    }
+    return true;
+  }
   const existing = await getCreditById(id);
   check(await supabase.from('credits').delete().eq('id', id), 'delete credit');
 
@@ -281,7 +382,7 @@ export async function togglePinCredit(id) {
   const credit = await getCreditById(id);
   if (!credit) return null;
   const updated = await updateCredit(id, { isPinned: !credit.isPinned });
-  return updated.isPinned;
+  return updated ? updated.isPinned : false;
 }
 
 // ---------------- Storage ----------------
@@ -374,8 +475,33 @@ export async function deleteImagesFromStorage(imageUrlsOrNames) {
 
 // ---------------- Customer Reviews (+1 / -1) ----------------
 
+function getReviewsFilePath() {
+  return path.join(getDataDir(), 'reviews.json');
+}
+
+function readLocalReviews() {
+  try {
+    const file = getReviewsFilePath();
+    if (fs.existsSync(file)) {
+      const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+      if (Array.isArray(data)) return data;
+    }
+  } catch {}
+  return [];
+}
+
+function writeLocalReviews(list) {
+  try {
+    const dir = getDataDir();
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(getReviewsFilePath(), JSON.stringify(list, null, 2), 'utf8');
+  } catch {}
+}
+
 export async function getCustomerReviews() {
-  if (!supabase) return [];
+  if (!supabase) {
+    return readLocalReviews();
+  }
 
   try {
     const { data, error } = await supabase
@@ -416,7 +542,12 @@ export async function createCustomerReview({ type, customerName, message, images
     created_at: new Date().toISOString()
   };
 
-  if (!supabase) return row;
+  if (!supabase) {
+    const list = readLocalReviews();
+    list.unshift(row);
+    writeLocalReviews(list);
+    return row;
+  }
 
   try {
     const { data, error } = await supabase.from('customer_reviews').insert(row).select().maybeSingle();
@@ -453,7 +584,17 @@ export async function createCustomerReview({ type, customerName, message, images
 }
 
 export async function deleteCustomerReview(id) {
-  if (!supabase || !id) return true;
+  if (!id) return true;
+  if (!supabase) {
+    const list = readLocalReviews();
+    const target = list.find((r) => r.id === id);
+    const filtered = list.filter((r) => r.id !== id);
+    writeLocalReviews(filtered);
+    if (target?.images) {
+      await deleteImagesFromStorage(target.images);
+    }
+    return true;
+  }
   let imagesToDelete = [];
 
   try {

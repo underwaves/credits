@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initScrollReveal();
   initPortfolioFilter();
   initDynamicPortfolio();
+  initPortfolioLightbox();
   initDynamicSiteContent();
   initRateCardModal();
 });
@@ -190,6 +191,95 @@ async function initDynamicPortfolio() {
   } catch (err) {
     // If backend fetch fails, keep fallback static HTML
     console.debug('[portfolio] Using fallback static cards:', err);
+  }
+}
+
+// ---------------- 4.15 Portfolio Lightbox System ----------------
+function initPortfolioLightbox() {
+  const modal = document.getElementById('portfolio-lightbox-modal');
+  if (!modal) return;
+
+  const modalImg = document.getElementById('lightbox-img');
+  const modalTitle = document.getElementById('lightbox-title');
+  const modalDesc = document.getElementById('lightbox-desc');
+  const modalCatText = document.getElementById('lightbox-cat-text');
+  const modalTech = document.getElementById('lightbox-tech');
+  const modalFullLink = document.getElementById('lightbox-full-link');
+  const closeBtn = document.getElementById('lightbox-close-btn');
+  const dismissBtn = document.getElementById('lightbox-dismiss-btn');
+
+  function openLightbox(data) {
+    if (modalImg) modalImg.src = data.image || '';
+    if (modalTitle) modalTitle.textContent = data.title || '';
+    if (modalDesc) modalDesc.textContent = data.desc || '';
+    if (modalCatText) modalCatText.textContent = data.categoryLabel || 'ผลงาน';
+    if (modalFullLink) {
+      modalFullLink.href = data.demoUrl || data.image || '#';
+    }
+    if (modalTech) {
+      modalTech.innerHTML = (data.tech || [])
+        .map((t) => `<span class="tech-tag">${escapeHtml(t)}</span>`)
+        .join('');
+    }
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+  if (dismissBtn) dismissBtn.addEventListener('click', closeLightbox);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeLightbox();
+  });
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) {
+      closeLightbox();
+    }
+  });
+
+  // Delegate click on portfolio-grid
+  const grid = document.getElementById('portfolio-grid');
+  if (grid) {
+    grid.addEventListener('click', (e) => {
+      const card = e.target.closest('.portfolio-card');
+      if (!card) return;
+
+      const thumbWrap = e.target.closest('.portfolio-thumb-wrap');
+      const actionLink = e.target.closest('.portfolio-link-wrap a');
+
+      if (thumbWrap || actionLink) {
+        const linkHref = actionLink ? actionLink.getAttribute('href') : '';
+        const imgEl = card.querySelector('.portfolio-thumb-img');
+        const imgSrc = imgEl ? imgEl.src : '';
+        const targetUrl = linkHref || imgSrc;
+
+        // If clicking thumbnail or clicking an image link, open in lightbox
+        if (thumbWrap || (targetUrl && targetUrl.match(/\.(png|webp|jpg|jpeg|svg)($|\?)/i))) {
+          if (actionLink && targetUrl && targetUrl.match(/\.(png|webp|jpg|jpeg|svg)($|\?)/i)) {
+            e.preventDefault();
+          }
+          const title = card.querySelector('.portfolio-title')?.textContent || '';
+          const desc = card.querySelector('.portfolio-desc')?.textContent || '';
+          const catLabel = card.querySelector('.portfolio-cat-badge')?.textContent || '';
+          const tags = Array.from(card.querySelectorAll('.tech-tag')).map((t) => t.textContent.trim());
+
+          openLightbox({
+            image: targetUrl && targetUrl.match(/\.(png|webp|jpg|jpeg|svg)($|\?)/i) ? targetUrl : imgSrc,
+            title,
+            desc,
+            categoryLabel: catLabel,
+            demoUrl: targetUrl || imgSrc,
+            tech: tags
+          });
+        }
+      }
+    });
   }
 }
 
