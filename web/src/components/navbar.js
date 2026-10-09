@@ -5,7 +5,7 @@ export function Navbar() {
         <!-- Brand Logo -->
         <a href="/" class="brand-link" aria-label="SUNFZENITH หน้าแรก">
           <div class="brand-logo-wrap anim-sun-glow">
-            <span class="brand-sun-emoji">☀️</span>
+            <img src="/images/mascot-logo.png" alt="SUNFZENITH" class="brand-avatar-img" width="44" height="44" />
           </div>
           <div class="brand-info">
             <span class="brand-name">SUNFZENITH</span>

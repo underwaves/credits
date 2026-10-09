@@ -45,7 +45,10 @@
   height: 100%;
   border-radius: var(--radius-pill);
   object-fit: contain;
-  padding: 2px;
+  padding: 1px;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .brand-sun-emoji {
@@ -982,8 +985,12 @@ html[data-theme="dark"] .filter-tab.active {
 .footer-avatar-img {
   width: 100%;
   height: 100%;
+  border-radius: var(--radius-pill);
   object-fit: contain;
-  padding: 2px;
+  padding: 1px;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .footer-sun-emoji {

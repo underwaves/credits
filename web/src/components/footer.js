@@ -7,7 +7,7 @@ export function Footer() {
         <div class="footer-brand-col">
           <div class="footer-brand-header">
             <div class="footer-avatar-wrap anim-sun-glow">
-              <span class="brand-sun-emoji">☀️</span>
+              <img src="/images/mascot-logo.png" alt="SUNFZENITH" class="footer-avatar-img" width="44" height="44" />
             </div>
             <div>
               <span class="footer-brand-title">SUNFZENITH</span>

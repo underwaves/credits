@@ -103,3 +103,8 @@ export function MascotZenny({ mood = 'happy', size = 160, className = '' } = {})
 export function MascotImage({ size = 160, className = '', alt = 'SUNFZENITH Mascot' } = {}) {
   return `<img src="/images/mascot.png" alt="${alt}" class="${className}" width="${size}" height="${size}" style="object-fit: contain;" />`;
 }
+
+export function MascotLogoImage({ size = 44, className = '', alt = 'SUNFZENITH' } = {}) {
+  return `<img src="/images/mascot-logo.png" alt="${alt}" class="${className}" width="${size}" height="${size}" style="object-fit: contain;" />`;
+}
+
