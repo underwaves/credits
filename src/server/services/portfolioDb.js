@@ -22,9 +22,10 @@ export const SEED_PORTFOLIO = [
     categoryLabel: 'Web App & IoT',
     desc: 'นวัตกรรมตู้รับยาอัตโนมัติพร้อมระบบสายพานลำเลียง จุดตรวจความปลอดภัย 5 Rights และระบบเสียงพูดภาษาไทยแนะนำวิธีทานยาเพื่อผู้สูงอายุ',
     tech: ['React 19', 'Tailwind CSS', 'ESP32 IoT', 'Web Speech API', 'Vite'],
-    image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=800&q=80',
-    demoUrl: 'https://github.com/underwaves/smart-pharmacy-locker',
-    demoLabel: 'ดูโปรเจกต์บน GitHub',
+    image: '/images/portfolio/portfolio-smart-pharmacy-locker.webp',
+    demoUrl: '/locker',
+    demoLabel: 'ทดลองใช้งานระบบจริง',
+    githubUrl: 'https://github.com/underwaves/smart-pharmacy-locker',
     isReal: true,
     createdAt: '2026-09-01T00:00:00.000Z'
   },
@@ -172,7 +173,9 @@ function ensureDataFile() {
     if (fs.existsSync(defaultSource)) {
       try {
         seedToUse = JSON.parse(fs.readFileSync(defaultSource, 'utf8'));
-      } catch {}
+      } catch (err) {
+        console.warn('[portfolioDb] Failed parsing default portfolio.json, falling back to SEED_PORTFOLIO:', err.message);
+      }
     }
     fs.writeFileSync(file, JSON.stringify(seedToUse, null, 2), 'utf8');
   }

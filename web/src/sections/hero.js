@@ -59,7 +59,7 @@ export function HeroSection() {
               <span class="trust-icon">🎨</span>
               <div>
                 <strong>สไลด์ & โปสเตอร์ เริ่มต้น 49 ฿</strong>
-                <span class="trust-sub">สไลด์ 49.- • เว็บไซต์เริ่มต้น 149.-</span>
+                <span class="trust-sub">สไลด์ 49.- • เว็บไซต์เริ่มต้น 790.-</span>
               </div>
             </div>
           </div>

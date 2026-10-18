@@ -12,16 +12,32 @@ if (process.env.SKIP_WEB_BUILD === '1') {
   process.exit(0);
 }
 
-if (!existsSync(path.join(root, 'node_modules', 'vite'))) {
-  console.log('[postinstall] vite not installed → skipping web build');
-  process.exit(0);
+const vitePath = path.join(root, 'node_modules', 'vite');
+if (!existsSync(vitePath)) {
+  console.error('\n❌ [postinstall] Error: "vite" is not installed.');
+  console.error('   Vite is required in "dependencies" so frontend assets can be built on deployment.');
+  console.error('   Please ensure "vite" is listed in "dependencies" in package.json.\n');
+  process.exit(1);
 }
 
-console.log('[postinstall] building web bundle (vite build)…');
-const result = spawnSync(process.execPath, [path.join(root, 'node_modules', 'vite', 'bin', 'vite.js'), 'build', '--config', 'vite.config.js'], {
+console.log('[postinstall] Building frontend production bundle (vite build)…');
+const viteBin = path.join(vitePath, 'bin', 'vite.js');
+const result = spawnSync(process.execPath, [viteBin, 'build', '--config', 'vite.config.js'], {
   cwd: root,
   stdio: 'inherit'
 });
 
 // A failed build must fail the deploy rather than ship a site without its frontend.
-process.exit(result.status ?? 1);
+if (result.status !== 0) {
+  console.error(`\n❌ [postinstall] Vite build failed with exit code ${result.status ?? 1}. Deployment cannot proceed without frontend assets.\n`);
+  process.exit(result.status ?? 1);
+}
+
+const distIndexPath = path.join(root, 'dist', 'index.html');
+if (!existsSync(distIndexPath)) {
+  console.error('\n❌ [postinstall] Vite build completed but "dist/index.html" was not created.\n');
+  process.exit(1);
+}
+
+console.log('[postinstall] ✅ Production bundle built successfully in dist/\n');
+process.exit(0);

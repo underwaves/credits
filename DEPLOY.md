@@ -33,6 +33,14 @@
    - **Build Command:** `npm install && npm run build`
    - **Start Command:** `npm start`
    - **Plan:** `Free`
+
+> [!NOTE]
+> **เกี่ยวกับ Frontend Production Build:**
+> - โฟลเดอร์ `dist/` ถูก ignore ใน `.gitignore` เพื่อป้องกันการคอมมิตไฟล์ที่ build แล้วขึ้น Git
+> - เครื่องมือ build อย่าง `vite` และ fonts ทั้งหมดถูกจัดไว้ใน `dependencies` ของ `package.json` เพื่อให้มั่นใจว่าจะถูกติดตั้งแน่นอนใน production แม้แพลตฟอร์มจะตั้งค่า `NODE_ENV=production` หรือรันด้วย `--omit=dev`
+> - สคริปต์ `scripts/postinstall.js` จะช่วยรัน `vite build` ให้อัตโนมัติหลัง `npm install` และจะ Fail-fast ทันทีหากไม่มี Vite หรือ build ไม่สำเร็จ
+> - เซิร์ฟเวอร์ในโหมด production (`NODE_ENV=production`) มีระบบตรวจสอบความสมบูรณ์ของ `dist/index.html` ตั้งแต่เริ่มทำงาน หากไม่พบบันเดิล เซิร์ฟเวอร์จะปฏิเสธการเริ่มทำงานทันทีพร้อมแจ้ง Error ชัดเจน แทนการเสิร์ฟไฟล์รุ่นเก่า
+
 6. เลื่อนลงมาที่หัวข้อ **Environment Variables** -> กด **Add Environment Variable** และระบุค่าดังต่อไปนี้:
 
 | Environment Variable | คำอธิบาย | ตัวอย่าง / วิธีสร้าง |

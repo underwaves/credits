@@ -2,9 +2,9 @@
 
   <img src="public/images/logo.svg" alt="SUNFZ Logo" width="80" height="80">
 
-  # SUNFZ Store — Credit & Proof Showcase Web Application
+  # SUNFZENITH — Full-stack Portfolio & Credit Verification Web Application
 
-  **Minimal Modern & Clean Trust Platform for Gaming Accounts & Digital Goods Proof-of-Delivery**
+  **เว็บไซต์นำเสนอผลงานและระบบรวมเครดิต/รีวิวพร้อมหลักฐาน สำหรับสร้างความน่าเชื่อถือให้ธุรกิจดิจิทัล**
 
   [![Node.js](https://img.shields.io/badge/Node.js-v18%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org)
   [![Express](https://img.shields.io/badge/Express-v5.0-000000?logo=express&logoColor=white)](https://expressjs.com)
@@ -28,12 +28,12 @@
 
 ## 📖 Overview
 
-**SUNFZ Store** is a full-stack, proof-of-delivery credit showcase web application built for digital commerce sellers (game accounts, premium accounts, digital items, and online services).
+**SUNFZENITH** เป็นเว็บแอปแบบ Full-stack สำหรับนำเสนอบริการและ Portfolio ควบคู่กับระบบเครดิต/รีวิวพร้อมหลักฐาน เหมาะกับร้านค้าออนไลน์หรือผู้ให้บริการดิจิทัลที่ต้องการให้ลูกค้าตรวจสอบประวัติและความน่าเชื่อถือได้
 
-Designed around the **"Clean Trust & Proof-First"** design philosophy, it allows sellers to upload and organize payment slips, handover screenshots, and customer chat proofs into an elegant, high-converting public catalog with zero clutter.
+ฐานข้อมูลหลักคือ **Supabase PostgreSQL** และ Supabase Storage สำหรับรูปหลักฐาน โดยมี JSON ในเครื่องเป็น fallback สำหรับการพัฒนาในเครื่องหรือกรณีฐานข้อมูลยังไม่ได้ตั้งค่าเท่านั้น
 
 ### 💡 Core Design Principles
-- **Decoupled User Experience:** The customer-facing storefront (`/`) contains **zero admin controls, buttons, or modals** — strictly clean for visitors to browse and verify.
+- **Separated Experiences:** หน้าสาธารณะ (`/` และ `/credits`) ใช้สำหรับดูข้อมูลและส่งรีวิว ส่วนการจัดการข้อมูลทั้งหมดอยู่ใน `/admin` เท่านั้น
 - **Dedicated Admin Studio:** Store administrators manage everything exclusively through a PIN-protected, standalone web app portal (`/admin`).
 - **Proof-First Cards:** High-resolution screenshots take center stage with responsive aspect ratios, zoomable lightboxes, and one-click deep-link sharing.
 
@@ -41,49 +41,45 @@ Designed around the **"Clean Trust & Proof-First"** design philosophy, it allows
 
 ## ✨ Key Features
 
-### 🛍️ Customer Storefront (`/`)
-- **Clean Card Feed:** Displays verified orders with high-res proof thumbnails, transaction dates, customer handles, and prices.
-- **Interactive Lightbox:** Fullscreen image modal supporting multiple screenshots, zoom-in inspection, keyboard navigation (Escape, Arrow keys), and direct image download.
-- **Instant Search:** Real-time client-side search filtering by item title, customer name, price, or description.
-- **Deep Linking:** Direct URL support (e.g. `/?credit=sample-1`) to open specific credit proofs instantly.
-- **Social Quick Links:** Seamless integration with Line, Facebook, and Discord channels.
+### 🌐 Public Website (`/` และ `/credits`)
+- **Brand & Portfolio Website:** แสดงบริการ ราคา ขั้นตอนทำงาน และผลงานแบบ responsive
+- **Credit & Review Feed:** แสดงเครดิตพร้อมรูปหลักฐาน ราคา ลูกค้า วันที่ ค้นหา และปักหมุดรายการสำคัญ
+- **Interactive Lightbox:** เปิดดูรูปเต็ม, เลื่อนดูหลายรูป, ซูม และเปิดลิงก์เฉพาะเครดิตได้
+- **Customer Reviews:** ส่งรีวิว `+1` หรือรายงาน `-1` พร้อมหลักฐานรูปภาพ
+- **SEO Basics:** มี `robots.txt`, `sitemap.xml` และหน้า 404
 
 ### 🛡️ Dedicated Admin Studio (`/admin`)
-- **PIN Lock Authentication:** Fast numeric PIN entry with stateless HMAC signed session tokens and HttpOnly cookies.
+- **PIN Lock Authentication:** PIN ที่ hash ด้วย scrypt, session ที่ลงลายเซ็น HMAC และ HttpOnly cookie
 - **Drag & Drop Upload:** Multi-file drag-and-drop dropzone supporting up to 5 images per credit (JPG, PNG, WebP) with instant thumbnail removal.
 - **Flexible Items Categorization:** "Sell anything" structure — title, price, customer, review note, and pin toggle.
 - **One-Click Pinning:** Pin featured items to always appear at the top of the feed.
-- **Full CRUD Management:** Real-time editing, deletion with safeguard confirmation, and image replacements.
-- **Shop Customization:** Live editing of shop name, tagline, announcement marquee, and social links.
-- **Zero Data Loss Backup:** One-click JSON database export and instant restore.
+- **Full CRUD Management:** จัดการเครดิต, Portfolio, บริการ, แพ็กเกจราคา, เนื้อหาเว็บไซต์ และรีวิว
+- **Shop Customization:** แก้ชื่อร้าน tagline announcement และ social links
+- **Backup:** Export/Import ข้อมูลสำคัญใน JSON โดยไม่รวม PIN หรือ hash ของ PIN
 
 ---
 
 ## 🏗️ Architecture & Design
 
 ```
-├── server.js               # Express 5 server, HMAC sessions, REST API, Multer upload
-├── data/
-│   └── database.json       # Atomic JSON document database
-├── public/
-│   ├── index.html          # Public customer storefront (Zero admin exposure)
-│   ├── admin.html          # Dedicated Admin Studio Web App
-│   ├── css/
-│   │   └── style.css       # Custom styles, smooth fonts, scrollbar & animations
-│   ├── js/
-│   │   ├── app.js          # Customer frontend logic (Lightbox, search, render)
-│   │   └── admin.js        # Admin studio logic (PIN auth, CRUD, drag & drop)
-│   ├── images/             # Brand logos & vector placeholders
-│   └── uploads/            # Uploaded proof screenshots & slips
-├── DEPLOY.md               # 24/7 Cloud deployment guide
-└── package.json            # Dependencies & start scripts
+├── web/                    # Vite frontend: HTML, ES modules, CSS และ assets
+├── src/
+│   ├── server/             # Express routes, middleware, services และ data fallback
+│   └── shared/             # Validation และ sanitization ที่ใช้ร่วมกัน
+├── tests/                  # Vitest + Supertest integration/security tests
+├── supabase_schema.sql     # ตาราง, index, RLS และ Storage policy
+├── supabase_security_migration.sql
+├── server.js               # จุดเริ่มต้น Express server
+└── package.json            # คำสั่ง build, test และ QA
 ```
 
 ### 🔒 Security Highlights
-- **Stateless HMAC-SHA256 Sessions:** Admin sessions are signed cryptographically using server secret keys.
-- **HttpOnly & SameSite Cookies:** Mitigates XSS token extraction.
-- **Atomic Database Writes:** JSON database updates use temporary swap files (`.tmp` -> rename) to prevent file corruption during server interruptions.
-- **Input Sanitization:** Complete HTML entity escaping across all rendered fields to prevent XSS injection.
+- **scrypt PIN hashing + constant-time comparison:** ไม่เก็บ PIN เป็น plain text
+- **HMAC-SHA256 sessions + HttpOnly/SameSite/Secure cookies:** ลดความเสี่ยงจาก token theft และ session tampering
+- **Rate limiting, same-origin guard และ security headers:** ป้องกัน brute-force, CSRF และ browser attacks พื้นฐาน
+- **Safe upload handling:** จำกัดไฟล์สูงสุด 5 รูป รูปละ 5 MB และตรวจ magic bytes ของ JPG/PNG/WebP
+- **Input validation & sanitization:** จำกัดขนาดข้อมูล, escape HTML และบล็อก URL อันตราย
+- **Supabase RLS:** เปิด public read เฉพาะข้อมูลที่เปิดเผยได้ การเขียนทำผ่าน server ที่เก็บ service role key ไว้ใน environment variables
 
 ---
 
@@ -97,14 +93,16 @@ Designed around the **"Clean Trust & Proof-First"** design philosophy, it allows
 | **Styling** | [Tailwind CSS CDN](https://tailwindcss.com/) & Custom CSS | Responsive layout following `#F8FAFC` Minimal Trust Palette |
 | **Typography** | Google Fonts | Plus Jakarta Sans, Prompt, Noto Sans Thai |
 | **Icons** | [Lucide Icons](https://lucide.dev/) | Crisp, modern SVG icons |
-| **Database** | Embedded JSON DB | Portable, human-readable atomic JSON persistence |
+| **Database** | Supabase PostgreSQL | ตารางเครดิต รีวิว และตั้งค่าร้าน พร้อม RLS, index และ JSONB |
+| **Storage** | Supabase Storage | เก็บรูปหลักฐานผ่าน server API |
+| **Testing** | Vitest + Supertest | ทดสอบ validation, API, session และ production configuration |
 
 ---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- [Node.js](https://nodejs.org/) v18.0.0 or higher
+- [Node.js](https://nodejs.org/) v20.19 or higher
 - [npm](https://www.npmjs.com/) v9.0.0 or higher
 
 ### 1. Clone Repository
@@ -113,12 +111,17 @@ git clone https://github.com/underwaves/credits.git
 cd credits
 ```
 
-### 2. Install Dependencies
+### 2. Configure Environment
+Copy `.env.example` to `.env`, then set at least a strong `ADMIN_PIN`. For Supabase, add `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. Never commit `.env`.
+
+In a Supabase project, run `supabase_schema.sql` and then `supabase_security_migration.sql` once in the SQL Editor.
+
+### 3. Install Dependencies
 ```bash
 npm install
 ```
 
-### 3. Start Application
+### 4. Start Application
 ```bash
 npm start
 ```
@@ -126,9 +129,17 @@ The server will start at:
 - **Public Customer Site:** `http://localhost:3000`
 - **Admin Studio:** `http://localhost:3000/admin`
 
-For development with live reloading:
+For development with frontend live reloading, run these in separate terminals:
 ```bash
+npm run dev:server
 npm run dev
+```
+
+### 5. Verify Before Deployment
+```bash
+npm test
+npm run build
+npm run qa
 ```
 
 ---
@@ -142,7 +153,7 @@ npm run dev
    - **Pin Items:** Click the star icon to pin important transactions to the top.
    - **Edit / Delete:** Modify pricing, title, notes, or delete records.
    - **Update PIN & Settings:** Change your PIN and store announcement at the Settings tab.
-   - **Download Backup:** Export your entire store database as a `.json` file for safekeeping.
+   - **Download Backup:** Export data as a `.json` file for safekeeping. PIN and PIN hash are deliberately excluded.
 
 ---
 

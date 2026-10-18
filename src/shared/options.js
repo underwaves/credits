@@ -23,7 +23,7 @@ export const CONTACT_CHANNELS = Object.freeze([
   { id: 'line', label: 'LINE ID', placeholder: 'เช่น sunny.dream' },
   { id: 'facebook', label: 'Facebook', placeholder: 'ชื่อเฟซบุ๊กหรือลิงก์โปรไฟล์' },
   { id: 'email', label: 'อีเมล', placeholder: 'you@example.com' },
-  { id: 'phone', label: 'เบอร์โทร', placeholder: '08x-xxx-xxxx' }
+  { id: 'phone', label: 'เบอร์โทร', placeholder: 'เช่น 089-123-4567' }
 ]);
 
 export const LIMITS = Object.freeze({

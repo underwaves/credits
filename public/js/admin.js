@@ -68,10 +68,16 @@ function showAdminToast(message, type = 'success') {
   const icon = type === 'error' ? 'alert-circle' : 'check-circle-2';
 
   toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-2xl border shadow-xl text-xs sm:text-sm font-semibold transition-all duration-300 transform translate-y-2 opacity-0 ${bgClass}`;
-  toast.innerHTML = `
-    <i data-lucide="${icon}" class="w-4 h-4 shrink-0 ${type === 'error' ? 'text-rose-400' : 'text-amber-400'}"></i>
-    <span>${message}</span>
-  `;
+  
+  const iconEl = document.createElement('i');
+  iconEl.setAttribute('data-lucide', icon);
+  iconEl.className = `w-4 h-4 shrink-0 ${type === 'error' ? 'text-rose-400' : 'text-amber-400'}`;
+  
+  const textEl = document.createElement('span');
+  textEl.textContent = message;
+
+  toast.appendChild(iconEl);
+  toast.appendChild(textEl);
 
   container.appendChild(toast);
   updateIcons();
@@ -193,7 +199,9 @@ async function handleLogout() {
       method: 'POST',
       headers: getAdminHeaders()
     });
-  } catch (e) {}
+  } catch (e) {
+    console.warn('[admin] Logout request warning:', e.message);
+  }
   showLoginView();
   showAdminToast('ออกจากระบบเรียบร้อยแล้ว');
 }
@@ -904,6 +912,7 @@ async function handleSaveEditCredit(e) {
     formData.append('customer', customer || '');
     formData.append('description', description || '');
     formData.append('isPinned', isPinned);
+    formData.append('remainingImages', JSON.stringify(adminState.editRemainingImages || []));
 
     if (adminState.editNewFiles.length > 0) {
       adminState.editNewFiles.forEach(file => {
@@ -1626,7 +1635,7 @@ function populateSocialsForm() {
   };
 
   setCheck('social-line-enabled', s.line?.enabled);
-  setVal('social-line-id', s.line?.label);
+  setVal('social-line-label', s.line?.label);
   setVal('social-line-url', s.line?.url);
 
   setCheck('social-fb-enabled', s.facebook?.enabled);
@@ -1657,7 +1666,7 @@ async function handleSaveSocialsSettings(e) {
   const payload = {
     line: {
       enabled: document.getElementById('social-line-enabled')?.checked ?? true,
-      label: document.getElementById('social-line-id')?.value.trim() || '',
+      label: document.getElementById('social-line-label')?.value.trim() || '',
       url: document.getElementById('social-line-url')?.value.trim() || ''
     },
     facebook: {
@@ -2158,6 +2167,7 @@ function sanitizeUrl(rawUrl, fallback = '#') {
     if (parsed.protocol === 'https:' || parsed.protocol === 'http:') return parsed.href;
     return fallback;
   } catch {
+    // Non-URL string or invalid format: safe return of configured fallback
     return fallback;
   }
 }

@@ -81,6 +81,15 @@ export function sameOriginGuard(req, res, next) {
     return next();
   }
 
+  // Block Sec-Fetch-Site: cross-site requests from browsers
+  const secFetchSite = req.headers['sec-fetch-site'];
+  if (secFetchSite === 'cross-site') {
+    return res.status(403).json({
+      success: false,
+      message: 'คำขอไม่ถูกต้อง (Cross-origin request blocked)'
+    });
+  }
+
   const origin = req.headers['origin'];
   const host = req.headers['host'];
 
@@ -95,6 +104,18 @@ export function sameOriginGuard(req, res, next) {
       }
     } catch {
       return res.status(400).json({ success: false, message: 'Invalid Origin header' });
+    }
+  } else if (!origin && req.headers['referer'] && host) {
+    try {
+      const refererHost = new URL(req.headers['referer']).host;
+      if (refererHost !== host) {
+        return res.status(403).json({
+          success: false,
+          message: 'คำขอไม่ถูกต้อง (Cross-origin request blocked)'
+        });
+      }
+    } catch {
+      return res.status(400).json({ success: false, message: 'Invalid Referer header' });
     }
   }
 

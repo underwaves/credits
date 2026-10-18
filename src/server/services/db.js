@@ -487,7 +487,9 @@ export async function deleteImagesFromStorage(imageUrlsOrNames) {
         if (fs.existsSync(filePath)) {
           try {
             fs.unlinkSync(filePath);
-          } catch (_) {}
+          } catch (err) {
+            console.debug(`[db] File cleanup notice for ${filePath}:`, err.message);
+          }
         }
       }
     }
@@ -507,7 +509,9 @@ function readLocalReviews() {
       const data = JSON.parse(fs.readFileSync(file, 'utf8'));
       if (Array.isArray(data)) return data;
     }
-  } catch {}
+  } catch (err) {
+    console.warn('[db] Failed reading local reviews file, falling back to empty list:', err.message);
+  }
   return [];
 }
 
@@ -516,7 +520,9 @@ function writeLocalReviews(list) {
     const dir = getDataDir();
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(getReviewsFilePath(), JSON.stringify(list, null, 2), 'utf8');
-  } catch {}
+  } catch (err) {
+    console.error('[db] Failed writing local reviews file:', err.message);
+  }
 }
 
 export async function getCustomerReviews() {
@@ -530,7 +536,9 @@ export async function getCustomerReviews() {
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (!error && data) {
+    if (error) {
+      console.warn('[db.getCustomerReviews] Failed reading customer_reviews table (falling back to shop_config):', error);
+    } else if (data) {
       return data.map((r) => ({
         id: r.id,
         type: r.type,
@@ -540,15 +548,21 @@ export async function getCustomerReviews() {
         createdAt: r.created_at
       }));
     }
-  } catch {}
+  } catch (err) {
+    console.warn('[db.getCustomerReviews] Unexpected exception reading customer_reviews table:', err);
+  }
 
   // Fallback to shop_config.stats.customer_reviews
   try {
-    const { data: cfg } = await supabase.from('shop_config').select('stats').eq('id', 'main').maybeSingle();
-    if (cfg?.stats?.customer_reviews && Array.isArray(cfg.stats.customer_reviews)) {
+    const { data: cfg, error: cfgError } = await supabase.from('shop_config').select('stats').eq('id', 'main').maybeSingle();
+    if (cfgError) {
+      console.warn('[db.getCustomerReviews] Failed reading shop_config stats customer_reviews fallback:', cfgError);
+    } else if (cfg?.stats?.customer_reviews && Array.isArray(cfg.stats.customer_reviews)) {
       return cfg.stats.customer_reviews;
     }
-  } catch {}
+  } catch (err) {
+    console.warn('[db.getCustomerReviews] Unexpected exception reading shop_config fallback:', err);
+  }
 
   return [];
 }
@@ -572,7 +586,9 @@ export async function createCustomerReview({ type, customerName, message, images
 
   try {
     const { data, error } = await supabase.from('customer_reviews').insert(row).select().maybeSingle();
-    if (!error && data) {
+    if (error) {
+      console.warn('[db.createCustomerReview] Failed inserting into customer_reviews table (falling back to shop_config stats):', error);
+    } else if (data) {
       return {
         id: data.id,
         type: data.type,
@@ -582,12 +598,11 @@ export async function createCustomerReview({ type, customerName, message, images
         createdAt: data.created_at
       };
     }
-  } catch {}
+  } catch (err) {
+    console.warn('[db.createCustomerReview] Unexpected exception inserting into customer_reviews table:', err);
+  }
 
   // Graceful fallback to shop_config.stats.customer_reviews
-  const { data: cfg } = await supabase.from('shop_config').select('stats').eq('id', 'main').single();
-  const currentStats = cfg?.stats || {};
-  const list = currentStats.customer_reviews || [];
   const clientObj = {
     id: row.id,
     type: row.type,
@@ -596,10 +611,34 @@ export async function createCustomerReview({ type, customerName, message, images
     images: row.images,
     createdAt: row.created_at
   };
-  list.unshift(clientObj);
-  await supabase.from('shop_config').update({
-    stats: { ...currentStats, customer_reviews: list }
-  }).eq('id', 'main');
+
+  let savedToFallback = false;
+  try {
+    const { data: cfg, error: cfgReadError } = await supabase.from('shop_config').select('stats').eq('id', 'main').single();
+    if (cfgReadError) {
+      // Do NOT continue with an empty object: updating with {} would wipe every other stats key
+      console.warn('[db.createCustomerReview] Failed reading shop_config stats for fallback insert (skipping update to avoid overwriting stats):', cfgReadError);
+    } else {
+      const currentStats = cfg?.stats || {};
+      const list = Array.isArray(currentStats.customer_reviews) ? currentStats.customer_reviews : [];
+      list.unshift(clientObj);
+      const { error: cfgUpdateError } = await supabase.from('shop_config').update({
+        stats: { ...currentStats, customer_reviews: list }
+      }).eq('id', 'main');
+      if (cfgUpdateError) {
+        console.warn('[db.createCustomerReview] Failed updating shop_config stats for fallback insert:', cfgUpdateError);
+      } else {
+        savedToFallback = true;
+      }
+    }
+  } catch (err) {
+    console.warn('[db.createCustomerReview] Unexpected exception saving to shop_config fallback:', err);
+  }
+
+  if (!savedToFallback) {
+    // Surface the failure so the route responds with an error instead of a false "success"
+    throw new Error('Failed to save customer review: customer_reviews table and shop_config fallback both failed');
+  }
 
   return clientObj;
 }
@@ -616,26 +655,78 @@ export async function deleteCustomerReview(id) {
     }
     return true;
   }
-  let imagesToDelete = [];
+  // Track read and delete outcomes per storage location separately
+  let primaryImages = [];
+  let primaryReadOk = false;
+  let primaryFound = false;
+  let primaryDeleted = false;
 
   try {
-    const { data } = await supabase.from('customer_reviews').select('images').eq('id', id).maybeSingle();
-    if (data?.images) imagesToDelete = data.images;
-    await supabase.from('customer_reviews').delete().eq('id', id);
-  } catch {}
-
-  try {
-    const { data: cfg } = await supabase.from('shop_config').select('stats').eq('id', 'main').single();
-    if (cfg?.stats?.customer_reviews && Array.isArray(cfg.stats.customer_reviews)) {
-      const target = cfg.stats.customer_reviews.find((r) => r.id === id);
-      if (target?.images) imagesToDelete = [...imagesToDelete, ...target.images];
-      const filtered = cfg.stats.customer_reviews.filter((r) => r.id !== id);
-      await supabase.from('shop_config').update({
-        stats: { ...cfg.stats, customer_reviews: filtered }
-      }).eq('id', 'main');
+    const { data, error: selectErr } = await supabase.from('customer_reviews').select('images').eq('id', id).maybeSingle();
+    if (selectErr) {
+      console.warn('[db.deleteCustomerReview] Failed selecting review images from customer_reviews table:', selectErr);
+    } else {
+      primaryReadOk = true;
+      if (data) {
+        primaryFound = true;
+        primaryImages = Array.isArray(data.images) ? data.images : [];
+      }
     }
-  } catch {}
+    const { error: deleteErr } = await supabase.from('customer_reviews').delete().eq('id', id);
+    if (deleteErr) {
+      console.warn('[db.deleteCustomerReview] Failed deleting from customer_reviews table:', deleteErr);
+    } else {
+      primaryDeleted = true;
+    }
+  } catch (err) {
+    console.warn('[db.deleteCustomerReview] Unexpected exception deleting from customer_reviews table:', err);
+  }
 
+  let fallbackImages = [];
+  let fallbackReadOk = false;
+  let fallbackFound = false;
+  let fallbackDeleted = false;
+
+  try {
+    const { data: cfg, error: cfgReadErr } = await supabase.from('shop_config').select('stats').eq('id', 'main').single();
+    if (cfgReadErr) {
+      console.warn('[db.deleteCustomerReview] Failed reading shop_config stats for fallback delete:', cfgReadErr);
+    } else {
+      fallbackReadOk = true;
+      const list = Array.isArray(cfg?.stats?.customer_reviews) ? cfg.stats.customer_reviews : [];
+      const target = list.find((r) => r.id === id);
+      if (target) {
+        fallbackFound = true;
+        const filtered = list.filter((r) => r.id !== id);
+        const { error: cfgUpdateErr } = await supabase.from('shop_config').update({
+          stats: { ...cfg.stats, customer_reviews: filtered }
+        }).eq('id', 'main');
+        if (cfgUpdateErr) {
+          console.warn('[db.deleteCustomerReview] Failed updating shop_config stats for fallback delete:', cfgUpdateErr);
+        } else {
+          fallbackDeleted = true;
+          fallbackImages = Array.isArray(target.images) ? target.images : [];
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[db.deleteCustomerReview] Unexpected exception in shop_config fallback delete:', err);
+  }
+
+  // Only succeed when each source is confirmed deleted or confirmed not to contain the review ID
+  const primaryConfirmed = primaryDeleted || (primaryReadOk && !primaryFound);
+  const fallbackConfirmed = fallbackDeleted || (fallbackReadOk && !fallbackFound);
+
+  if (!primaryConfirmed || !fallbackConfirmed) {
+    throw new Error(`Failed to delete customer review ${id}: review may still exist`);
+  }
+
+  const imagesToDelete = [
+    ...new Set([
+      ...(primaryFound && primaryDeleted ? primaryImages : []),
+      ...(fallbackFound && fallbackDeleted ? fallbackImages : [])
+    ])
+  ];
   if (imagesToDelete.length > 0) {
     await deleteImagesFromStorage(imagesToDelete);
   }
@@ -663,21 +754,40 @@ export async function saveContactMessage(msg) {
   // Try dedicated table contact_messages
   try {
     const { data, error } = await supabase.from('contact_messages').insert(item).select().maybeSingle();
-    if (!error && data) return data;
-  } catch {}
+    if (error) {
+      console.warn('[db.saveContactMessage] Failed inserting into contact_messages table (falling back to shop_config stats):', error);
+    } else if (data) return data;
+  } catch (err) {
+    console.warn('[db.saveContactMessage] Unexpected exception inserting into contact_messages table:', err);
+  }
 
   // Fallback to storing in shop_config stats so message is never lost
+  let savedToFallback = false;
   try {
-    const { data: cfg } = await supabase.from('shop_config').select('stats').eq('id', 'main').single();
-    const currentStats = cfg?.stats || {};
-    const messages = Array.isArray(currentStats.contact_messages) ? currentStats.contact_messages : [];
-    messages.unshift(item);
-    // Keep last 100 messages
-    await supabase.from('shop_config').update({
-      stats: { ...currentStats, contact_messages: messages.slice(0, 100) }
-    }).eq('id', 'main');
+    const { data: cfg, error: cfgReadErr } = await supabase.from('shop_config').select('stats').eq('id', 'main').single();
+    if (cfgReadErr) {
+      // Do NOT continue with an empty object: updating with {} would wipe every other stats key
+      console.warn('[db.saveContactMessage] Failed reading shop_config stats for fallback (skipping update to avoid overwriting stats):', cfgReadErr);
+    } else {
+      const currentStats = cfg?.stats || {};
+      const messages = Array.isArray(currentStats.contact_messages) ? currentStats.contact_messages : [];
+      messages.unshift(item);
+      // Keep last 100 messages
+      const { error: cfgUpdateErr } = await supabase.from('shop_config').update({
+        stats: { ...currentStats, contact_messages: messages.slice(0, 100) }
+      }).eq('id', 'main');
+      if (cfgUpdateErr) {
+        console.warn('[db.saveContactMessage] Failed updating shop_config stats for fallback:', cfgUpdateErr);
+      } else {
+        savedToFallback = true;
+      }
+    }
   } catch (err) {
-    console.error('[db] Failed to save contact message fallback:', err.message);
+    console.error('[db.saveContactMessage] Unexpected exception in saveContactMessage fallback:', err);
+  }
+
+  if (!savedToFallback) {
+    throw new Error('Failed to save contact message: contact_messages table and shop_config fallback both failed');
   }
 
   return item;

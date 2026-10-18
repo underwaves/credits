@@ -76,6 +76,20 @@
 </head>
 <body class="min-h-screen flex flex-col antialiased selection:bg-amber-100 selection:text-amber-900">
 
+  <!-- Ecosystem Top Switcher Bar (เชื่อม 5 เว็บไซต์) -->
+  <div style="background: #0F172A; color: #E2E8F0; font-size: 0.78rem; border-bottom: 1px solid rgba(255,255,255,0.08);">
+    <div class="container" style="display: flex; align-items: center; justify-content: space-between; padding: 0.4rem 1rem; gap: 0.75rem; overflow-x: auto;">
+      <span>เครือข่ายบริการ <strong>SUNFZENITH</strong>:</span>
+      <div style="display: flex; gap: 0.35rem; flex-wrap: nowrap;">
+        <a href="https://sunfz-portal.vercel.app" style="color: #CBD5E1; text-decoration: none; padding: 0.2rem 0.65rem; border-radius: 999px; white-space: nowrap;">🌟 รวมผลงาน (Hub)</a>
+        <a href="/credits" style="background: #10B981; color: #FFFFFF; text-decoration: none; padding: 0.2rem 0.65rem; border-radius: 999px; font-weight: 600; white-space: nowrap;">🛡️ เว็บเก็บเครดิต</a>
+        <a href="https://sunfz-creative.vercel.app" style="color: #CBD5E1; text-decoration: none; padding: 0.2rem 0.65rem; border-radius: 999px; white-space: nowrap;">🎨 กราฟิก & เอกสาร</a>
+        <a href="https://sunfz-webdev.vercel.app" style="color: #CBD5E1; text-decoration: none; padding: 0.2rem 0.65rem; border-radius: 999px; white-space: nowrap;">💻 รับทำเว็บ/แอป</a>
+        <a href="https://sunfz-gaming.vercel.app" style="color: #CBD5E1; text-decoration: none; padding: 0.2rem 0.65rem; border-radius: 999px; white-space: nowrap;">🎮 รับเล่นเกม</a>
+      </div>
+    </div>
+  </div>
+
   <!-- Header / Navbar -->
   <header class="navbar-wrapper" id="site-navbar">
     <div class="container navbar-inner">
@@ -84,7 +98,7 @@
           <img src="/images/mascot-logo.png" alt="SUNFZENITH" class="brand-avatar-img" width="44" height="44" />
         </div>
         <div class="brand-info">
-          <span class="brand-name">SUNFZENITH</span>
+          <span id="nav-shop-name" class="brand-name">SUNFZENITH</span>
           <span class="brand-tagline">สมุดรวมเครดิตซื้อขาย</span>
         </div>
       </a>
@@ -116,7 +130,7 @@
     <div class="max-w-[1024px] mx-auto px-4 sm:px-6">
       <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold mb-3">
         <i data-lucide="check-circle" class="w-3.5 h-3.5 text-amber-600"></i>
-        <span>หลักฐานการส่งมอบ &amp; สลิปจริงทุกออเดอร์</span>
+        <span id="announcement-text">หลักฐานการส่งมอบ &amp; สลิปจริงทุกออเดอร์</span>
       </div>
 
       <h1 class="font-heading text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
@@ -152,6 +166,9 @@
           </button>
         </div>
       </div>
+
+      <!-- Dynamic Social Links -->
+      <div id="social-links-container" class="mt-4 flex flex-wrap items-center justify-center gap-2"></div>
     </div>
   </section>
 
@@ -262,7 +279,7 @@
     <div class="max-w-[1024px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
       <div class="flex items-center gap-2">
         <img src="/images/logo.svg" alt="SUNFZENITH" class="w-4 h-4">
-        <span class="font-bold text-slate-800">SUNFZENITH</span>
+        <span id="footer-shop-name" class="font-bold text-slate-800">SUNFZENITH</span>
         <span>&copy; 2026 • รวมเครดิตการซื้อขาย</span>
       </div>
       <div class="flex items-center gap-3 text-slate-500">

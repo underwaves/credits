@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
@@ -54,7 +55,11 @@ describe('Server & Endpoints', () => {
     // 2. Remove temporary test fixtures directory
     try {
       fs.rmSync(tempDir, { recursive: true, force: true });
-    } catch (e) {}
+    } catch (e) {
+      if (e && e.code !== 'ENOENT') {
+        console.warn('[tests] Cleanup notice for tempDir:', e.message);
+      }
+    }
   });
 
   describe('Static & Pages Routing', () => {
@@ -220,6 +225,133 @@ describe('Server & Endpoints', () => {
         });
       expect(restoreRes.status).toBe(200);
       expect(restoreRes.body.success).toBe(true);
+    });
+
+    it('never includes a PIN or PIN hash in an exported backup', async () => {
+      const res = await request(app)
+        .get('/api/admin/export')
+        .set('Cookie', adminCookie);
+
+      expect(res.status).toBe(200);
+      const backup = JSON.parse(res.text);
+      expect(backup.settings.adminPin).toBeUndefined();
+      expect(backup.settings.adminPinHash).toBeUndefined();
+    });
+
+    it('does not accept authentication material from an imported backup', async () => {
+      const backup = {
+        settings: {
+          shopName: 'SUNFZENITH',
+          adminPin: 'attacker-controlled-pin',
+          adminPinHash: 'scrypt:fake-salt:fake-hash'
+        }
+      };
+
+      const importRes = await request(app)
+        .post('/api/admin/import')
+        .set('Cookie', adminCookie)
+        .attach('backupFile', Buffer.from(JSON.stringify(backup)), {
+          filename: 'backup.json',
+          contentType: 'application/json'
+        });
+
+      expect(importRes.status).toBe(200);
+      const loginRes = await request(app).post('/api/admin/login').send({ pin: TEST_PIN });
+      expect(loginRes.status).toBe(200);
+    });
+
+    it('validates all sections of backup file before writing and leaves system untouched on partial invalidity', async () => {
+      const partialInvalidBackup = {
+        settings: {
+          shopName: 'MUTATED_SHOP_NAME_SHOULD_NOT_PERSIST',
+          tagline: 'MUTATED_TAGLINE'
+        },
+        credits: [
+          { id: 'bad-credit-1', price: -50 } // invalid: missing title & negative price
+        ]
+      };
+
+      const importRes = await request(app)
+        .post('/api/admin/import')
+        .set('Cookie', adminCookie)
+        .attach('backupFile', Buffer.from(JSON.stringify(partialInvalidBackup)), {
+          filename: 'invalid-backup.json',
+          contentType: 'application/json'
+        });
+
+      expect(importRes.status).toBe(400);
+      expect(importRes.body.success).toBe(false);
+
+      const settingsRes = await request(app).get('/api/public/settings');
+      expect(settingsRes.status).toBe(200);
+      expect(settingsRes.body.settings.shopName).toBe('SUNFZENITH');
+    });
+  });
+
+  describe('Credit input security', () => {
+    it('rejects an unsafe externally supplied credit image URL', async () => {
+      const res = await request(app)
+        .post('/api/admin/credits')
+        .set('Cookie', adminCookie)
+        .field('title', 'Unsafe image test')
+        .field('imageUrl', 'javascript:alert(1)');
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+    });
+
+    it('retains existing proof images and cleans up only newly uploaded images when credit update fails', async () => {
+      const dbModule = await import('../src/server/services/db.js');
+      const { vi } = await import('vitest');
+
+      const createRes = await request(app)
+        .post('/api/admin/credits')
+        .set('Cookie', adminCookie)
+        .field('title', 'Credit With Existing Proof')
+        .field('imageUrl', 'https://example.com/existing-proof.jpg');
+      expect(createRes.status).toBe(200);
+      const creditId = createRes.body.credit.id;
+
+      const deletedImageBatches = [];
+      const deleteSpy = vi
+        .spyOn(dbModule, 'deleteImagesFromStorage')
+        .mockImplementation(async (imgs) => {
+          deletedImageBatches.push(imgs);
+        });
+      const uploadSpy = vi
+        .spyOn(dbModule, 'uploadImage')
+        .mockResolvedValue({ url: '/images/uploads/new-temp-proof.png', fileName: 'new-temp-proof.png' });
+      const updateSpy = vi
+        .spyOn(dbModule, 'updateCredit')
+        .mockRejectedValue(new Error('Simulated DB write failure'));
+
+      // Valid minimal 1x1 PNG signature buffer
+      const pngBuffer = Buffer.from([
+        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+        0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52
+      ]);
+
+      try {
+        const updateRes = await request(app)
+          .put(`/api/admin/credits/${creditId}`)
+          .set('Cookie', adminCookie)
+          .field('title', 'Attempted Update')
+          .field('remainingImages', JSON.stringify([]))
+          .attach('images', pngBuffer, { filename: 'new.png', contentType: 'image/png' });
+
+        expect(updateRes.status).toBe(400);
+        expect(updateRes.body.success).toBe(false);
+
+        // Old image must NOT be in any deleted batch; only the newly uploaded image should be rolled back
+        const allDeleted = deletedImageBatches.flat();
+        expect(allDeleted).not.toContain('https://example.com/existing-proof.jpg');
+        expect(allDeleted).toContain('/images/uploads/new-temp-proof.png');
+      } finally {
+        updateSpy.mockRestore();
+        uploadSpy.mockRestore();
+        deleteSpy.mockRestore();
+        await dbModule.deleteCredit(creditId);
+      }
     });
   });
 
@@ -443,6 +575,96 @@ describe('Server & Endpoints', () => {
         SUPABASE_KEY: 'legacy-anon-jwt-or-publishable-key'
       });
       expect(cfg.supabaseKey).toBe('legacy-anon-jwt-or-publishable-key');
+    });
+  });
+
+  describe('Production Build Enforcement & Legacy Fallback Prevention', () => {
+    it('ensures "vite" is in dependencies (not devDependencies) for production builds', () => {
+      const pkgPath = path.resolve(__dirname, '../package.json');
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+      expect(pkg.dependencies).toHaveProperty('vite');
+      expect(pkg.devDependencies?.vite).toBeUndefined();
+    });
+
+    it('throws an error on startup in production when dist/index.html is missing', () => {
+      const nonExistentDist = path.join(tempDir, 'missing-dist-test');
+      expect(() => {
+        createApp({
+          isProd: true,
+          distDir: nonExistentDist
+        });
+      }).toThrow(/Production bundle missing:.*index\.html.*was not found/);
+    });
+
+    it('serves modern web/index.html and never legacy public/index.html in development without dist', async () => {
+      const nonExistentDist = path.join(tempDir, 'missing-dist-test');
+      const devApp = createApp({
+        isProd: false,
+        distDir: nonExistentDist
+      });
+
+      const res = await request(devApp).get('/');
+      expect(res.status).toBe(200);
+      expect(res.text).toContain('Small Dream, Big Zenith');
+      expect(res.text).not.toContain('SUNFZENITH - รวมเครดิตการซื้อขาย');
+    });
+
+    it('serves web/credits.html and never legacy public/index.html in development without dist', async () => {
+      const nonExistentDist = path.join(tempDir, 'missing-dist-test');
+      const devApp = createApp({
+        isProd: false,
+        distDir: nonExistentDist
+      });
+
+      const res = await request(devApp).get('/credits');
+      expect(res.status).toBe(200);
+      expect(res.text).toContain('สมุดรวมเครดิต');
+      expect(res.text).not.toContain('SUNFZENITH - รวมเครดิตการซื้อขาย');
+    });
+
+    it('serves web/404.html and never legacy public/index.html in development without dist', async () => {
+      const nonExistentDist = path.join(tempDir, 'missing-dist-test');
+      const devApp = createApp({
+        isProd: false,
+        distDir: nonExistentDist
+      });
+
+      const res = await request(devApp).get('/non-existent-page-test-404');
+      expect(res.status).toBe(404);
+      expect(res.text).toContain('404');
+      expect(res.text).not.toContain('SUNFZENITH - รวมเครดิตการซื้อขาย');
+    });
+
+    it('never serves legacy public/index.html across any page endpoint', async () => {
+      const legacyPath = path.resolve(__dirname, '../public/index.html');
+      const legacyHtml = fs.readFileSync(legacyPath, 'utf8');
+
+      const resHome = await request(app).get('/');
+      expect(resHome.text).not.toBe(legacyHtml);
+      expect(resHome.text).not.toContain('SUNFZENITH - รวมเครดิตการซื้อขาย');
+
+      const resCredits = await request(app).get('/credits');
+      expect(resCredits.text).not.toBe(legacyHtml);
+      expect(resCredits.text).not.toContain('SUNFZENITH - รวมเครดิตการซื้อขาย');
+    });
+
+    it('postinstall fails with exit code 1 if vite is missing', () => {
+      const postinstallScript = path.resolve(__dirname, '../scripts/postinstall.js');
+      const fakeDir = fs.mkdtempSync(path.join(os.tmpdir(), 'postinstall-missing-vite-'));
+      const fakeScriptsDir = path.join(fakeDir, 'scripts');
+      fs.mkdirSync(fakeScriptsDir, { recursive: true });
+      fs.copyFileSync(postinstallScript, path.join(fakeScriptsDir, 'postinstall.js'));
+
+      const res = spawnSync(process.execPath, [path.join(fakeScriptsDir, 'postinstall.js')], {
+        cwd: fakeDir,
+        env: { ...process.env, SKIP_WEB_BUILD: '0' },
+        encoding: 'utf8'
+      });
+
+      expect(res.status).toBe(1);
+      expect(res.stderr).toContain('Vite is required in "dependencies"');
+
+      fs.rmSync(fakeDir, { recursive: true, force: true });
     });
   });
 });

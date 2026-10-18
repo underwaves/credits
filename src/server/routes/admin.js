@@ -62,6 +62,23 @@ async function processUploadedImages(files) {
   }
 }
 
+/**
+ * Accept a manually supplied image URL only when it is safe to place in an
+ * image src attribute. Uploaded files go through processUploadedImages()
+ * instead, which also verifies their file signatures.
+ */
+function getSafeImageUrl(imageUrl) {
+  if (typeof imageUrl !== 'string' || !imageUrl.trim()) return null;
+  return sanitizeImageUrl(imageUrl.trim(), '');
+}
+
+/** Keep authentication material out of downloadable backups and imports. */
+function withoutAuthenticationFields(settings) {
+  if (!settings || typeof settings !== 'object' || Array.isArray(settings)) return null;
+  const { adminPin, adminPinHash, ...safeSettings } = settings;
+  return safeSettings;
+}
+
 // ---------------- Admin Auth ----------------
 adminRouter.post('/login', loginLimiter, async (req, res) => {
   try {
@@ -151,7 +168,14 @@ adminRouter.post('/credits', requireAdmin, imageUpload.array('images', MAX_FILES
     if (req.files && req.files.length > 0) {
       uploadedImages = await processUploadedImages(req.files);
     } else if (req.body.imageUrl && typeof req.body.imageUrl === 'string') {
-      uploadedImages = [req.body.imageUrl.trim()];
+      const safeImageUrl = getSafeImageUrl(req.body.imageUrl);
+      if (!safeImageUrl) {
+        return res.status(400).json({
+          success: false,
+          message: 'ลิงก์รูปภาพไม่ถูกต้อง กรุณาใช้ https:// หรือพาธรูปภาพภายในเว็บไซต์'
+        });
+      }
+      uploadedImages = [safeImageUrl];
     } else {
       uploadedImages = ['/images/placeholder-credit.svg'];
     }
@@ -192,15 +216,33 @@ adminRouter.put('/credits/:id', requireAdmin, imageUpload.array('images', MAX_FI
     }
 
     let finalImages = [];
+    let baseImages = [];
+    if (req.body.remainingImages !== undefined) {
+      try {
+        const parsed = typeof req.body.remainingImages === 'string'
+          ? JSON.parse(req.body.remainingImages)
+          : req.body.remainingImages;
+        if (Array.isArray(parsed)) {
+          baseImages = parsed.filter(img => typeof img === 'string' && (existing.images || []).includes(img));
+        }
+      } catch {
+        baseImages = existing.images || [];
+      }
+    } else if (keepExistingImages === 'true' || keepExistingImages === true) {
+      baseImages = existing.images || [];
+    }
+
     if (req.files && req.files.length > 0) {
       uploadedImages = await processUploadedImages(req.files);
-      if (keepExistingImages === 'true' || keepExistingImages === true) {
-        finalImages = [...(existing.images || []), ...uploadedImages];
-      } else {
-        finalImages = uploadedImages;
-      }
+      finalImages = [...baseImages, ...uploadedImages];
     } else {
-      finalImages = existing.images || ['/images/placeholder-credit.svg'];
+      finalImages = req.body.remainingImages !== undefined
+        ? baseImages
+        : (existing.images || ['/images/placeholder-credit.svg']);
+    }
+
+    if (finalImages.length === 0) {
+      finalImages = ['/images/placeholder-credit.svg'];
     }
 
     const updates = {
@@ -216,6 +258,22 @@ adminRouter.put('/credits/:id', requireAdmin, imageUpload.array('images', MAX_FI
     };
 
     const updated = await db.updateCredit(req.params.id, updates);
+    if (!updated) {
+      throw new Error('Failed to update credit record');
+    }
+
+    // Clean up images that were removed from this credit only after update succeeds
+    const removedImages = (existing.images || []).filter(
+      (img) => !finalImages.includes(img) && img !== '/images/placeholder-credit.svg'
+    );
+    if (removedImages.length > 0) {
+      try {
+        await db.deleteImagesFromStorage(removedImages);
+      } catch (cleanupErr) {
+        console.warn('[admin] Failed cleaning up removed credit images:', cleanupErr.message);
+      }
+    }
+
     res.json({ success: true, credit: updated, message: 'อัปเดตข้อมูลเครดิตเรียบร้อย' });
   } catch (err) {
     console.error('[admin] Update credit error:', err.message);
@@ -662,7 +720,9 @@ adminRouter.get('/export', requireAdmin, async (req, res) => {
     const portfolio = getAllPortfolio();
 
     const backup = {
-      settings: configData.settings,
+      // A backup is often stored outside the server. Never include a PIN or a
+      // PIN hash in it, even though this endpoint itself requires an admin.
+      settings: withoutAuthenticationFields(configData.settings),
       categories: configData.categories,
       content,
       portfolio,
@@ -679,6 +739,166 @@ adminRouter.get('/export', requireAdmin, async (req, res) => {
   }
 });
 
+function isPlainObject(val) {
+  return Boolean(val) && typeof val === 'object' && !Array.isArray(val);
+}
+
+function isValidSettingsSection(settings) {
+  if (!isPlainObject(settings)) return false;
+  if (settings.shopName !== undefined && (typeof settings.shopName !== 'string' || !settings.shopName.trim())) return false;
+  if (settings.tagline !== undefined && typeof settings.tagline !== 'string') return false;
+  if (settings.announcement !== undefined && typeof settings.announcement !== 'string') return false;
+  if (settings.socials !== undefined) {
+    if (!isPlainObject(settings.socials)) return false;
+    for (const val of Object.values(settings.socials)) {
+      if (!isPlainObject(val)) return false;
+      if (val.url !== undefined && typeof val.url !== 'string') return false;
+      if (val.label !== undefined && typeof val.label !== 'string') return false;
+      if (val.enabled !== undefined && typeof val.enabled !== 'boolean') return false;
+    }
+  }
+  if (settings.stats !== undefined && !isPlainObject(settings.stats)) return false;
+  return true;
+}
+
+function isValidCategoriesSection(categories) {
+  return (
+    Array.isArray(categories) &&
+    categories.every((item) => typeof item === 'string' && item.trim().length > 0)
+  );
+}
+
+function isValidContentSection(content) {
+  if (!isPlainObject(content)) return false;
+  const hasKnownKey =
+    content.general !== undefined ||
+    content.socials !== undefined ||
+    content.services !== undefined ||
+    content.pricing !== undefined;
+  if (!hasKnownKey) return false;
+
+  if (content.general !== undefined) {
+    if (!isPlainObject(content.general)) return false;
+    for (const [key, val] of Object.entries(content.general)) {
+      if (key === 'showAnnouncement') {
+        if (typeof val !== 'boolean') return false;
+      } else if (typeof val !== 'string') {
+        return false;
+      }
+    }
+  }
+  if (content.socials !== undefined) {
+    if (!isPlainObject(content.socials)) return false;
+    for (const val of Object.values(content.socials)) {
+      if (!isPlainObject(val)) return false;
+      if (val.url !== undefined && typeof val.url !== 'string') return false;
+      if (val.label !== undefined && typeof val.label !== 'string') return false;
+      if (val.enabled !== undefined && typeof val.enabled !== 'boolean') return false;
+    }
+  }
+  if (content.services !== undefined) {
+    if (!Array.isArray(content.services)) return false;
+    for (const item of content.services) {
+      if (!isPlainObject(item)) return false;
+      if (typeof item.title !== 'string' || !item.title.trim()) return false;
+      if (item.id !== undefined && (typeof item.id !== 'string' || !item.id.trim())) return false;
+      if (item.features !== undefined && (!Array.isArray(item.features) || !item.features.every((f) => typeof f === 'string'))) {
+        return false;
+      }
+    }
+  }
+  if (content.pricing !== undefined) {
+    if (!Array.isArray(content.pricing)) return false;
+    for (const item of content.pricing) {
+      if (!isPlainObject(item)) return false;
+      if (typeof item.title !== 'string' || !item.title.trim()) return false;
+      if (item.id !== undefined && (typeof item.id !== 'string' || !item.id.trim())) return false;
+      if (item.features !== undefined && (!Array.isArray(item.features) || !item.features.every((f) => typeof f === 'string'))) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+function isValidPortfolioSection(portfolio) {
+  if (!Array.isArray(portfolio)) return false;
+  return portfolio.every((item) => {
+    if (!isPlainObject(item)) return false;
+    if (typeof item.title !== 'string' || !item.title.trim()) return false;
+    if (item.id !== undefined && (typeof item.id !== 'string' || !item.id.trim())) return false;
+    if (item.category !== undefined && typeof item.category !== 'string') return false;
+    if (item.categoryLabel !== undefined && typeof item.categoryLabel !== 'string') return false;
+    if (item.desc !== undefined && typeof item.desc !== 'string') return false;
+    if (
+      item.tech !== undefined &&
+      typeof item.tech !== 'string' &&
+      (!Array.isArray(item.tech) || !item.tech.every((t) => typeof t === 'string'))
+    ) {
+      return false;
+    }
+    if (item.image !== undefined && typeof item.image !== 'string') return false;
+    if (item.demoUrl !== undefined && typeof item.demoUrl !== 'string') return false;
+    if (item.demoLabel !== undefined && typeof item.demoLabel !== 'string') return false;
+    if (item.isReal !== undefined && typeof item.isReal !== 'boolean') return false;
+    return true;
+  });
+}
+
+function isValidCreditsSection(credits) {
+  if (!Array.isArray(credits)) return false;
+  return credits.every((item) => {
+    if (!isPlainObject(item)) return false;
+    if (typeof item.title !== 'string' || !item.title.trim()) return false;
+    if (
+      item.id !== undefined &&
+      !(typeof item.id === 'string' && item.id.trim().length > 0) &&
+      !(typeof item.id === 'number' && Number.isFinite(item.id))
+    ) {
+      return false;
+    }
+    if (item.game !== undefined && typeof item.game !== 'string') return false;
+    if (item.price !== undefined) {
+      const numericPrice = typeof item.price === 'number' ? item.price : (typeof item.price === 'string' && item.price.trim() !== '' ? Number(item.price) : NaN);
+      if (!Number.isFinite(numericPrice) || numericPrice < 0) return false;
+    }
+    if (item.customer !== undefined && typeof item.customer !== 'string') return false;
+    if (item.rating !== undefined) {
+      const numericRating = typeof item.rating === 'number' ? item.rating : (typeof item.rating === 'string' && item.rating.trim() !== '' ? Number(item.rating) : NaN);
+      if (!Number.isFinite(numericRating) || numericRating < 1 || numericRating > 5) return false;
+    }
+    if (item.date !== undefined && typeof item.date !== 'string') return false;
+    if (item.images !== undefined && (!Array.isArray(item.images) || !item.images.every((img) => typeof img === 'string'))) {
+      return false;
+    }
+    if (item.description !== undefined && typeof item.description !== 'string') return false;
+    if (item.isPinned !== undefined && typeof item.isPinned !== 'boolean') return false;
+    return true;
+  });
+}
+
+function isValidReviewsSection(reviews) {
+  if (!Array.isArray(reviews)) return false;
+  return reviews.every((item) => {
+    if (!isPlainObject(item)) return false;
+    if (item.id !== undefined && (typeof item.id !== 'string' || !item.id.trim())) return false;
+    if (item.type !== undefined && item.type !== '+1' && item.type !== '-1') return false;
+    if (item.customerName !== undefined && typeof item.customerName !== 'string') return false;
+    if (item.customer_name !== undefined && typeof item.customer_name !== 'string') return false;
+    if (item.message !== undefined && typeof item.message !== 'string') return false;
+    if (item.images !== undefined && (!Array.isArray(item.images) || !item.images.every((img) => typeof img === 'string'))) {
+      return false;
+    }
+    return (
+      item.type === '+1' ||
+      item.type === '-1' ||
+      typeof item.message === 'string' ||
+      typeof item.customerName === 'string' ||
+      typeof item.customer_name === 'string'
+    );
+  });
+}
+
 adminRouter.post(
   '/import',
   requireAdmin,
@@ -689,24 +909,77 @@ adminRouter.post(
         return res.status(400).json({ success: false, message: 'กรุณาเลือกไฟล์สำรองข้อมูล JSON' });
       }
       const raw = req.file.buffer.toString('utf8');
-      const parsed = JSON.parse(raw);
-      if (!parsed.settings && !parsed.content && !Array.isArray(parsed.credits)) {
+      let parsed;
+      try {
+        parsed = JSON.parse(raw);
+      } catch {
+        return res.status(400).json({ success: false, message: 'ไฟล์สำรองข้อมูลไม่ใช่ JSON ที่ถูกต้อง' });
+      }
+
+      if (!isPlainObject(parsed)) {
+        return res.status(400).json({ success: false, message: 'ไฟล์สำรองข้อมูลต้องเป็น JSON object' });
+      }
+
+      const hasKnownSection =
+        parsed.settings !== undefined ||
+        parsed.categories !== undefined ||
+        parsed.content !== undefined ||
+        parsed.portfolio !== undefined ||
+        parsed.credits !== undefined ||
+        parsed.reviews !== undefined;
+
+      if (!hasKnownSection) {
         return res.status(400).json({ success: false, message: 'รูปแบบไฟล์สำรองข้อมูลไม่ถูกต้อง' });
       }
 
-      if (parsed.settings) {
-        await db.updateShopSettings(parsed.settings);
+      // Validate ALL present backup sections upfront before writing any system state
+      let safeSettings = null;
+      if (parsed.settings !== undefined) {
+        safeSettings = withoutAuthenticationFields(parsed.settings);
+        if (!safeSettings || !isValidSettingsSection(safeSettings)) {
+          return res.status(400).json({ success: false, message: 'ข้อมูลการตั้งค่าในไฟล์สำรองไม่ถูกต้อง' });
+        }
       }
-      if (parsed.categories) {
+      if (parsed.categories !== undefined) {
+        if (!isValidCategoriesSection(parsed.categories)) {
+          return res.status(400).json({ success: false, message: 'หมวดหมู่ในไฟล์สำรองไม่ถูกต้อง' });
+        }
+      }
+      if (parsed.content !== undefined) {
+        if (!isValidContentSection(parsed.content)) {
+          return res.status(400).json({ success: false, message: 'เนื้อหาเว็บไซต์ในไฟล์สำรองไม่ถูกต้อง' });
+        }
+      }
+      if (parsed.portfolio !== undefined) {
+        if (!isValidPortfolioSection(parsed.portfolio)) {
+          return res.status(400).json({ success: false, message: 'รายการผลงานในไฟล์สำรองไม่ถูกต้อง' });
+        }
+      }
+      if (parsed.credits !== undefined) {
+        if (!isValidCreditsSection(parsed.credits)) {
+          return res.status(400).json({ success: false, message: 'รายการเครดิตในไฟล์สำรองไม่ถูกต้อง' });
+        }
+      }
+      if (parsed.reviews !== undefined) {
+        if (!isValidReviewsSection(parsed.reviews)) {
+          return res.status(400).json({ success: false, message: 'รายการรีวิวในไฟล์สำรองไม่ถูกต้อง' });
+        }
+      }
+
+      // All sections validated; now apply writes
+      if (safeSettings) {
+        await db.updateShopSettings(safeSettings);
+      }
+      if (parsed.categories !== undefined) {
         await db.updateCategories(parsed.categories);
       }
-      if (parsed.content) {
+      if (parsed.content !== undefined) {
         saveSiteContent(parsed.content);
       }
-      if (Array.isArray(parsed.portfolio)) {
+      if (parsed.portfolio !== undefined) {
         savePortfolioList(parsed.portfolio);
       }
-      if (Array.isArray(parsed.credits)) {
+      if (parsed.credits !== undefined) {
         for (const c of parsed.credits) {
           const existing = await db.getCreditById(c.id);
           if (existing) {
@@ -714,6 +987,19 @@ adminRouter.post(
           } else {
             await db.createCredit(c);
           }
+        }
+      }
+      if (parsed.reviews !== undefined) {
+        for (const r of parsed.reviews) {
+          if (r.id) {
+            await db.deleteCustomerReview(r.id);
+          }
+          await db.createCustomerReview({
+            type: r.type === '-1' ? '-1' : '+1',
+            customerName: r.customerName || r.customer_name || 'ลูกค้าทั่วไป',
+            message: r.message || '',
+            images: Array.isArray(r.images) ? r.images : []
+          });
         }
       }
 
@@ -724,3 +1010,4 @@ adminRouter.post(
     }
   }
 );
+

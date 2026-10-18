@@ -19,6 +19,7 @@ const state = {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
+  initThemeToggle();
   await fetchSettings();
   await Promise.all([fetchCredits(), fetchReviews()]);
 
@@ -29,10 +30,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (creditIdParam) {
       openLightbox(creditIdParam);
     }
-  } catch (e) {}
+  } catch (e) {
+    console.warn('[app] Deep-link credit parsing notice:', e.message);
+  }
 
   updateIcons();
 });
+
+// Theme Toggle Handler
+function initThemeToggle() {
+  const btn = document.getElementById('theme-toggle-btn');
+  if (!btn) return;
+
+  const savedTheme = localStorage.getItem('sunfz_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+
+  btn.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const nextTheme = isDark ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', nextTheme);
+    localStorage.setItem('sunfz_theme', nextTheme);
+  });
+}
 
 // Helper to refresh Lucide icons
 function updateIcons() {
@@ -51,10 +70,16 @@ function showToast(message, type = 'success') {
   const icon = type === 'error' ? 'alert-circle' : 'check-circle-2';
 
   toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-xl text-xs sm:text-sm font-medium transition-all duration-300 transform translate-y-2 opacity-0 ${bgClass}`;
-  toast.innerHTML = `
-    <i data-lucide="${icon}" class="w-4 h-4 shrink-0"></i>
-    <span>${message}</span>
-  `;
+
+  const iconEl = document.createElement('i');
+  iconEl.setAttribute('data-lucide', icon);
+  iconEl.className = 'w-4 h-4 shrink-0';
+
+  const textEl = document.createElement('span');
+  textEl.textContent = message || '';
+
+  toast.appendChild(iconEl);
+  toast.appendChild(textEl);
 
   container.appendChild(toast);
   updateIcons();
@@ -810,7 +835,9 @@ function openLightbox(id) {
     const url = new URL(window.location);
     url.searchParams.set('credit', id);
     window.history.replaceState({}, '', url);
-  } catch (e) {}
+  } catch (e) {
+    console.debug('[app] history.replaceState notice:', e.message);
+  }
 
   updateIcons();
 }
@@ -897,7 +924,9 @@ function closeLightbox() {
     const url = new URL(window.location);
     url.searchParams.delete('credit');
     window.history.replaceState({}, '', url);
-  } catch (e) {}
+  } catch (e) {
+    console.debug('[app] history.replaceState notice:', e.message);
+  }
 }
 
 function copyCreditLink() {
@@ -950,6 +979,7 @@ function sanitizeUrl(rawUrl, fallback = '#') {
     if (parsed.protocol === 'https:' || parsed.protocol === 'http:') return parsed.href;
     return fallback;
   } catch {
+    // Non-URL string or invalid format: safe return of configured fallback
     return fallback;
   }
 }

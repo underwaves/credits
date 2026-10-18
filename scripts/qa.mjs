@@ -39,12 +39,13 @@ if (fs.existsSync(path.join(dist, 'index.html'))) {
   check('Contains concept "Small Dream, Big Zenith"', indexHtml.includes('Small Dream, Big Zenith'));
   check('Contains services section', indexHtml.includes('id="services"'));
   check('Contains portfolio section', indexHtml.includes('id="portfolio"'));
-  check('Contains pricing section', indexHtml.includes('id="pricing"'));
+  check('Contains rate card modal', indexHtml.includes('id="rate-card-modal"'));
   check('Contains contact section', indexHtml.includes('id="contact"'));
   check('Contains LINE OA link (@419ajynp)', indexHtml.includes('line.me/R/ti/p/@419ajynp'));
   check('Contains no contact form (LINE OA CTA only)', !indexHtml.includes('id="contact-form"'));
   check('Contains sun emoji brand icon', indexHtml.includes('☀️'));
   check('Contains CSRF/Same-origin security script', indexHtml.includes('sunfz'));
+  check('Does not serve legacy credits title in index.html', !indexHtml.includes('SUNFZENITH - รวมเครดิตการซื้อขาย'));
 }
 
 // 3. Credits HTML Quality Check
@@ -56,6 +57,7 @@ if (fs.existsSync(path.join(dist, 'credits.html'))) {
   check('Contains review type indicator', creditsHtml.includes('btn-submit-review'));
   check('Contains credits container/grid', creditsHtml.includes('id="credits-grid"'));
   check('Contains search input', creditsHtml.includes('id="search-input"'));
+  check('Does not serve legacy credits title in credits.html', !creditsHtml.includes('SUNFZENITH - รวมเครดิตการซื้อขาย'));
 }
 
 // 4. Fonts and Assets

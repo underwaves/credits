@@ -191,9 +191,11 @@ publicRouter.post('/reviews', reviewLimiter, imageUpload.array('images', MAX_FIL
     if (uploadedImages.length > 0) {
       await db.deleteImagesFromStorage(uploadedImages);
     }
-    res.status(400).json({
+    // Image validation errors are client errors (400); anything else (e.g. DB save failure) is a server error (500)
+    const isImageValidationError = typeof err.message === 'string' && err.message.includes('รูปภาพ');
+    res.status(isImageValidationError ? 400 : 500).json({
       success: false,
-      message: err.message.includes('รูปภาพ') ? err.message : 'เกิดข้อผิดพลาดในการบันทึกรีวิว กรุณาลองใหม่อีกครั้ง'
+      message: isImageValidationError ? err.message : 'เกิดข้อผิดพลาดในการบันทึกรีวิว กรุณาลองใหม่อีกครั้ง'
     });
   }
 });

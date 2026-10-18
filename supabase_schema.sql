@@ -1,18 +1,18 @@
 -- =============================================
--- SQL SCHEMA FOR SUPABASE (MY-CREDITS / SUNFZ)
+-- SQL SCHEMA FOR SUPABASE (MY-CREDITS / SUNFZENITH)
 -- คัดลอกโค้ดทั้งหมดนี้ไปวางในหน้า Supabase -> SQL Editor แล้วกด RUN
 -- =============================================
 
 -- 1. ตารางตั้งค่าร้านค้า (Settings & Categories)
 CREATE TABLE IF NOT EXISTS public.shop_config (
     id TEXT PRIMARY KEY DEFAULT 'main',
-    shop_name TEXT NOT NULL DEFAULT 'SUNFZ',
-    tagline TEXT DEFAULT 'รวมหลักฐานและเครดิตการซื้อขายจริง เช็คประวัติได้ที่นี่ 100%',
-    announcement TEXT DEFAULT '✨ รวมเครดิตซื้อขายร้าน SUNFZ ซื้อขายปลอดภัย มีหลักฐานทุกรายการ!',
+    shop_name TEXT NOT NULL DEFAULT 'SUNFZENITH',
+    tagline TEXT DEFAULT 'Small Dream, Big Zenith',
+    announcement TEXT DEFAULT '✨ ยินดีต้อนรับสู่ SUNFZENITH สตูดิโอสร้างสรรค์งานดิจิทัล เว็บไซต์ และดีไซน์',
     admin_pin_hash TEXT,
-    socials JSONB DEFAULT '{"facebook":{"label":"Facebook Fanpage","url":"https://facebook.com","enabled":true},"line":{"label":"Line ID: @sunfz","url":"https://line.me","enabled":true},"discord":{"label":"Discord Server","url":"https://discord.gg","enabled":true},"tiktok":{"label":"TikTok Shop","url":"","enabled":false}}'::jsonb,
-    stats JSONB DEFAULT '{"ratingScore":"5.0","totalOrders":"เครดิตจริง 100%","deliveryRate":"ส่งไว ปลอดภัย","responseTime":"ไม่กี่นาที","warrantyPeriod":"มีประกัน"}'::jsonb,
-    categories JSONB DEFAULT '["ทั้งหมด", "ทั่วไป", "ไอดีเกม", "แอพพรีเมียม", "เติมเกม"]'::jsonb,
+    socials JSONB DEFAULT '{"facebook":{"label":"Facebook Page","url":"https://www.facebook.com/profile.php?id=61595346770633&locale=th_TH","enabled":true},"line":{"label":"LINE OA: @419ajynp","url":"https://line.me/R/ti/p/@419ajynp","enabled":true},"discord":{"label":"Discord Server","url":"","enabled":false},"tiktok":{"label":"TikTok","url":"","enabled":false}}'::jsonb,
+    stats JSONB DEFAULT '{"ratingScore":"5.0","totalOrders":"ผลงานคุณภาพ 100%","deliveryRate":"ส่งตรงเวลา ใส่ใจทุกรายละเอียด","responseTime":"ตอบกลับรวดเร็ว","warrantyPeriod":"ดูแลหลังส่งมอบ"}'::jsonb,
+    categories JSONB DEFAULT '["ทั้งหมด", "ทั่วไป", "เว็บไซต์", "สไลด์", "ดีไซน์"]'::jsonb,
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -38,51 +38,59 @@ CREATE INDEX IF NOT EXISTS idx_credits_is_pinned ON public.credits (is_pinned DE
 CREATE INDEX IF NOT EXISTS idx_credits_game ON public.credits (game);
 
 -- 3. ข้อมูลเริ่มต้น (Initial Data - ไม่มี PIN ฝังตายตัว ให้กำหนดผ่าน ADMIN_PIN หรือหน้า Admin)
-INSERT INTO public.shop_config (id, shop_name, tagline, announcement, categories)
-VALUES ('main', 'SUNFZ', 'รวมหลักฐานและเครดิตการซื้อขายจริง เช็คประวัติได้ที่นี่ 100%', '✨ รวมเครดิตซื้อขายร้าน SUNFZ ซื้อขายปลอดภัย มีหลักฐานทุกรายการ!', '["ทั้งหมด", "ทั่วไป", "ไอดีเกม", "แอพพรีเมียม", "เติมเกม"]'::jsonb)
+INSERT INTO public.shop_config (id, shop_name, tagline, announcement, categories, socials, stats)
+VALUES (
+    'main',
+    'SUNFZENITH',
+    'Small Dream, Big Zenith',
+    '✨ ยินดีต้อนรับสู่ SUNFZENITH สตูดิโอสร้างสรรค์งานดิจิทัล เว็บไซต์ และดีไซน์',
+    '["ทั้งหมด", "ทั่วไป", "เว็บไซต์", "สไลด์", "ดีไซน์"]'::jsonb,
+    '{"facebook":{"label":"Facebook Page","url":"https://www.facebook.com/profile.php?id=61595346770633&locale=th_TH","enabled":true},"line":{"label":"LINE OA: @419ajynp","url":"https://line.me/R/ti/p/@419ajynp","enabled":true},"discord":{"label":"Discord Server","url":"","enabled":false},"tiktok":{"label":"TikTok","url":"","enabled":false}}'::jsonb,
+    '{"ratingScore":"5.0","totalOrders":"ผลงานคุณภาพ 100%","deliveryRate":"ส่งตรงเวลา ใส่ใจทุกรายละเอียด","responseTime":"ตอบกลับรวดเร็ว","warrantyPeriod":"ดูแลหลังส่งมอบ"}'::jsonb
+)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.credits (id, title, game, price, customer, rating, date, time_ago, images, description, is_pinned, created_at)
 VALUES
 (
     'sample-1',
-    'ไอดี Genshin Impact C6 Furina + Sign R1 & 24 ตัว 5 ดาว',
-    'ไอดีเกม',
-    4500,
+    'ออกแบบและพัฒนาเว็บไซต์ Portfolio & Presentation',
+    'เว็บไซต์',
+    3500,
     'คุณธนภัทร',
     5,
     '2026-10-03',
     '10 นาทีที่แล้ว',
     '["/images/sample-genshin.svg"]'::jsonb,
-    'ส่งมอบเรียบร้อย ลูกค้าเช็คไอดีถูกต้อง โอนเงินไวมากครับ ขอบคุณที่ไว้วางใจ!',
+    'ส่งมอบงานเรียบร้อย เว็บไซต์ Responsive โหลดไว ลูกค้าตรวจรับงานและพึงพอใจมากครับ ขอบคุณที่ไว้วางใจ!',
     true,
     '2026-10-03T03:50:40.631Z'
 ),
 (
     'sample-2',
-    'บัญชีพรีเมียม 1 ปี ใช้งานได้ยาวๆ ไม่หลุด',
-    'แอพพรีเมียม',
-    490,
+    'ออกแบบสไลด์ Pitch Deck ระดับมืออาชีพ 25 สไลด์',
+    'สไลด์',
+    1500,
     'คุณนนท์',
     5,
     '2026-10-03',
     '2 ชม. ที่แล้ว',
     '["/images/sample-starrail.svg"]'::jsonb,
-    'ส่งเมลและรหัสให้เรียบร้อย ล็อกอินผ่านฉลุย ขอบคุณครับ',
+    'จัดทำสไลด์นำเสนอธุรกิจ โทนสีทันสมัย อ่านง่าย ส่งมอบตรงเวลา ขอบคุณครับ',
     true,
     '2026-10-03T01:50:40.631Z'
 ),
 (
     'sample-3',
-    'เติมแพ็กรายเดือน / เติมเกมส่งไว',
-    'เติมเกม',
-    179,
+    'ออกแบบโลโก้และแบรนดิ้งชุดเริ่มต้น (Vector + Brand Guide)',
+    'ดีไซน์',
+    1200,
     'คุณกอล์ฟ',
     5,
     '2026-10-02',
     'เมื่อวานนี้',
     '["/images/sample-genshin.svg"]'::jsonb,
-    'โอนปุ๊บเติมปั๊บ เข้าทันทีภายใน 2 นาทีครับ',
+    'ส่งมอบไฟล์ครบถ้วน AI, PNG, SVG พร้อมคู่มือการใช้งาน ขอบคุณที่ใช้บริการครับ',
     false,
     '2026-10-02T10:30:00.000Z'
 )

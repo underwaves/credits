@@ -480,9 +480,10 @@ export const PORTFOLIO_DATA = [
       "Web Speech API",
       "Vite"
     ],
-    "image": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=800&q=80",
-    "demoUrl": "https://github.com/underwaves/smart-pharmacy-locker",
-    "demoLabel": "ดูโปรเจกต์บน GitHub",
+    "image": "/images/portfolio/portfolio-smart-pharmacy-locker.webp",
+    "demoUrl": "https://underwaves.github.io/smart-pharmacy-locker/",
+    "demoLabel": "เข้าชมระบบจริง",
+    "githubUrl": "https://github.com/underwaves/smart-pharmacy-locker",
     "isReal": true,
     "createdAt": "2026-09-01T00:00:00.000Z"
   },
