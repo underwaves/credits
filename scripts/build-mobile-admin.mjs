@@ -27,7 +27,9 @@ function runNpm(args, label) {
 }
 
 if (!existsSync(angularCli)) {
-  runNpm(['ci'], 'Installing locked Ionic dependencies…');
+  // Render sets NODE_ENV=production for service builds, which makes npm omit
+  // Angular CLI and other devDependencies unless we explicitly include them.
+  runNpm(['ci', '--include=dev'], 'Installing locked Ionic build dependencies…');
 }
 
 runNpm(
