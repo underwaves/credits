@@ -1,5 +1,7 @@
 import { Injectable, signal } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
 import { Preferences } from '@capacitor/preferences';
+import { environment } from '../../environments/environment';
 
 export interface CreditItem {
   id: string;
@@ -51,8 +53,8 @@ export interface AIReviewInsights {
   providedIn: 'root'
 })
 export class ApiService {
-  // Configurable base URL: localhost:3000 for web/Capacitor iOS, or 10.0.2.2 for Android AVD
-  public serverUrl = signal<string>('http://localhost:3000');
+  // Web production shares its origin with the Express API. Native builds use the configured host.
+  public serverUrl = signal<string>(this.getDefaultServerUrl());
   public token = signal<string | null>(null);
   public isAuthenticated = signal<boolean>(false);
   public shopName = signal<string>('SUNFZENITH');
@@ -60,13 +62,23 @@ export class ApiService {
   private TOKEN_KEY = 'sunfz_admin_token';
   private SERVER_URL_KEY = 'sunfz_server_url';
 
+  private getDefaultServerUrl(): string {
+    if (!environment.production) return 'http://localhost:3000';
+    return Capacitor.isNativePlatform() ? environment.apiBaseUrl : window.location.origin;
+  }
+
   constructor() {
     this.initFromStorage();
   }
 
   private async initFromStorage() {
     const { value: savedUrl } = await Preferences.get({ key: this.SERVER_URL_KEY });
-    if (savedUrl) this.serverUrl.set(savedUrl);
+    const isLocalDevelopmentUrl = Boolean(savedUrl && /^https?:\/\/(localhost|127\.0\.0\.1|10\.0\.2\.2)(:\d+)?$/i.test(savedUrl));
+    if (savedUrl && !(environment.production && isLocalDevelopmentUrl)) {
+      this.serverUrl.set(savedUrl);
+    } else if (environment.production && isLocalDevelopmentUrl) {
+      await Preferences.set({ key: this.SERVER_URL_KEY, value: this.serverUrl() });
+    }
 
     const { value: savedToken } = await Preferences.get({ key: this.TOKEN_KEY });
     if (savedToken) {

@@ -11,7 +11,9 @@
   "scripts": {
     "dev": "vite --config vite.config.js",
     "dev:server": "node --watch server.js",
-    "build": "vite build --config vite.config.js",
+    "build": "npm run build:web && npm run build:mobile-admin",
+    "build:web": "vite build --config vite.config.js",
+    "build:mobile-admin": "node scripts/build-mobile-admin.mjs",
     "postinstall": "node scripts/postinstall.js",
     "start": "node server.js",
     "test": "vitest run",

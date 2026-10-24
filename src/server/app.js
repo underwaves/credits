@@ -21,6 +21,8 @@ export function createApp(customConfig = {}) {
   const isProd = effectiveConfig.isProd ?? config.isProd;
   const distDir = customConfig.distDir || path.join(rootDir, 'dist');
   const distIndexPath = path.join(distDir, 'index.html');
+  const mobileAdminDir = customConfig.mobileAdminDir || path.join(rootDir, 'mobile-admin', 'www');
+  const mobileAdminIndexPath = path.join(mobileAdminDir, 'index.html');
 
   // Enforce frontend production bundle in production mode
   if (isProd && !fs.existsSync(distIndexPath)) {
@@ -76,6 +78,24 @@ export function createApp(customConfig = {}) {
       }
     })
   );
+
+  // The Ionic admin is built into its own directory and shares this origin's API.
+  app.use('/mobile-admin', express.static(mobileAdminDir, {
+    index: false,
+    maxAge: '1h',
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache');
+      } else if (/\.(css|js|woff2|svg|png|jpg|webp)$/.test(filePath)) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      }
+    }
+  }));
+  app.get(/^\/mobile-admin(?:\/.*)?$/, (req, res, next) => {
+    if (!fs.existsSync(mobileAdminIndexPath)) return next();
+    res.setHeader('Cache-Control', 'no-cache');
+    return res.sendFile(mobileAdminIndexPath);
+  });
 
   // Serve uploaded images statically
   const uploadsDir = path.join(rootDir, 'public', 'images', 'uploads');

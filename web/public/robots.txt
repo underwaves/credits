@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /admin
+Disallow: /mobile-admin
 Disallow: /api/
 
 Sitemap: https://sunfz-credits.onrender.com/sitemap.xml

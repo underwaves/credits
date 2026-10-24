@@ -31,13 +31,17 @@ function readEnv(env = process.env) {
   const supabaseUrl = env.SUPABASE_URL || '';
   const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SECRET_KEY || '';
 
-  if (isProd && supabaseUrl) {
-    if (!serviceRoleKey) {
-      console.error('\n❌ [CRITICAL SECURITY ERROR] Application startup halted:');
-      console.error('   In production, the server API must use SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SECRET_KEY.');
-      console.error('   Do NOT use SUPABASE_KEY (anon/publishable key or legacy anon JWT) for backend server operations in production.\n');
-      throw new Error('SUPABASE_SERVICE_ROLE_KEY must be configured for the server in production.');
-    }
+  if (isProd && !supabaseUrl) {
+    console.error('\n❌ [CRITICAL DATA SAFETY ERROR] Application startup halted:');
+    console.error('   SUPABASE_URL is required in production so credits and uploads are not stored on ephemeral local disk.\n');
+    throw new Error('SUPABASE_URL must be configured for the server in production.');
+  }
+
+  if (isProd && !serviceRoleKey) {
+    console.error('\n❌ [CRITICAL SECURITY ERROR] Application startup halted:');
+    console.error('   In production, the server API must use SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SECRET_KEY.');
+    console.error('   Do NOT use SUPABASE_KEY (anon/publishable key or legacy anon JWT) for backend server operations in production.\n');
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY must be configured for the server in production.');
   }
 
   const supabaseKey = isProd ? serviceRoleKey : (serviceRoleKey || env.SUPABASE_KEY || '');

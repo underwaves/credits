@@ -54,6 +54,12 @@
 7. กด **Create Web Service** -> รอระบบ Deploy ประมาณ 1-2 นาที
 8. คุณจะได้ลิงก์เว็บจริงทันที เช่น `https://sunfz-credits.onrender.com` ใช้งานได้ตลอด 24 ชม.
 
+### Ionic Admin Studio
+
+เมื่อ deploy รุ่นที่มีโฟลเดอร์ `mobile-admin/` แล้ว แอปเว็บสำหรับมือถือจะอยู่ที่ `https://<โดเมนของคุณ>/mobile-admin/` และใช้ API/ฐานข้อมูล origin เดียวกับเว็บหลัก การ build หลัก (`npm run build`) จะสร้างทั้งเว็บและ Ionic app พร้อมเสิร์ฟหน้าแอดมินให้อัตโนมัติ
+
+ก่อนเปิดใช้งานจริง ให้ตั้ง `ADMIN_PIN`, `SESSION_SECRET`, `SUPABASE_URL` และ `SUPABASE_SERVICE_ROLE_KEY` ใน Environment Variables ของ Render โดยไม่ใส่คีย์เหล่านี้ลง GitHub แอป Android ที่ติดตั้งแยกจะใช้ API URL `https://sunfz-credits.onrender.com` เป็นค่าเริ่มต้น และแก้ได้จากหน้า **Settings** ในแอป
+
 ---
 
 ## ขั้นตอนการหมุนเวียนคีย์ (Secret Rotation Guide)
