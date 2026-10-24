@@ -14,7 +14,9 @@ function initThemeToggle() {
   const btn = document.getElementById('theme-toggle-btn');
   if (!btn) return;
 
-  const currentTheme = localStorage.getItem('sunfz_theme') || 'light';
+  const savedTheme = localStorage.getItem('sunfz_theme');
+  const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+  const currentTheme = savedTheme || (prefersDark ? 'dark' : 'light');
   document.documentElement.setAttribute('data-theme', currentTheme);
 
   btn.addEventListener('click', () => {
@@ -156,7 +158,6 @@ async function initDynamicPortfolio() {
         const demoUrl = escapeHtml(sanitizeUrl(item.demoUrl || item.image));
         const demoLabel = escapeHtml(item.demoLabel || 'ดูภาพผลงานเต็ม');
         const techList = Array.isArray(item.tech) ? item.tech : (item.tech ? String(item.tech).split(',') : []);
-        const isLocker = item.id === 'p1' || demoUrl === '/locker' || demoUrl.includes('smart-pharmacy-locker');
 
         return `
           <div class="card-glass card-interactive portfolio-card reveal-on-scroll revealed" data-category="${cat}">
@@ -171,24 +172,10 @@ async function initDynamicPortfolio() {
               <div class="portfolio-tech-tags">
                 ${techList.map((t) => `<span class="tech-tag">${escapeHtml(t.trim())}</span>`).join('')}
               </div>
-              <div class="portfolio-link-wrap" style="display: flex; gap: 8px; flex-wrap: wrap;">
-                ${isLocker ? `
-                  <button type="button" class="btn btn-secondary btn-sm" onclick="openLockerModal()" style="font-weight: 700;">
-                    <span>🎮 ใช้งานระบบจริงในนี้</span> <span>→</span>
-                  </button>
-                  <a href="${demoUrl}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="font-size: 0.82rem; opacity: 0.9;">
-                    <span>เปิดแยกแท็บ</span> <span>↗</span>
-                  </a>
-                ` : `
-                  <a href="${demoUrl}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">
-                    <span>${demoLabel}</span> <span>→</span>
-                  </a>
-                `}
-                ${item.githubUrl ? `
-                  <a href="${escapeHtml(sanitizeUrl(item.githubUrl))}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="font-size: 0.82rem; opacity: 0.85;">
-                    <span>GitHub</span> <span>↗</span>
-                  </a>
-                ` : ''}
+              <div class="portfolio-link-wrap">
+                <a href="${demoUrl}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">
+                  <span>${demoLabel}</span> <span>→</span>
+                </a>
               </div>
             </div>
           </div>
@@ -272,7 +259,7 @@ function initPortfolioLightbox() {
       const targetUrl = linkHref || imgSrc;
 
       // If clicked an action link that is an external website/page (not an image), allow normal navigation
-      if (actionLink && targetUrl && !targetUrl.match(/\.(png|webp|jpg|jpeg|svg)($|\?)/i) && (targetUrl.startsWith('http') || targetUrl.startsWith('/credits') || targetUrl.startsWith('/locker'))) {
+      if (actionLink && targetUrl && !targetUrl.match(/\.(png|webp|jpg|jpeg|svg)($|\?)/i) && (targetUrl.startsWith('http') || targetUrl.startsWith('/credits'))) {
         return;
       }
 
@@ -580,15 +567,10 @@ function showToast(message, type = 'success') {
 
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
-
-  const iconSpan = document.createElement('span');
-  iconSpan.textContent = type === 'success' ? '✨' : '⚠️';
-
-  const textSpan = document.createElement('span');
-  textSpan.textContent = message || '';
-
-  toast.appendChild(iconSpan);
-  toast.appendChild(textSpan);
+  toast.innerHTML = `
+    <span>${type === 'success' ? '✨' : '⚠️'}</span>
+    <span>${message}</span>
+  `;
 
   container.appendChild(toast);
   setTimeout(() => toast.classList.add('show'), 10);
@@ -598,31 +580,3 @@ function showToast(message, type = 'success') {
     setTimeout(() => toast.remove(), 300);
   }, 4000);
 }
-
-// ---------------- 7. Smart Pharmacy Locker Live Interactive Modal ----------------
-window.openLockerModal = function(view = 'normal') {
-  const modal = document.getElementById('locker-interactive-modal');
-  const iframe = document.getElementById('locker-interactive-iframe');
-  if (!modal || !iframe) return;
-  const query = (view && view !== 'normal') ? `?view=${view}` : '';
-  iframe.src = `/locker/${query}`;
-  modal.classList.add('open');
-  modal.setAttribute('aria-hidden', 'false');
-  document.body.style.overflow = 'hidden';
-};
-
-window.closeLockerModal = function() {
-  const modal = document.getElementById('locker-interactive-modal');
-  if (!modal) return;
-  modal.classList.remove('open');
-  modal.setAttribute('aria-hidden', 'true');
-  document.body.style.overflow = '';
-};
-
-window.setLockerFrameView = function(view) {
-  const iframe = document.getElementById('locker-interactive-iframe');
-  if (!iframe) return;
-  const query = (view && view !== 'normal') ? `?view=${view}` : '';
-  iframe.src = `/locker/${query}`;
-};
-

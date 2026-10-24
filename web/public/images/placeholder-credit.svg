@@ -1,18 +1,60 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" width="960" height="640" fill="none">
   <defs>
-    <linearGradient id="bg-pl" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0f172a" />
-      <stop offset="100%" stop-color="#1e293b" />
+    <linearGradient id="canvas" x1="80" y1="40" x2="850" y2="600" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5F6FF"/>
+      <stop offset="1" stop-color="#FFF7E8"/>
     </linearGradient>
+    <linearGradient id="paper" x1="350" y1="145" x2="620" y2="500" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F9FAFF"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="360" y1="200" x2="570" y2="440" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFD36B"/>
+      <stop offset="1" stop-color="#F4A927"/>
+    </linearGradient>
+    <filter id="shadow" x="280" y="105" width="400" height="470" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="18"/>
+      <feGaussianBlur stdDeviation="18"/>
+      <feComposite in2="hardAlpha" operator="out"/>
+      <feColorMatrix values="0 0 0 0 0.09 0 0 0 0 0.14 0 0 0 0 0.25 0 0 0 0.13 0"/>
+      <feBlend in2="BackgroundImageFix" result="effect1_dropShadow"/>
+      <feBlend in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+    </filter>
   </defs>
-  <rect width="800" height="600" fill="url(#bg-pl)"/>
-  <circle cx="400" cy="250" r="80" fill="#334155" stroke="#475569" stroke-width="2"/>
-  <path d="M360 270 L390 230 L410 250 L440 210 L450 270 Z" fill="#64748b"/>
-  <circle cx="375" cy="220" r="10" fill="#94a3b8"/>
-  <text x="400" y="380" font-family="'Prompt', sans-serif" font-size="22" font-weight="600" fill="#94a3b8" text-anchor="middle">
-    ภาพหลักฐานเครดิตการซื้อขาย
-  </text>
-  <text x="400" y="415" font-family="'Prompt', sans-serif" font-size="16" fill="#64748b" text-anchor="middle">
-    คลิกเพื่อดูรูปภาพขนาดเต็ม
-  </text>
+  <rect width="960" height="640" fill="url(#canvas)"/>
+  <circle cx="180" cy="92" r="164" fill="#DDE6FF" fill-opacity=".36"/>
+  <circle cx="830" cy="540" r="205" fill="#FFE7B8" fill-opacity=".4"/>
+  <circle cx="480" cy="290" r="205" stroke="#D6DDF0" stroke-opacity=".55" stroke-width="1.5"/>
+  <circle cx="480" cy="290" r="238" stroke="#D6DDF0" stroke-opacity=".3" stroke-width="1.5"/>
+  <g filter="url(#shadow)">
+    <rect x="354" y="142" width="252" height="326" rx="26" fill="url(#paper)" stroke="#E6EAF3" stroke-width="2"/>
+    <rect x="382" y="174" width="56" height="56" rx="18" fill="url(#accent)"/>
+    <path d="M399 188h22v27l-11-6-11 6v-27Z" stroke="#7B5718" stroke-width="2.5" stroke-linejoin="round"/>
+    <rect x="453" y="184" width="114" height="10" rx="5" fill="#24324D" fill-opacity=".82"/>
+    <rect x="453" y="202" width="82" height="8" rx="4" fill="#9AA6BC" fill-opacity=".66"/>
+    <rect x="382" y="252" width="196" height="1.5" fill="#E8EBF2"/>
+    <rect x="382" y="275" width="92" height="8" rx="4" fill="#A2AEC3" fill-opacity=".65"/>
+    <rect x="492" y="273" width="86" height="12" rx="6" fill="#E9F6EF"/>
+    <rect x="382" y="302" width="124" height="8" rx="4" fill="#A2AEC3" fill-opacity=".5"/>
+    <rect x="520" y="300" width="58" height="12" rx="6" fill="#FFF2D7"/>
+    <rect x="382" y="329" width="107" height="8" rx="4" fill="#A2AEC3" fill-opacity=".5"/>
+    <rect x="505" y="327" width="73" height="12" rx="6" fill="#E9F6EF"/>
+    <rect x="382" y="356" width="196" height="1.5" fill="#E8EBF2"/>
+    <circle cx="410" cy="398" r="17" fill="#EAF5EF"/>
+    <path d="m402 398 5.5 5.5L418 392" stroke="#388568" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="440" y="390" width="138" height="8" rx="4" fill="#24324D" fill-opacity=".75"/>
+    <rect x="440" y="407" width="94" height="7" rx="3.5" fill="#A2AEC3" fill-opacity=".6"/>
+  </g>
+  <g transform="rotate(-8 637 194)">
+    <rect x="592" y="158" width="120" height="66" rx="18" fill="#FFFFFF" stroke="#E7EAF2" stroke-width="2"/>
+    <circle cx="616" cy="191" r="11" fill="#EAF5EF"/>
+    <path d="m611 191 3.5 3.5L621 188" stroke="#388568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="636" y="185" width="56" height="9" rx="4.5" fill="#567066" fill-opacity=".7"/>
+  </g>
+  <g font-family="'Prompt', 'Noto Sans Thai', sans-serif" text-anchor="middle">
+    <text x="480" y="535" fill="#26344E" font-size="21" font-weight="700">ภาพประกอบเครดิต</text>
+    <text x="480" y="565" fill="#7A859B" font-size="15" font-weight="400">ภาพหลักฐานจริงยังไม่พร้อมแสดง</text>
+  </g>
 </svg>

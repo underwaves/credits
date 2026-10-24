@@ -37,17 +37,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateIcons();
 });
 
-// Theme Toggle Handler
 function initThemeToggle() {
-  const btn = document.getElementById('theme-toggle-btn');
-  if (!btn) return;
+  const button = document.getElementById('theme-toggle-btn');
+  if (!button) return;
 
-  const savedTheme = localStorage.getItem('sunfz_theme') || 'light';
-  document.documentElement.setAttribute('data-theme', savedTheme);
+  const savedTheme = localStorage.getItem('sunfz_theme');
+  const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+  document.documentElement.setAttribute('data-theme', savedTheme || (prefersDark ? 'dark' : 'light'));
 
-  btn.addEventListener('click', () => {
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    const nextTheme = isDark ? 'light' : 'dark';
+  button.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', nextTheme);
     localStorage.setItem('sunfz_theme', nextTheme);
   });
@@ -70,16 +70,10 @@ function showToast(message, type = 'success') {
   const icon = type === 'error' ? 'alert-circle' : 'check-circle-2';
 
   toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-xl text-xs sm:text-sm font-medium transition-all duration-300 transform translate-y-2 opacity-0 ${bgClass}`;
-
-  const iconEl = document.createElement('i');
-  iconEl.setAttribute('data-lucide', icon);
-  iconEl.className = 'w-4 h-4 shrink-0';
-
-  const textEl = document.createElement('span');
-  textEl.textContent = message || '';
-
-  toast.appendChild(iconEl);
-  toast.appendChild(textEl);
+  toast.innerHTML = `
+    <i data-lucide="${icon}" class="w-4 h-4 shrink-0"></i>
+    <span>${message}</span>
+  `;
 
   container.appendChild(toast);
   updateIcons();
@@ -355,7 +349,7 @@ function renderFeed() {
       const customerName = credit.customer ? escapeHtml(credit.customer) : 'ลูกค้า';
 
       return `
-        <div class="clean-card overflow-hidden flex flex-col justify-between group">
+        <div class="clean-card credit-entry-card overflow-hidden flex flex-col justify-between group">
           <div
             onclick="openLightbox('${credit.id}')"
             class="relative w-full h-64 sm:h-72 bg-slate-100 cursor-pointer overflow-hidden"

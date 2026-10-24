@@ -22,10 +22,9 @@ export const SEED_PORTFOLIO = [
     categoryLabel: 'Web App & IoT',
     desc: 'นวัตกรรมตู้รับยาอัตโนมัติพร้อมระบบสายพานลำเลียง จุดตรวจความปลอดภัย 5 Rights และระบบเสียงพูดภาษาไทยแนะนำวิธีทานยาเพื่อผู้สูงอายุ',
     tech: ['React 19', 'Tailwind CSS', 'ESP32 IoT', 'Web Speech API', 'Vite'],
-    image: '/images/portfolio/portfolio-smart-pharmacy-locker.webp',
-    demoUrl: '/locker',
-    demoLabel: 'ทดลองใช้งานระบบจริง',
-    githubUrl: 'https://github.com/underwaves/smart-pharmacy-locker',
+    image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=800&q=80',
+    demoUrl: 'https://github.com/underwaves/smart-pharmacy-locker',
+    demoLabel: 'ดูโปรเจกต์บน GitHub',
     isReal: true,
     createdAt: '2026-09-01T00:00:00.000Z'
   },
