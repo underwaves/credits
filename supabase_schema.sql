@@ -37,7 +37,7 @@ CREATE INDEX IF NOT EXISTS idx_credits_created_at ON public.credits (created_at 
 CREATE INDEX IF NOT EXISTS idx_credits_is_pinned ON public.credits (is_pinned DESC);
 CREATE INDEX IF NOT EXISTS idx_credits_game ON public.credits (game);
 
--- 3. ข้อมูลเริ่มต้น (Initial Data - ไม่มี PIN ฝังตายตัว ให้กำหนดผ่าน ADMIN_PIN หรือหน้า Admin)
+-- 3. ค่าเริ่มต้นร้านค้า (ไม่มี PIN ฝังตายตัว ให้กำหนดผ่าน ADMIN_PIN หรือหน้า Admin)
 INSERT INTO public.shop_config (id, shop_name, tagline, announcement, categories, socials, stats)
 VALUES (
     'main',
@@ -47,52 +47,6 @@ VALUES (
     '["ทั้งหมด", "ทั่วไป", "เว็บไซต์", "สไลด์", "ดีไซน์"]'::jsonb,
     '{"facebook":{"label":"Facebook Page","url":"https://www.facebook.com/profile.php?id=61595346770633&locale=th_TH","enabled":true},"line":{"label":"LINE OA: @419ajynp","url":"https://line.me/R/ti/p/@419ajynp","enabled":true},"discord":{"label":"Discord Server","url":"","enabled":false},"tiktok":{"label":"TikTok","url":"","enabled":false}}'::jsonb,
     '{"ratingScore":"5.0","totalOrders":"ผลงานคุณภาพ 100%","deliveryRate":"ส่งตรงเวลา ใส่ใจทุกรายละเอียด","responseTime":"ตอบกลับรวดเร็ว","warrantyPeriod":"ดูแลหลังส่งมอบ"}'::jsonb
-)
-ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.credits (id, title, game, price, customer, rating, date, time_ago, images, description, is_pinned, created_at)
-VALUES
-(
-    'sample-1',
-    'ออกแบบและพัฒนาเว็บไซต์ Portfolio & Presentation',
-    'เว็บไซต์',
-    3500,
-    'คุณธนภัทร',
-    5,
-    '2026-10-03',
-    '10 นาทีที่แล้ว',
-    '["/images/sample-genshin.svg"]'::jsonb,
-    'ส่งมอบงานเรียบร้อย เว็บไซต์ Responsive โหลดไว ลูกค้าตรวจรับงานและพึงพอใจมากครับ ขอบคุณที่ไว้วางใจ!',
-    true,
-    '2026-10-03T03:50:40.631Z'
-),
-(
-    'sample-2',
-    'ออกแบบสไลด์ Pitch Deck ระดับมืออาชีพ 25 สไลด์',
-    'สไลด์',
-    1500,
-    'คุณนนท์',
-    5,
-    '2026-10-03',
-    '2 ชม. ที่แล้ว',
-    '["/images/sample-starrail.svg"]'::jsonb,
-    'จัดทำสไลด์นำเสนอธุรกิจ โทนสีทันสมัย อ่านง่าย ส่งมอบตรงเวลา ขอบคุณครับ',
-    true,
-    '2026-10-03T01:50:40.631Z'
-),
-(
-    'sample-3',
-    'ออกแบบโลโก้และแบรนดิ้งชุดเริ่มต้น (Vector + Brand Guide)',
-    'ดีไซน์',
-    1200,
-    'คุณกอล์ฟ',
-    5,
-    '2026-10-02',
-    'เมื่อวานนี้',
-    '["/images/sample-genshin.svg"]'::jsonb,
-    'ส่งมอบไฟล์ครบถ้วน AI, PNG, SVG พร้อมคู่มือการใช้งาน ขอบคุณที่ใช้บริการครับ',
-    false,
-    '2026-10-02T10:30:00.000Z'
 )
 ON CONFLICT (id) DO NOTHING;
 
