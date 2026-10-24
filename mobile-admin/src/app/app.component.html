@@ -1,0 +1,33 @@
+<ion-app>
+  <ion-menu contentId="main-content" type="overlay">
+    <ion-content>
+      <ion-list id="inbox-list">
+        <ion-list-header>SUNFZENITH</ion-list-header>
+        <ion-note class="menu-caption">ADMIN STUDIO · {{ api.shopName() }}</ion-note>
+
+        @for (p of appPages; track p; let i = $index) {
+          <ion-menu-toggle auto-hide="false">
+            <ion-item routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false" routerLinkActive="selected">
+              <ion-icon aria-hidden="true" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
+              <ion-label>{{ p.title }}</ion-label>
+              @if (p.badge) {
+                <ion-badge slot="end" color="warning">{{ p.badge }}</ion-badge>
+              }
+            </ion-item>
+          </ion-menu-toggle>
+        }
+      </ion-list>
+
+      <ion-list id="labels-list">
+        <ion-list-header>สถานะระบบ</ion-list-header>
+        <ion-item lines="none">
+          <ion-icon aria-hidden="true" slot="start" ios="shield-checkmark-outline" md="shield-checkmark-sharp" [color]="api.isAuthenticated() ? 'success' : 'medium'"></ion-icon>
+          <ion-label>
+            {{ api.isAuthenticated() ? 'เข้าสู่ระบบแล้ว (Online)' : 'ยังไม่ได้ล็อกอิน (Offline)' }}
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+  <ion-router-outlet id="main-content"></ion-router-outlet>
+</ion-app>

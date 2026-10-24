@@ -1,0 +1,524 @@
+<ion-header class="studio-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>
+      <span class="brand-lockup">
+        <span class="brand-mark"><ion-icon name="sparkles"></ion-icon></span>
+        <span class="brand-copy"><strong>SUNFZENITH</strong><small>ADMIN STUDIO</small></span>
+      </span>
+    </ion-title>
+    <ion-buttons slot="end">
+      @if (api.isAuthenticated()) {
+        <ion-button (click)="handleLogout()" title="ออกจากระบบ">
+          <ion-icon slot="icon-only" name="log-out"></ion-icon>
+        </ion-button>
+      }
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+
+  <!-- ============================================== -->
+  <!-- 1. LOGIN SCREEN (When Not Authenticated)       -->
+  <!-- ============================================== -->
+  @if (!api.isAuthenticated()) {
+    <div class="login-wrapper ion-text-center">
+      <ion-card class="login-card">
+        <ion-card-header>
+          <div class="login-logo-box">
+            <ion-icon name="shield-checkmark" color="primary" class="shield-icon"></ion-icon>
+          </div>
+          <ion-card-title>เข้าสู่ระบบแอดมิน</ion-card-title>
+          <ion-card-subtitle>SUNFZENITH Admin Studio (019)</ion-card-subtitle>
+        </ion-card-header>
+
+        <ion-card-content>
+          <ion-item lines="full" class="ion-margin-bottom">
+            <ion-label position="stacked">รหัส PIN แอดมิน</ion-label>
+            <ion-input
+              type="password"
+              placeholder="กรอกรหัส PIN"
+              [ngModel]="pinInput()"
+              (ngModelChange)="pinInput.set($event)"
+              (keyup.enter)="handleLogin()"
+            ></ion-input>
+          </ion-item>
+
+          @if (loginError()) {
+            <ion-note color="danger" class="error-note">
+              <ion-icon name="alert-circle"></ion-icon>
+              {{ loginError() }}
+            </ion-note>
+          }
+
+          <ion-button expand="block" (click)="handleLogin()" class="ion-margin-top" color="warning">
+            <ion-icon slot="start" name="log-in"></ion-icon>
+            เข้าสู่ระบบแอดมิน
+          </ion-button>
+
+          <div class="server-status-pill ion-margin-top">
+            <ion-note>เซิร์ฟเวอร์: {{ api.serverUrl() }}</ion-note>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  }
+
+  <!-- ============================================== -->
+  <!-- 2. AUTHENTICATED ADMIN PAGES                   -->
+  <!-- ============================================== -->
+  @else {
+
+    <!-- -------------------------------------------- -->
+    <!-- VIEW A: DASHBOARD OVERVIEW                   -->
+    <!-- -------------------------------------------- -->
+    @if (folder() === 'Dashboard') {
+      <div class="dashboard-section">
+        <section class="welcome-banner">
+          <div class="welcome-copy">
+            <span class="eyebrow"><ion-icon name="sparkles"></ion-icon> YOUR BUSINESS AT A GLANCE</span>
+            <h2>สวัสดี, {{ api.shopName() }} <span>👋</span></h2>
+            <p>ภาพรวมร้านของคุณวันนี้ พร้อมเครื่องมือช่วยจัดการทุกอย่างในที่เดียว</p>
+          </div>
+          <div class="welcome-art" aria-hidden="true">
+            <div class="orbit orbit-one"></div>
+            <div class="orbit orbit-two"></div>
+            <ion-icon name="stats-chart"></ion-icon>
+          </div>
+        </section>
+
+        <!-- 4 Stats Cards -->
+        <ion-grid class="stats-grid">
+          <ion-row>
+            <ion-col size="6" size-md="3">
+              <ion-card class="stat-card credits-stat">
+                <ion-card-content>
+                  <div class="stat-topline"><span class="stat-icon"><ion-icon name="document-text"></ion-icon></span><ion-note>รายการเครดิต</ion-note></div>
+                  <h3>{{ credits().length }}</h3>
+                  <span class="stat-caption">บันทึกทั้งหมด</span>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+            <ion-col size="6" size-md="3">
+              <ion-card class="stat-card sales-stat">
+                <ion-card-content>
+                  <div class="stat-topline"><span class="stat-icon"><ion-icon name="wallet"></ion-icon></span><ion-note>ยอดขายสะสม</ion-note></div>
+                  <h3 class="money-text">฿{{ getTotalSales().toLocaleString() }}</h3>
+                  <span class="stat-caption">ยอดรวมจากเครดิต</span>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+            <ion-col size="6" size-md="3">
+              <ion-card class="stat-card reviews-stat">
+                <ion-card-content>
+                  <div class="stat-topline"><span class="stat-icon"><ion-icon name="thumbs-up"></ion-icon></span><ion-note>รีวิวเชิงบวก</ion-note></div>
+                  <h3 class="positive-text">+{{ getPositiveReviewsCount() }}</h3>
+                  <span class="stat-caption">เสียงตอบรับที่ดี</span>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+            <ion-col size="6" size-md="3">
+              <ion-card class="stat-card issues-stat">
+                <ion-card-content>
+                  <div class="stat-topline"><span class="stat-icon"><ion-icon name="alert-circle"></ion-icon></span><ion-note>รายงานปัญหา</ion-note></div>
+                  <h3 class="issue-text">-{{ getIssueReviewsCount() }}</h3>
+                  <span class="stat-caption">รายการที่ควรติดตาม</span>
+                </ion-card-content>
+              </ion-card>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+
+        <!-- Quick AI Actions Card -->
+        <ion-card class="ai-hub-card">
+          <div class="ai-card-glow" aria-hidden="true"></div>
+          <ion-card-content>
+            <div class="ai-hub-copy">
+              <span class="ai-kicker"><ion-icon name="sparkles"></ion-icon> SMART TOOLS</span>
+              <h3>ให้ AI ช่วยจัดการงานซ้ำ ๆ</h3>
+              <p>อ่านสลิปและสรุปความเห็นลูกค้าได้ในไม่กี่วินาที</p>
+            </div>
+            <div class="ai-actions">
+              <ion-button expand="block" (click)="takeSlipPhoto(); folder.set('ScanSlip')" color="warning">
+                <ion-icon slot="start" name="camera"></ion-icon>
+                ตรวจสลิปด้วย AI
+                <ion-icon slot="end" name="arrow-forward"></ion-icon>
+              </ion-button>
+              <ion-button expand="block" (click)="folder.set('Reviews')" class="secondary-ai-action">
+                <ion-icon slot="start" name="sparkles"></ion-icon>
+                วิเคราะห์รีวิวลูกค้า
+              </ion-button>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    }
+
+    <!-- -------------------------------------------- -->
+    <!-- VIEW B: AI SLIP SCANNER (Star Feature)       -->
+    <!-- -------------------------------------------- -->
+    @if (folder() === 'ScanSlip') {
+      <div class="scan-slip-section">
+        <ion-card class="scan-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="scan" color="primary"></ion-icon>
+              AI ตรวจสลิป &amp; เพิ่มเครดิต
+            </ion-card-title>
+            <ion-card-subtitle>ถ่ายภาพสลิปโอนเงินเพื่อให้ AI ถอดรหัสยอดเงินอัตโนมัติ</ion-card-subtitle>
+          </ion-card-header>
+
+          <ion-card-content>
+            <!-- Camera Trigger Buttons -->
+            <div class="camera-actions">
+              <ion-button expand="block" (click)="takeSlipPhoto()" color="primary">
+                <ion-icon slot="start" name="camera"></ion-icon>
+                {{ currentSlipPhoto() ? 'ถ่ายรูปสลิปใหม่' : 'เปิดกล้องถ่ายรูปสลิป' }}
+              </ion-button>
+            </div>
+
+            <!-- Photo Preview -->
+            @if (currentSlipPhoto()) {
+              <div class="photo-preview-box ion-margin-top">
+                <ion-img [src]="currentSlipPhoto()!" alt="สลิปที่เลือก"></ion-img>
+
+                <ion-button
+                  expand="block"
+                  color="warning"
+                  (click)="runAISlipScan()"
+                  [disabled]="isScanning()"
+                  class="ion-margin-top"
+                >
+                  @if (isScanning()) {
+                    <ion-spinner name="crescent"></ion-spinner>
+                    <span class="ion-margin-start">AI กำลังวิเคราะห์สลิป...</span>
+                  } @else {
+                    <ion-icon slot="start" name="sparkles"></ion-icon>
+                    ส่งให้ AI ตรวจสอบและอ่านสลิป
+                  }
+                </ion-button>
+              </div>
+            }
+
+            <!-- AI OCR Result Box -->
+            @if (scanResult()) {
+              <div class="ai-result-panel ion-margin-top">
+                <div class="result-header">
+                  <ion-icon name="checkmark-circle" color="success"></ion-icon>
+                  <strong>ผลการตรวจจับด้วย AI:</strong>
+                  <ion-badge color="success">{{ (scanResult()!.confidenceScore * 100).toFixed(0) }}% แม่นยำ</ion-badge>
+                </div>
+                <p>ยอดเงิน: <strong class="money-highlight">฿{{ scanResult()!.amount?.toLocaleString() }}</strong></p>
+                <p>ธนาคาร: <strong>{{ scanResult()!.bank }}</strong></p>
+                <p>วันที่: <strong>{{ scanResult()!.transferDate }}</strong></p>
+                <p>รหัสอ้างอิง: <code>{{ scanResult()!.transactionId }}</code></p>
+                <p class="summary-text"><em>{{ scanResult()!.summary }}</em></p>
+              </div>
+            }
+
+            <!-- Credit Form (Pre-filled by AI) -->
+            @if (currentSlipPhoto()) {
+              <div class="credit-form ion-margin-top">
+                <ion-item lines="full">
+                  <ion-label position="stacked">ชื่อรายการ / บริการ</ion-label>
+                  <ion-input [ngModel]="creditTitle()" (ngModelChange)="creditTitle.set($event)"></ion-input>
+                </ion-item>
+
+                <ion-item lines="full">
+                  <ion-label position="stacked">ราคา (บาท)</ion-label>
+                  <ion-input type="number" [ngModel]="creditPrice()" (ngModelChange)="creditPrice.set($event)"></ion-input>
+                </ion-item>
+
+                <ion-item lines="full">
+                  <ion-label position="stacked">ชื่อลูกค้า</ion-label>
+                  <ion-input [ngModel]="creditCustomer()" (ngModelChange)="creditCustomer.set($event)"></ion-input>
+                </ion-item>
+
+                <ion-item lines="full">
+                  <ion-label position="stacked">บันทึกรายละเอียด / หมายเหตุ</ion-label>
+                  <ion-textarea [ngModel]="creditDescription()" (ngModelChange)="creditDescription.set($event)" rows="3"></ion-textarea>
+                </ion-item>
+
+                <ion-button
+                  expand="block"
+                  color="success"
+                  (click)="submitCredit()"
+                  [disabled]="isSubmittingCredit()"
+                  class="ion-margin-top"
+                >
+                  @if (isSubmittingCredit()) {
+                    <ion-spinner name="crescent"></ion-spinner>
+                    <span class="ion-margin-start">กำลังบันทึกขึ้น Supabase...</span>
+                  } @else {
+                    <ion-icon slot="start" name="checkmark-circle"></ion-icon>
+                    บันทึกเครดิตขึ้น Supabase
+                  }
+                </ion-button>
+              </div>
+            }
+
+            @if (submitMessage()) {
+              <div class="submit-success-banner ion-margin-top">
+                <ion-icon name="checkmark-circle" color="success"></ion-icon>
+                <span>{{ submitMessage() }}</span>
+              </div>
+            }
+          </ion-card-content>
+        </ion-card>
+      </div>
+    }
+
+    <!-- -------------------------------------------- -->
+    <!-- VIEW C: CREDITS FEED                         -->
+    <!-- -------------------------------------------- -->
+    @if (folder() === 'Credits') {
+      <div class="credits-section">
+        <div class="section-title-bar">
+          <h3>รายการเครดิตทั้งหมด ({{ credits().length }})</h3>
+          <ion-button fill="clear" size="small" (click)="fetchCredits()">
+            <ion-icon name="refresh"></ion-icon>
+          </ion-button>
+        </div>
+
+        @if (isLoadingData()) {
+          <div class="ion-text-center ion-padding">
+            <ion-spinner name="dots"></ion-spinner>
+          </div>
+        } @else {
+          <ion-grid>
+            <ion-row>
+              @for (c of credits(); track c.id) {
+                <ion-col size="12" size-md="6">
+                  <ion-card class="credit-card">
+                    @if (c.images && c.images.length > 0) {
+                      <ion-img [src]="c.images[0]" alt="{{ c.title }}"></ion-img>
+                    }
+                    <ion-card-header>
+                      <div class="card-price-badge">฿{{ c.price.toLocaleString() }}</div>
+                      <ion-card-title>{{ c.title }}</ion-card-title>
+                      <ion-card-subtitle>ลูกค้า: {{ c.customer || 'ทั่วไป' }} • {{ c.date }}</ion-card-subtitle>
+                    </ion-card-header>
+                    @if (c.description) {
+                      <ion-card-content>
+                        <p>{{ c.description }}</p>
+                      </ion-card-content>
+                    }
+                  </ion-card>
+                </ion-col>
+              }
+            </ion-row>
+          </ion-grid>
+        }
+      </div>
+    }
+
+    <!-- -------------------------------------------- -->
+    <!-- VIEW D: REVIEWS & AI SENTIMENT INSIGHTS       -->
+    <!-- -------------------------------------------- -->
+    @if (folder() === 'Reviews') {
+      <div class="reviews-section">
+        <ion-card class="ai-insights-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="sparkles" color="warning"></ion-icon>
+              AI วิเคราะห์เสียงตอบรับจากลูกค้า
+            </ion-card-title>
+            <ion-card-subtitle>สรุปผลความพึงพอใจและจุดที่ควรปรับปรุง</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-button expand="block" (click)="runAIReviewAnalysis()" [disabled]="isAnalyzingReviews()" color="primary">
+              @if (isAnalyzingReviews()) {
+                <ion-spinner name="crescent"></ion-spinner>
+                <span class="ion-margin-start">AI กำลังวิเคราะห์ความคิดเห็น...</span>
+              } @else {
+                <ion-icon slot="start" name="sparkles"></ion-icon>
+                ประมวลผลรีวิวด้วย AI
+              }
+            </ion-button>
+
+            @if (reviewInsights()) {
+              <div class="insights-box ion-margin-top">
+                <div class="gauge-row">
+                  <div class="gauge-score">
+                    <h1>{{ reviewInsights()!.satisfactionScore }}%</h1>
+                    <ion-note>ดัชนีความพึงพอใจ</ion-note>
+                  </div>
+                  <div class="gauge-meta">
+                    <ion-badge color="success">{{ reviewInsights()!.sentimentOverall }}</ion-badge>
+                    <p>รีวิวทั้งหมด: {{ reviewInsights()!.totalReviews }} รายการ</p>
+                  </div>
+                </div>
+
+                <div class="strengths-box ion-margin-top">
+                  <h4>
+                    <ion-icon name="thumbs-up" color="success"></ion-icon>
+                    จุดเด่นที่ลูกค้าชื่นชอบ:
+                  </h4>
+                  <ul>
+                    @for (s of reviewInsights()!.topStrengths; track s) {
+                      <li>{{ s }}</li>
+                    }
+                  </ul>
+                </div>
+
+                @if (reviewInsights()!.reportedIssues.length > 0) {
+                  <div class="issues-box ion-margin-top">
+                    <h4>
+                      <ion-icon name="thumbs-down" color="danger"></ion-icon>
+                      ประเด็นที่ลูกค้ากังวล:
+                    </h4>
+                    <ul>
+                      @for (issue of reviewInsights()!.reportedIssues; track issue) {
+                        <li>{{ issue }}</li>
+                      }
+                    </ul>
+                  </div>
+                }
+
+                <div class="recs-box ion-margin-top">
+                  <h4>
+                    <ion-icon name="bulb" color="warning"></ion-icon>
+                    คำแนะนำในการพัฒนาบริการ:
+                  </h4>
+                  <ul>
+                    @for (r of reviewInsights()!.actionableRecommendations; track r) {
+                      <li>{{ r }}</li>
+                    }
+                  </ul>
+                  <p class="summary-line"><strong>สรุป:</strong> {{ reviewInsights()!.executiveSummary }}</p>
+                </div>
+              </div>
+            }
+          </ion-card-content>
+        </ion-card>
+
+        <!-- Customer Reviews List -->
+        <ion-list class="reviews-list">
+          @for (r of reviews(); track r.id) {
+            <ion-item lines="full">
+              <ion-icon slot="start" [name]="r.type === '+1' ? 'thumbs-up' : 'thumbs-down'" [color]="r.type === '+1' ? 'success' : 'danger'"></ion-icon>
+              <ion-label>
+                <h3>{{ r.customerName || 'ลูกค้าทั่วไป' }} <ion-badge [color]="r.type === '+1' ? 'success' : 'danger'">{{ r.type }}</ion-badge></h3>
+                <p>{{ r.message }}</p>
+                <ion-note>{{ r.createdAt }}</ion-note>
+              </ion-label>
+            </ion-item>
+          }
+        </ion-list>
+      </div>
+    }
+
+    <!-- -------------------------------------------- -->
+    <!-- VIEW E: AI CRAFT ASSISTANT                   -->
+    <!-- -------------------------------------------- -->
+    @if (folder() === 'AICopywriter') {
+      <div class="craft-section">
+        <ion-card class="craft-card">
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="sparkles" color="warning"></ion-icon>
+              AI CRAFT Content Generator
+            </ion-card-title>
+            <ion-card-subtitle>โครงสร้าง CRAFT: Context, Role, Action, Format, Tone</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-item lines="full">
+              <ion-label position="stacked">หัวข้อที่ต้องการให้ AI ช่วยเขียน</ion-label>
+              <ion-input [ngModel]="craftTopic()" (ngModelChange)="craftTopic.set($event)"></ion-input>
+            </ion-item>
+
+            <ion-button expand="block" color="warning" (click)="runAICraft()" [disabled]="isGeneratingCraft()" class="ion-margin-top">
+              @if (isGeneratingCraft()) {
+                <ion-spinner name="crescent"></ion-spinner>
+                <span class="ion-margin-start">AI กำลังร่างข้อความ...</span>
+              } @else {
+                <ion-icon slot="start" name="sparkles"></ion-icon>
+                ร่างคำบรรยายด้วย AI
+              }
+            </ion-button>
+
+            @if (craftResult()) {
+              <div class="craft-result ion-margin-top">
+                <h3>{{ craftResult()!.title }}</h3>
+                <h4 class="tagline">{{ craftResult()!.tagline }}</h4>
+                <p>{{ craftResult()!.description }}</p>
+
+                @if (craftResult()!.features) {
+                  <h5>ฟีเจอร์เด่น:</h5>
+                  <ul>
+                    @for (f of craftResult()!.features; track f) {
+                      <li>{{ f }}</li>
+                    }
+                  </ul>
+                }
+
+                @if (craftResult()!.tags) {
+                  <div class="tags-container ion-margin-top">
+                    @for (t of craftResult()!.tags; track t) {
+                      <ion-badge color="medium">{{ t }}</ion-badge>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </ion-card-content>
+        </ion-card>
+      </div>
+    }
+
+    <!-- -------------------------------------------- -->
+    <!-- VIEW F: SETTINGS                             -->
+    <!-- -------------------------------------------- -->
+    @if (folder() === 'Settings') {
+      <div class="settings-section">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>การเชื่อมต่อเซิร์ฟเวอร์</ion-card-title>
+            <ion-card-subtitle>กำหนดที่อยู่ API สำหรับทดสอบบนคอมพิวเตอร์หรือ Android</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-item lines="full">
+              <ion-label position="stacked">API Server URL</ion-label>
+              <ion-input [ngModel]="serverUrlInput()" (ngModelChange)="serverUrlInput.set($event)"></ion-input>
+            </ion-item>
+            <ion-note class="hint-note">
+              • บนเว็บ / คอมพิวเตอร์: <code>http://localhost:3000</code><br/>
+              • บน Android Emulator AVD: <code>http://10.0.2.2:3000</code>
+            </ion-note>
+
+            <ion-button expand="block" (click)="saveServerUrl()" class="ion-margin-top">
+              บันทึกการตั้งค่า
+            </ion-button>
+
+            <ion-button expand="block" color="danger" fill="outline" (click)="handleLogout()" class="ion-margin-top">
+              <ion-icon slot="start" name="log-out"></ion-icon>
+              ออกจากระบบ
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    }
+
+  }
+
+  <!-- Floating Action Button for Quick Slip Capture -->
+  @if (api.isAuthenticated()) {
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab-button (click)="takeSlipPhoto(); folder.set('ScanSlip')" color="warning">
+        <ion-icon name="camera" aria-label="ถ่ายภาพสลิป"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+  }
+
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-title size="small" class="ion-text-center footer-text">
+      SUNFZENITH <span>•</span> ADMIN STUDIO <span>•</span> 2026
+    </ion-title>
+  </ion-toolbar>
+</ion-footer>

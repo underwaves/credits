@@ -1,0 +1,160 @@
+/* SUNFZENITH Admin Studio — a calm, light workspace with a clear brand palette. */
+@import "@ionic/angular/css/core.css";
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+:root {
+  color-scheme: light;
+  --ion-font-family: "Noto Sans Thai", "IBM Plex Sans Thai", "Segoe UI", sans-serif;
+  --ion-background-color: #f4f6fb;
+  --ion-background-color-rgb: 244, 246, 251;
+  --ion-text-color: #18233c;
+  --ion-text-color-rgb: 24, 35, 60;
+  --ion-card-background: #ffffff;
+  --ion-item-background: #ffffff;
+
+  --ion-color-primary: #4659e8;
+  --ion-color-primary-rgb: 70, 89, 232;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #3e4ecc;
+  --ion-color-primary-tint: #596aeb;
+
+  --ion-color-secondary: #67738d;
+  --ion-color-secondary-rgb: 103, 115, 141;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #5b657c;
+  --ion-color-secondary-tint: #76819a;
+
+  --ion-color-tertiary: #a979f4;
+  --ion-color-tertiary-rgb: 169, 121, 244;
+  --ion-color-tertiary-contrast: #ffffff;
+  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
+  --ion-color-tertiary-shade: #956ad7;
+  --ion-color-tertiary-tint: #b287f5;
+
+  --ion-color-success: #138a68;
+  --ion-color-success-rgb: 19, 138, 104;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #11795c;
+  --ion-color-success-tint: #2b9678;
+
+  --ion-color-warning: #f3b83f;
+  --ion-color-warning-rgb: 243, 184, 63;
+  --ion-color-warning-contrast: #242a3c;
+  --ion-color-warning-contrast-rgb: 36, 42, 60;
+  --ion-color-warning-shade: #d6a238;
+  --ion-color-warning-tint: #f4c053;
+
+  --ion-color-danger: #d85c70;
+  --ion-color-danger-rgb: 216, 92, 112;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #be5163;
+  --ion-color-danger-tint: #dc6c7e;
+
+  --ion-color-medium: #77829a;
+  --ion-color-medium-rgb: 119, 130, 154;
+  --ion-color-medium-contrast: #ffffff;
+  --ion-color-medium-contrast-rgb: 255, 255, 255;
+  --ion-color-medium-shade: #697288;
+  --ion-color-medium-tint: #8590a5;
+  --ion-color-light: #f4f6fb;
+  --ion-color-light-rgb: 244, 246, 251;
+  --ion-color-light-contrast: #18233c;
+  --ion-color-light-contrast-rgb: 24, 35, 60;
+  --ion-color-light-shade: #d7d9df;
+  --ion-color-light-tint: #f5f7fb;
+}
+
+html, body, ion-app {
+  min-height: 100%;
+  background: var(--ion-background-color);
+  font-family: var(--ion-font-family);
+}
+
+ion-content {
+  --background: var(--ion-background-color);
+  --padding-bottom: 88px;
+}
+
+ion-toolbar {
+  --background: #ffffff;
+  --color: #18233c;
+  --border-color: #e8ebf2;
+}
+
+ion-card {
+  color: var(--ion-text-color);
+  --background: #ffffff;
+  box-shadow: 0 10px 30px rgba(30, 43, 75, 0.06);
+}
+
+ion-item {
+  --background: #ffffff;
+  --color: #18233c;
+  --border-color: #e8ebf2;
+  --highlight-color-focused: var(--ion-color-primary);
+}
+
+ion-button {
+  --border-radius: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Shared surfaces used by the secondary admin views. */
+app-folder {
+  .scan-slip-section, .credits-section, .reviews-section, .craft-section, .settings-section { padding-top: 8px; }
+  .scan-card, .ai-insights-card, .craft-card, .settings-section > ion-card { overflow: hidden; border: 1px solid #e7eaf2; border-radius: 22px; }
+  .scan-card ion-card-title, .ai-insights-card ion-card-title, .craft-card ion-card-title { display: flex; align-items: center; gap: 9px; color: #1c2944; font-weight: 800; }
+
+  .photo-preview-box { overflow: hidden; padding: 10px; border: 1px solid #e5e8f0; border-radius: 16px; background: #f3f5f9; }
+  .photo-preview-box ion-img { max-height: 360px; object-fit: contain; }
+  .ai-result-panel, .submit-success-banner { padding: 16px; border: 1px solid #c6eadb; border-radius: 16px; color: #145b48; background: #effaf5; }
+  .ai-result-panel .result-header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .ai-result-panel p { margin: 7px 0; }
+  .ai-result-panel .money-highlight { color: #138a68; font-size: 1.25rem; }
+  .ai-result-panel .summary-text { color: #52756b; font-size: 0.9rem; }
+  .submit-success-banner { display: flex; align-items: center; gap: 9px; font-weight: 700; }
+  .credit-form ion-item { margin-top: 8px; --border-radius: 12px; }
+
+  .section-title-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .section-title-bar h3 { margin: 0; color: #1c2944; font-size: 20px; font-weight: 800; }
+  .credit-card { overflow: hidden; height: calc(100% - 16px); margin: 8px 0; border: 1px solid #e7eaf2; border-radius: 18px; }
+  .credit-card ion-img { height: 190px; object-fit: cover; }
+  .credit-card ion-card-title { color: #1c2944; font-size: 17px; font-weight: 750; }
+  .credit-card .card-price-badge { display: inline-block; margin-bottom: 7px; padding: 4px 9px; border-radius: 8px; color: #855d11; background: #fff5d9; font-size: 12px; font-weight: 800; }
+  .credit-card ion-card-subtitle { font-size: 12px; }
+
+  .ai-insights-card { background: linear-gradient(135deg, #f5f6ff, #fff); }
+  .insights-box .gauge-row { display: flex; align-items: center; gap: 18px; padding: 16px; border: 1px solid #e8eaf5; border-radius: 16px; background: #fff; }
+  .insights-box .gauge-score { min-width: 110px; text-align: center; }
+  .insights-box .gauge-score h1 { margin: 0; color: #4659e8; font-size: 2.2rem; font-weight: 900; }
+  .insights-box .gauge-meta p { color: #78839a; }
+  .insights-box .strengths-box, .insights-box .issues-box, .insights-box .recs-box { margin-top: 12px; padding: 15px; border: 1px solid #e9ebf1; border-radius: 15px; background: #fff; }
+  .insights-box h4 { display: flex; align-items: center; gap: 7px; margin: 0 0 8px; color: #27334d; font-size: 14px; }
+  .insights-box ul { margin: 0; padding-left: 20px; color: #65718a; font-size: 13px; line-height: 1.8; }
+  .insights-box .summary-line { margin: 12px 0 0; color: #56627b; font-size: 13px; }
+  .reviews-list { overflow: hidden; margin-top: 16px; border: 1px solid #e7eaf2; border-radius: 18px; background: #fff; }
+  .reviews-list ion-item { --padding-start: 16px; --inner-padding-end: 16px; }
+  .reviews-list h3 { color: #26334e; font-weight: 750; }
+  .reviews-list p { white-space: normal; line-height: 1.6; }
+
+  .craft-result { padding: 18px; border: 1px solid #e5e8f2; border-radius: 16px; background: #f8f9fc; }
+  .craft-result h3 { margin-top: 0; color: #1c2944; font-weight: 800; }
+  .craft-result .tagline { color: #a97923; font-size: 0.95rem; font-weight: 750; }
+  .tags-container { display: flex; flex-wrap: wrap; gap: 6px; }
+  .settings-section .hint-note { display: block; margin-top: 12px; color: #73809a; font-size: 12px; line-height: 1.9; }
+  .settings-section ion-item { margin-bottom: 8px; --border-radius: 12px; }
+}
